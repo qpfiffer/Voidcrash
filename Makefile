@@ -2,7 +2,7 @@ CFLAGS=-Werror -Wextra -Wall -O0 -g3
 INCLUDES=-pthread -I./include/ `pkg-config --cflags sdl2`
 LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2`
 NAME=aaaaaa
-COMMON_OBJ=logging.o
+COMMON_OBJ=void.o logging.o
 
 
 all: $(NAME)
