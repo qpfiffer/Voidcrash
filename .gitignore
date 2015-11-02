@@ -1,3 +1,4 @@
 *.sw[op]
 *.o
 aaaaaa
+deps/forge/libforge.a

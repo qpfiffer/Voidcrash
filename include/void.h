@@ -8,6 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <forge.h>
 #include <SDL.h>
 
 #include "constants.h"

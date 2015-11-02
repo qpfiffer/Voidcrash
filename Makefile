@@ -1,11 +1,22 @@
-CFLAGS=-Werror -Wextra -Wall -O0 -g3
-INCLUDES=-pthread -I./include/ `pkg-config --cflags sdl2`
+CFLAGS=-Werror -Wextra -Wall
+DEBUG_CFLAGS=-O0 -g3
+RELEASE_CFLAGS=-O3
+INCLUDES=-pthread -I./deps/forge -I./include/ `pkg-config --cflags sdl2`
 LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2`
+LIB_DIRS=-L./deps/forge
 NAME=aaaaaa
 COMMON_OBJ=void.o logging.o
 
+debug: forge_debug $(NAME)
+release: forge_release $(NAME)
 
-all: $(NAME)
+forge_debug: 
+	@echo "Building Forge in in debug mode."
+	@cd ./deps/forge/; make clean debug
+
+forge_release: 
+	@echo "Building Forge in in release mode."
+	@cd ./deps/forge/; make clean release
 
 clean:
 	rm -f *.o
@@ -14,5 +25,5 @@ clean:
 %.o: ./src/%.c
 	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -c $<
 
-$(NAME): $(COMMON_OBJ) main.o
+$(NAME): $(COMMON_OBJ) ./deps/forge/libforge.a main.o
 	$(CC) $(CLAGS) $(LIB_INCLUDES) $(INCLUDES) -o $(NAME) $^ $(LIBS)
