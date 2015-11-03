@@ -2,6 +2,15 @@
 #include <SDL_opengl.h>
 #include "void.h"
 
+static inline void _void_gl_init() {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	glEnable(GL_CULL_FACE);
+
+	glEnable(GL_LIGHTING);
+}
+
 int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 	srandom(time(NULL));
 
@@ -32,6 +41,8 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 		log_msg(LOG_ERR, "Could not turn on vsync.");
 		return -1;
 	}
+
+	_void_gl_init();
 
 	return 0;
 }

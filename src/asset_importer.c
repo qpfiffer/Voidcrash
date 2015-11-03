@@ -83,7 +83,7 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 		}
 
 		if (line_buf[0] == 'f') {
-			/* Combination of vertex, uv and then normals. */
+			/* Defines a face. */
 			const int max = 3;
 			unsigned int uv_vec[max] = {0};
 			unsigned int normal_vec[max] = {0};

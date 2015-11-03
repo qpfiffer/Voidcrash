@@ -1,8 +1,8 @@
 CFLAGS=-Werror -Wextra -Wall -DF_DOUBLE_PRECISION
 DEBUG_CFLAGS=-O0 -g3 -DF_MEMORY_DEBUG -DF_EXIT_CRASH
 RELEASE_CFLAGS=-O3
-INCLUDES=-pthread -I./deps/forge -I./include/ `pkg-config --cflags sdl2`
-LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2`
+INCLUDES=-pthread -I./deps/forge -I./include/ `pkg-config --cflags sdl2 gl`
+LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2 gl`
 LIB_DIRS=-L./deps/forge
 NAME=aaaaaa
 COMMON_OBJ=asset_importer.o vector.o void.o logging.o
