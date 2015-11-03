@@ -45,9 +45,26 @@ void void_update(void_game_state_t *game_state) {
     }
 }
 
-void void_draw(SDL_Window *window) {
+static inline void void_game_render_entity(const void_game_entity_t *ent) {
+	UNUSED(ent);
+}
+
+void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 	SDL_Surface *main_surface = SDL_GetWindowSurface(window);
 	SDL_FillRect(main_surface, NULL, SDL_MapRGB(main_surface->format, 0, 0, 0));
 
+	size_t i = 0;
+	for (i = 0; i < game_state->entities->count; i++) {
+		const void_game_entity_t *ent = vector_get(game_state->entities, i);
+		void_game_render_entity(ent);
+	}
+
 	SDL_UpdateWindowSurface(window);
+}
+
+void_game_entity_t *void_create_entity(const void_asset_mesh_t *mesh) {
+	void_game_entity_t *entity = calloc(1, sizeof(void_game_entity_t));
+	entity->mesh = mesh;
+
+	return entity;
 }
