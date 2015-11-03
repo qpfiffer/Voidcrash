@@ -12,11 +12,11 @@ release: forge_release $(NAME)
 
 forge_debug: 
 	@echo "Building Forge in in debug mode."
-	@cd ./deps/forge/; make clean debug
+	@cd ./deps/forge/; make debug
 
 forge_release: 
 	@echo "Building Forge in in release mode."
-	@cd ./deps/forge/; make clean release
+	@cd ./deps/forge/; make release
 
 clean:
 	rm -f *.o
