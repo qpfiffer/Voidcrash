@@ -8,30 +8,30 @@ static inline void_asset_mesh_t *_void_asset_mesh_init() {
 		goto error;
 	}
 
-	mesh->vertex_indices = vector_new(sizeof(unsigned int), 64);
-	if (mesh->vertex_indices == NULL) {
+	mesh->vertices = vector_new(sizeof(unsigned int), 64);
+	if (mesh->vertices == NULL) {
 		goto error;
 	}
 
-	mesh->uv_indices = vector_new(sizeof(unsigned int), 64);
-	if (mesh->uv_indices == NULL) {
+	mesh->uvs = vector_new(sizeof(unsigned int), 64);
+	if (mesh->uvs == NULL) {
 		goto error;
 	}
 
-	mesh->normal_indices = vector_new(sizeof(unsigned int), 64);
-	if (mesh->normal_indices == NULL) {
+	mesh->normals = vector_new(sizeof(unsigned int), 64);
+	if (mesh->normals == NULL) {
 		goto error;
 	}
 
 	return mesh;
 
 error:
-	if (mesh->vertex_indices != NULL)
-		vector_free(mesh->vertex_indices);
-	if (mesh->uv_indices != NULL)
-		vector_free(mesh->uv_indices);
-	if (mesh->normal_indices != NULL)
-		vector_free(mesh->normal_indices);
+	if (mesh->vertices != NULL)
+		vector_free(mesh->vertices);
+	if (mesh->uvs != NULL)
+		vector_free(mesh->uvs);
+	if (mesh->normals != NULL)
+		vector_free(mesh->normals);
 	if (mesh != NULL)
 		free(mesh);
 
@@ -55,6 +55,10 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 	vector *temp_vertices = vector_new(sizeof(void_vector3_t), 128);
 	vector *temp_uvs = vector_new(sizeof(void_vector2_t), 128);
 	vector *temp_normals = vector_new(sizeof(void_vector3_t), 128);
+
+	vector *vertex_indices = vector_new(sizeof(unsigned int), 128);
+	vector *uv_indices = vector_new(sizeof(unsigned int), 128);
+	vector *normal_indices = vector_new(sizeof(unsigned int), 128);
 
 	while (fgets(line_buf, sizeof(line_buf), mesh_file)) {
 		if (line_buf[0] == 'v') {
@@ -96,15 +100,34 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 			}
 
 			for (int i = 0; i < max; i++) {
-				vector_append(mesh->uv_indices, &uv_vec[i], sizeof(unsigned int));
-				vector_append(mesh->normal_indices, &normal_vec[i], sizeof(unsigned int));
-				vector_append(mesh->vertex_indices, &vertex_vec[i], sizeof(unsigned int));
+				vector_append(mesh->uvs, &uv_vec[i], sizeof(unsigned int));
+				vector_append(mesh->normals, &normal_vec[i], sizeof(unsigned int));
+				vector_append(mesh->vertices, &vertex_vec[i], sizeof(unsigned int));
 			}
 		}
 	}
 
-	for (size_t i = 0; i < mesh->vertex_indices->count; i++) {
+	for (size_t i = 0; i < vertex_indices->count; i++) {
+		unsigned int vertex_index = *(unsigned int*)vector_get(vertex_indices, i);
+		unsigned int uv_index = *(unsigned int*)vector_get(uv_indices, i);
+		unsigned int normal_index = *(unsigned int*)vector_get(normal_indices, i);
+
+		const void_vector3_t vertex = *(const void_vector3_t *)vector_get(temp_vertices, vertex_index - 1);
+		const void_vector2_t uv = *(const void_vector2_t *)vector_get(temp_uvs, uv_index - 1);
+		const void_vector3_t normal = *(const void_vector3_t *)vector_get(temp_normals, normal_index - 1);
+
+		vector_append(mesh->vertices, &vertex, sizeof(vertex));
+		vector_append(mesh->uvs, &uv, sizeof(uv));
+		vector_append(mesh->normals, &normal, sizeof(normal));
 	}
+
+	vector_free(vertex_indices);
+	vector_free(uv_indices);
+	vector_free(normal_indices);
+
+	vector_free(temp_vertices);
+	vector_free(temp_uvs);
+	vector_free(temp_normals);
 
 	fclose(mesh_file);
 	return mesh;

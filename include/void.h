@@ -29,9 +29,9 @@ typedef struct {
 } void_vector2_t;
 
 typedef struct {
-	vector *vertex_indices;
-	vector *uv_indices;
-	vector *normal_indices;
+	vector *vertices;
+	vector *uvs;
+	vector *normals;
 } void_asset_mesh_t;
 
 void_asset_mesh_t *void_asset_import_mesh(const char *path);
