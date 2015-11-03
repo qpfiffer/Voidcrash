@@ -37,12 +37,12 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 }
 
 void void_update(void_game_state_t *game_state) {
-    SDL_Event e = {0};
-    while (SDL_PollEvent(&e) != 0) {
-        if (e.type == SDL_QUIT) {
-            game_state->should_quit = true;
-        }
-    }
+	SDL_Event e = {0};
+	while (SDL_PollEvent(&e) != 0) {
+		if (e.type == SDL_QUIT) {
+			game_state->should_quit = true;
+		}
+	}
 }
 
 static inline void void_game_render_entity(const void_game_entity_t *ent) {
