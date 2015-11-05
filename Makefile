@@ -4,7 +4,7 @@ RELEASE_CFLAGS=-O3
 INCLUDES=-pthread -I./deps/forge -I./include/ `pkg-config --cflags sdl2 gl`
 LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2 gl`
 LIB_DIRS=-L./deps/forge
-NAME=aaaaaa
+NAME=voidstar
 COMMON_OBJ=asset_importer.o vector.o void.o logging.o
 
 debug: forge_debug $(NAME)
