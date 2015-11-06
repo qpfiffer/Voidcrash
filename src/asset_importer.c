@@ -84,10 +84,10 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 
 		if (line_buf[0] == 'f') {
 			/* Defines a face. */
-			const int max = 3;
-			unsigned int uv_vec[max] = {0};
-			unsigned int normal_vec[max] = {0};
-			unsigned int vertex_vec[max] = {0};
+#define MAX 3
+			unsigned int uv_vec[MAX] = {0};
+			unsigned int normal_vec[MAX] = {0};
+			unsigned int vertex_vec[MAX] = {0};
 
 			int matches = sscanf(line_buf, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
 									   &vertex_vec[0], &uv_vec[0], &normal_vec[0],
@@ -99,7 +99,8 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 				goto error;
 			}
 
-			for (int i = 0; i < max; i++) {
+			int i = 0;
+			for (i = 0; i < MAX; i++) {
 				vector_append(mesh->uvs, &uv_vec[i], sizeof(unsigned int));
 				vector_append(mesh->normals, &normal_vec[i], sizeof(unsigned int));
 				vector_append(mesh->vertices, &vertex_vec[i], sizeof(unsigned int));
@@ -107,7 +108,8 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 		}
 	}
 
-	for (size_t i = 0; i < vertex_indices->count; i++) {
+	size_t i = 0;
+	for (i = 0; i < vertex_indices->count; i++) {
 		unsigned int vertex_index = *(unsigned int*)vector_get(vertex_indices, i);
 		unsigned int uv_index = *(unsigned int*)vector_get(uv_indices, i);
 		unsigned int normal_index = *(unsigned int*)vector_get(normal_indices, i);
