@@ -51,7 +51,7 @@ void void_update(void_game_state_t *game_state) {
 	SDL_Event e = {0};
 	while (SDL_PollEvent(&e) != 0) {
 		if (e.type == SDL_QUIT) {
-			game_state->should_quit = true;
+			game_state->should_quit = TRUE;
 		}
 	}
 }
@@ -73,9 +73,3 @@ void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 	SDL_UpdateWindowSurface(window);
 }
 
-void_game_entity_t *void_create_entity(const void_asset_mesh_t *mesh) {
-	void_game_entity_t *entity = calloc(1, sizeof(void_game_entity_t));
-	entity->mesh = mesh;
-
-	return entity;
-}

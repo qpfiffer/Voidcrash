@@ -1,10 +1,9 @@
 // vim: noet ts=4 sw=4
 #include "void.h"
 
-static inline void_asset_mesh_t *_void_asset_mesh_init() {
-	void_asset_mesh_t *mesh = malloc(sizeof(void_asset_mesh_t));
+static inline void_asset_mesh_t *_void_asset_mesh_init(void_asset_mesh_t *mesh) {
 	if (mesh == NULL) {
-		log_msg(LOG_ERR, "Could not allocate memory for new mesh.");
+		log_msg(LOG_ERR, "New mesh is NULL.");
 		goto error;
 	}
 
@@ -38,11 +37,11 @@ error:
 	return NULL;
 }
 
-void_asset_mesh_t *void_asset_import_mesh(const char *path) {
+int void_asset_import_mesh(const char *path, void_asset_mesh_t *out_mesh) {
+	_void_asset_mesh_init(out_mesh);
 	FILE *mesh_file = NULL;
-	void_asset_mesh_t *mesh = _void_asset_mesh_init();
 
-	if (mesh == NULL)
+	if (out_mesh == NULL)
 		goto error;
 
 	mesh_file = fopen(path, "r");
@@ -66,13 +65,11 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 				/* Vertex import. */
 				void_vector3_t vertex;
 				sscanf(line_buf, "v "VS_CHAR" "VS_CHAR" "VS_CHAR"\n", &vertex.x, &vertex.y, &vertex.z);
-				//vector_append(mesh->vertex_indices, &vertex, sizeof(vertex));
 				vector_append(temp_vertices, &vertex, sizeof(vertex));
 			} else if (line_buf[1] == 't') {
 				/* UV Index import. */
 				void_vector2_t uv_vertex;
 				sscanf(line_buf, "vt "VS_CHAR" "VS_CHAR"\n", &uv_vertex.x, &uv_vertex.y);
-				//vector_append(mesh->uv_indices, &uv_vertex, sizeof(uv_vertex));
 				vector_append(temp_uvs, &uv_vertex, sizeof(uv_vertex));
 			} else if (line_buf[1] == 'n') {
 				/* Normal import. */
@@ -101,9 +98,9 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 
 			int i = 0;
 			for (i = 0; i < MAX; i++) {
-				vector_append(mesh->uvs, &uv_vec[i], sizeof(unsigned int));
-				vector_append(mesh->normals, &normal_vec[i], sizeof(unsigned int));
-				vector_append(mesh->vertices, &vertex_vec[i], sizeof(unsigned int));
+				vector_append(out_mesh->uvs, &uv_vec[i], sizeof(unsigned int));
+				vector_append(out_mesh->normals, &normal_vec[i], sizeof(unsigned int));
+				vector_append(out_mesh->vertices, &vertex_vec[i], sizeof(unsigned int));
 			}
 		}
 	}
@@ -118,9 +115,9 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 		const void_vector2_t uv = *(const void_vector2_t *)vector_get(temp_uvs, uv_index - 1);
 		const void_vector3_t normal = *(const void_vector3_t *)vector_get(temp_normals, normal_index - 1);
 
-		vector_append(mesh->vertices, &vertex, sizeof(vertex));
-		vector_append(mesh->uvs, &uv, sizeof(uv));
-		vector_append(mesh->normals, &normal, sizeof(normal));
+		vector_append(out_mesh->vertices, &vertex, sizeof(vertex));
+		vector_append(out_mesh->uvs, &uv, sizeof(uv));
+		vector_append(out_mesh->normals, &normal, sizeof(normal));
 	}
 
 	vector_free(vertex_indices);
@@ -132,14 +129,12 @@ void_asset_mesh_t *void_asset_import_mesh(const char *path) {
 	vector_free(temp_normals);
 
 	fclose(mesh_file);
-	return mesh;
+	return TRUE;
 
 error:
-	if (mesh != NULL)
-		free(mesh);
 	if (mesh_file != NULL)
 		fclose(mesh_file);
 
-	return NULL;
+	return FALSE;
 }
 
