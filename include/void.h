@@ -9,6 +9,7 @@
 
 #include <forge.h>
 #include <GL/gl.h>
+#include <SDL_opengl.h>
 #include <SDL.h>
 
 #include "constants.h"

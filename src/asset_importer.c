@@ -1,5 +1,6 @@
 // vim: noet ts=4 sw=4
 #include "void.h"
+#include <fcntl.h>
 
 static inline void_asset_mesh_t *_void_asset_mesh_init(void_asset_mesh_t *mesh) {
 	if (mesh == NULL) {
@@ -138,3 +139,37 @@ error:
 	return FALSE;
 }
 
+int void_asset_import_shader(const char *vertex_shader, const char *fragment_shader, void_asset_shader_t *out_shader) {
+	int vertex_shader_fd = 0;
+	int fragment_shader_fd = 0;
+	GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+
+	if (vertex_shader_id == 0 || fragment_shader_id == 0) {
+		log_msg(LOG_ERR, "Could not create vertex and fragment shaders.");
+		goto error;
+	}
+
+	vertex_shader_fd = open(vertex_shader, O_RDONLY);
+	if (vertex_shader_fd == 0) {
+		log_msg(LOG_ERR, "Could not open vertex_shader file.");
+		goto error;
+	}
+
+	fragment_shader_fd = open(fragment_shader, O_RDONLY);
+	if (fragment_shader_fd == 0) {
+		log_msg(LOG_ERR, "Could not open fragment_shader file.");
+		goto error;
+	}
+
+	return TRUE;
+
+error:
+	if (vertex_shader_fd != 0)
+		close(vertex_shader_fd);
+
+	if (fragment_shader_fd != 0)
+		close(fragment_shader_fd);
+
+	return FALSE;
+}
