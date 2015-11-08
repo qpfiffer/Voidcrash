@@ -92,7 +92,7 @@ typedef void RShader;
 #endif
 
 extern RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, char *fragment, char *name);
-extern RShader	*r_shader_create_from_file(char *debug_output, uint output_size, char *vertex_file, char *fragment_file, char *name);
+extern RShader	*r_shader_create_from_file(char *debug_output, uint output_size, const char *vertex_file, const char *fragment_file, char *name);
 extern void		r_shader_destroy(RShader *shader);
 extern boolean	r_shader_set(RShader *shader);
 //extern void		r_shader_attrib_bind(RShader *shader, uint id, char *name);

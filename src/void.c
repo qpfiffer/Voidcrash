@@ -2,7 +2,13 @@
 #include <SDL_opengl.h>
 #include "void.h"
 
+void *getProcAddress(const char *name) {
+	void *p = glXGetProcAddress((const unsigned char *)name);
+	return p;
+}
+
 static inline void _void_gl_init() {
+	r_init(getProcAddress);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 

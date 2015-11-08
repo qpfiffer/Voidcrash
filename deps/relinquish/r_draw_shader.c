@@ -340,7 +340,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 }
 
 
-RShader	*r_shader_create_from_file(char *debug_output, uint output_size, char *vertex_file, char *fragment_file, char *name)
+RShader	*r_shader_create_from_file(char *debug_output, uint output_size, const char *vertex_file, const char *fragment_file, char *name)
 {
 	RShader	*shader;
 	uint size;

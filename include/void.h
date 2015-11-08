@@ -9,8 +9,10 @@
 
 #include <forge.h>
 #include <GL/gl.h>
+#include <GL/glx.h>
 #include <SDL_opengl.h>
 #include <SDL.h>
+#include <relinquish.h>
 
 #include "constants.h"
 #include "logging.h"
@@ -38,7 +40,7 @@ typedef struct {
 } void_asset_mesh_t;
 
 typedef struct {
-	GLuint program_id;
+	RShader *r_shader;
 } void_asset_shader_t;
 
 int void_asset_import_shader(const char *vertex_shader, const char *fragment_shader, void_asset_shader_t *out_shader);
