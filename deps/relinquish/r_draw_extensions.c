@@ -1,6 +1,9 @@
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "forge.h"
 #include "r_include.h"
 #include "relinquish.h"
@@ -25,18 +28,17 @@ void *r_extension_get_address(const char* proc)
 
 boolean r_extension_test(const char *string)
 {
-	const unsigned char *extension, *a;
-	uint i;
-	extension = glGetString(GL_EXTENSIONS);
-	if(extension != NULL)
-	{
-		for(a = extension; a[0] != 0; a++)
-		{
-			for(i = 0; string[i] != 0 && a[i] != 0 && string[i] == a[i]; i++);
-			if(string[i] == 0)
-				return TRUE;
-		}
-	}
+    PFNGLGETSTRINGIPROC glGetStringi = (PFNGLGETSTRINGIPROC)sui_gl_GetProcAddress("glGetStringi");
+	uint i = 0;
+	int maximum = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &maximum);
+    for (i = 0; i < maximum; i++) {
+        const unsigned char *extension = glGetStringi(GL_EXTENSIONS, i);
+        printf("Extension: %s\n", extension);
+        if (strcmp(string, (char *)extension) == 0)
+            return TRUE;
+    }
+
 	return FALSE;
 }
 

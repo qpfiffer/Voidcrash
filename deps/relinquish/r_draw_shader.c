@@ -148,7 +148,8 @@ void r_shader_init(void)
 
 #endif
 #ifdef RELINQUISH_CONTEXT_OPENGL
-	if(r_extension_test("GL_ARB_shading_language_100"))
+	if(r_extension_test("GL_ARB_shading_language_100") ||
+       r_extension_test("GL_ARB_shader_objects") )
 	{
 		r_glCreateShaderObjectARB =			r_extension_get_address("glCreateShaderObjectARB");
 		r_glDeleteObjectARB =				r_extension_get_address("glDeleteObjectARB");
