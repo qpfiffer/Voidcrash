@@ -63,7 +63,11 @@ void void_update(void_game_state_t *game_state) {
 }
 
 static inline void void_game_render_entity(const void_game_entity_t *ent) {
-	UNUSED(ent);
+	GLuint vertex_buffer;
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, ent->vertices->count * sizeof(void_vector3_t), ent->vertices->items,
+		GL_STATIC_DRAW);
 }
 
 void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
