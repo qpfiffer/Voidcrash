@@ -26,13 +26,12 @@ void *r_extension_get_address(const char* proc)
 
 boolean r_extension_test(const char *string)
 {
-    PFNGLGETSTRINGIPROC glGetStringi = (PFNGLGETSTRINGIPROC)sui_gl_GetProcAddress("glGetStringi");
+	PFNGLGETSTRINGIPROC glGetStringi = (PFNGLGETSTRINGIPROC)sui_gl_GetProcAddress("glGetStringi");
 	uint i = 0;
 	int maximum = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &maximum);
 	for (i = 0; i < maximum; i++) {
 		const unsigned char *extension = glGetStringi(GL_EXTENSIONS, i);
-		printf("Extension: %s\n", extension);
 		if (strcmp(string, (char *)extension) == 0)
 			return TRUE;
 	}

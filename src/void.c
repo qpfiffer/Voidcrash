@@ -9,6 +9,13 @@ void *get_proc_address(const char *name) {
 
 static inline void _void_gl_init() {
 	r_init(get_proc_address);
+	glMatrixMode(GL_MODELVIEW);
+
+	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
@@ -34,7 +41,7 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 	}
 
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 3 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 
 	gl_context = SDL_GL_CreateContext(*window);
@@ -62,24 +69,23 @@ void void_update(void_game_state_t *game_state) {
 	}
 }
 
-static inline void void_game_render_entity(const void_game_entity_t *ent) {
-	GLuint vertex_buffer;
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, ent->vertices->count * sizeof(void_vector3_t), ent->vertices->items,
-		GL_STATIC_DRAW);
-}
+//static inline void void_game_render_entity(const void_game_entity_t *ent) {
+//	UNUSED(ent);
+//}
 
 void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
-	SDL_Surface *main_surface = SDL_GetWindowSurface(window);
-	SDL_FillRect(main_surface, NULL, SDL_MapRGB(main_surface->format, 0, 0, 0));
+	UNUSED(game_state);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	size_t i = 0;
-	for (i = 0; i < game_state->entities->count; i++) {
-		const void_game_entity_t *ent = vector_get(game_state->entities, i);
-		void_game_render_entity(ent);
-	}
+	//size_t i = 0;
+	//for (i = 0; i < game_state->entities->count; i++) {
+	//	const void_game_entity_t *ent = vector_get(game_state->entities, i);
+	//	void_game_render_entity(ent);
+	//}
+	r_primitive_surface(0.0f, 0.0f, -2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 1.0f);
 
-	SDL_UpdateWindowSurface(window);
+	SDL_GL_SwapWindow(window);
 }
 

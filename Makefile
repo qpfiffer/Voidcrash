@@ -7,25 +7,24 @@ LIB_DIRS=-L./deps/forge -L./deps/relinquish
 NAME=voidstar
 COMMON_OBJ=asset_importer.o vector.o void.o logging.o
 
+debug: CFLAGS += $(DEBUG_CFLAGS)
 debug: forge_debug relinquish_debug $(NAME)
+
+release: CFLAGS += $(RELEASE_CFLAGS)
 release: forge_release relinquish_release $(NAME)
 
-forge_debug: CFLAGS += $(DEBUG_CFLAGS)
 forge_debug:
 	@echo "Building Forge in in debug mode."
 	@cd ./deps/forge/; make debug
 
-forge_release: CFLAGS += $(RELEASE_CFLAGS)
 forge_release:
 	@echo "Building Forge in in release mode."
 	@cd ./deps/forge/; make release
 
-relinquish_debug: CFLAGS += $(DEBUG_CFLAGS)
 relinquish_debug:
 	@echo "Building Relinquish in in debug mode."
 	@cd ./deps/relinquish/; make debug
 
-relinquish_release: CFLAGS += $(RELEASE_CFLAGS)
 relinquish_release:
 	@echo "Building Relinquish in in release mode."
 	@cd ./deps/relinquish/; make release
@@ -38,4 +37,4 @@ clean:
 	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -c $<
 
 $(NAME): $(COMMON_OBJ) ./deps/relinquish/librelinquish.a ./deps/forge/libforge.a main.o
-	$(CC) $(CLAGS) $(LIB_INCLUDES) $(INCLUDES) -o $(NAME) $^ $(LIBS)
+	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -o $(NAME) $^ $(LIBS)

@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
 	void_game_entity_t sphere;
 	void_asset_import_mesh("./assets/models/sphere.obj", &sphere.mesh);
-	void_asset_import_shader("./assets/shaders/basic.vertex", "./assets/shaders/basic.fragment", &sphere.shader);
+	//void_asset_import_shader("./assets/shaders/basic.vertex", "./assets/shaders/basic.fragment", &sphere.shader);
 
 	vector_append(game_state.entities, &sphere, sizeof(void_game_entity_t));
 
