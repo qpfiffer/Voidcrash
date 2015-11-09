@@ -19,9 +19,12 @@ static inline void _void_gl_init() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	glEnable(GL_CULL_FACE);
-
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glViewport(0, 0, 1280, 720);
 }
 
 int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
@@ -75,16 +78,33 @@ void void_update(void_game_state_t *game_state) {
 
 void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 	UNUSED(game_state);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	//size_t i = 0;
 	//for (i = 0; i < game_state->entities->count; i++) {
 	//	const void_game_entity_t *ent = vector_get(game_state->entities, i);
 	//	void_game_render_entity(ent);
 	//}
-	r_primitive_surface(0.0f, 0.0f, -2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+	float aspect = 1280 / 720;
+	float view[3] = {0, 0, 0};
+
+	r_matrix_set(NULL);
+	r_matrix_identity(NULL);
+	r_matrix_frustum(NULL,
+			-0.01 - view[0] * 0.01,
+			0.01 - view[0] * 0.01,
+			-0.01 * aspect - view[1] * 0.01,
+			0.01 * aspect - view[1] * 0.01,
+			0.01 * view[2], 100.0);
+
+	r_primitive_surface(0.0f, -1.0f, -3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
+
+	r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
+
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	r_primitive_line_flush();
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	r_primitive_line_flush();
 
 	SDL_GL_SwapWindow(window);
 }
