@@ -101,7 +101,8 @@ GLvoid		(APIENTRY *r_glDisableVertexAttribArrayARB)(GLuint index);
 
 GLvoid		(APIENTRY *r_glGetShaderInfoLog)(GLhandleARB object, GLsizei maxLenght, GLsizei *length, char *infoLog);
 GLvoid		(APIENTRY *r_glGetProgramInfoLog)(GLhandleARB object, GLsizei maxLenght, GLsizei *length, char *infoLog);
-
+GLvoid		(APIENTRY *r_glGenVertexArrays)(GLsizei n, GLuint *arrays);
+GLvoid		(APIENTRY *r_glBindVertexArray)(GLuint array);
 
 RShader *p_current_shader = NULL;
 uint p_current_textures[64] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
@@ -109,9 +110,6 @@ uint p_current_textures[64] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
 								-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 								-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-/*
-glGetShaderiv(shader, GL_COMPILE_STATUS, &bDidCompile)
-glGetProgramiv(program, GL_LINK_STATUS, &bDidLink).*/
 
 void r_shader_init(void)
 {
@@ -178,6 +176,8 @@ void r_shader_init(void)
 		r_glDisableVertexAttribArrayARB =	r_extension_get_address("glDisableVertexAttribArrayARB");
 		r_glActiveTextureARB =				r_extension_get_address("glActiveTextureARB");
 		r_glGetShaderInfoLog =					r_extension_get_address("glGetInfoLogARB");
+		r_glGenVertexArrays =				r_extension_get_address("glGenVertexArraysARB");
+		r_glBindVertexArray =				r_extension_get_address("glBindVertexArrayARB");
 		r_glGetProgramInfoLog = r_glGetShaderInfoLog;
 	}else
 	{
@@ -251,13 +251,9 @@ void r_shader_matrix_parse(RShader	*shader)
 	}
 }
 
-
-#define GL_COMPILE_STATUS  0x8B81
-//#define GL_LINK_STATUS    0x8b82
-
 RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, char *fragment, char *name)
 {
-	uint vertex_obj, fragment_obj, prog_obj, i, attribute_count = 0, uniform_count = 0, texture_count = 0;
+	uint vertex_obj = 0, fragment_obj = 0, prog_obj = 0, i = 0, attribute_count = 0, uniform_count = 0, texture_count = 0;
 	int size = 0;
 	RShaderInput input[256];
 	RShader *shader;
@@ -277,7 +273,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	{
 		printf("RELINQUISH: Shader Debug: %s\n", name);
 		r_glGetShaderInfoLog(vertex_obj, output_size - size, &size, debug_output);
-		//printf(debug_output);
+		printf("%s", debug_output);
 	}
 	output_size -= size;
 	r_glShaderSourceARB(fragment_obj, 1, (const char **)&fragment, NULL);
@@ -285,7 +281,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	if(debug_output != NULL)
 	{
 		r_glGetShaderInfoLog(fragment_obj, output_size - size, &size, debug_output);
-		//printf(debug_output);
+		printf("%s", debug_output);
 	}
 	output_size -= size;
 	r_shader_parse(input, &attribute_count, vertex, "attribute", 0, R_SIT_VDOUBLE4 + 1);
@@ -311,7 +307,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	if(debug_output != NULL)
 	{
 		r_glGetProgramInfoLog(prog_obj, output_size - size, &size, debug_output);
-		//printf(debug_output);
+		printf("%s", debug_output);
 	}
 	r_glUseProgramObjectARB(prog_obj);
 	shader->uniform_count = uniform_count;
@@ -334,7 +330,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	if(debug_output != NULL)
 	{
 		r_glGetProgramInfoLog(prog_obj, output_size - size, &size, debug_output);
-		//printf(debug_output);
+		printf("%s", debug_output);
 	}
 	r_shader_matrix_parse(shader);
 	return shader;

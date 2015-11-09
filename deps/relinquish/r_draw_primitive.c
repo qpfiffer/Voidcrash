@@ -77,7 +77,7 @@ char *r_shader_surface_vertex =
 "	vec3 expand;"
 "	vec3 vec;"
 "	col = color * alpha;"
-"	normal = normalize(NormalMatrix * vec3(0.0, 0.0, -1.0));"
+"	normal = normalize(vec3(NormalMatrix * vec4(0.0, 0.0, -1.0, 0.0)));"
 "	vec = pos + vec3(vertex.xy * size, 0.0);"
 "	expand = vec3((ModelViewProjectionMatrix * vec4(vec, 1.0)).zz * vertex.ba * pixel, 0);"
 //"	gl_Position = v = gl_ModelViewProjectionMatrix * vec4(vec + expand, 1.0);"

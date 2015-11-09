@@ -8,23 +8,23 @@ void *get_proc_address(const char *name) {
 }
 
 static inline void _void_gl_init() {
-	r_init(get_proc_address);
-	glMatrixMode(GL_MODELVIEW);
+	//glMatrixMode(GL_MODELVIEW);
 
 	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	//glEnable(GL_CULL_FACE);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_LIGHTING);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glViewport(0, 0, 1280, 720);
+	r_init(get_proc_address);
+
+	GLuint vao;
+	r_glGenVertexArrays(1, &vao);
+	r_glBindVertexArray(vao);
 }
 
 int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
@@ -97,9 +97,9 @@ void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 			0.01 * aspect - view[1] * 0.01,
 			0.01 * view[2], 100.0);
 
-	r_primitive_surface(0.0f, -1.0f, -3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
+	//r_primitive_surface(0.0f, -1.0f, -3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
 
-	r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
+	//r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
 
 	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
 	r_primitive_line_flush();
