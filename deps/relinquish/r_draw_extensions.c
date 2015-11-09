@@ -13,9 +13,7 @@ void *(*sui_gl_GetProcAddress)(const char* proc) = NULL;
 
 void r_extension_init(void *(*glGetProcAddr)(const char* proc))
 {
-	const unsigned char *extension;
 	sui_gl_GetProcAddress = glGetProcAddr;
-	extension = glGetString(GL_EXTENSIONS);
 }
 
 void *r_extension_get_address(const char* proc)
@@ -32,12 +30,12 @@ boolean r_extension_test(const char *string)
 	uint i = 0;
 	int maximum = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &maximum);
-    for (i = 0; i < maximum; i++) {
-        const unsigned char *extension = glGetStringi(GL_EXTENSIONS, i);
-        printf("Extension: %s\n", extension);
-        if (strcmp(string, (char *)extension) == 0)
-            return TRUE;
-    }
+	for (i = 0; i < maximum; i++) {
+		const unsigned char *extension = glGetStringi(GL_EXTENSIONS, i);
+		printf("Extension: %s\n", extension);
+		if (strcmp(string, (char *)extension) == 0)
+			return TRUE;
+	}
 
 	return FALSE;
 }

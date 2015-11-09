@@ -75,8 +75,8 @@ extern boolean f_debug_memory(); /*f_debug_memory checks if any of the bounds of
 
 #ifdef F_EXIT_CRASH
 
-extern void exit_crash(uint i); /* finction guaranteed to crash (Writes to NULL).*/
-#define exit(n) exit_crash(n) /* over writhing exit(0)  with afunction guaraneed tyo crash. */
+extern void exit_crash(); /* finction guaranteed to crash (Writes to NULL).*/
+#define exit(n) exit_crash() /* over writhing exit(0)  with afunction guaraneed tyo crash. */
 
 #endif
 

@@ -511,13 +511,11 @@ void r_array_load_vertex(void *pool, struct SUIArraySection *section, void *data
 void r_array_load_reference(void *pool, void *section, uint *reference, uint length)
 {
 	SUIArrayPool *p;
-	uint size;
 	p = pool;
 
 	if(r_array_pool_bound != pool)
 		r_array_vertex_atrib_set(pool);
 
-	size = ((SUIArraySection *)section)->vertex_start;
 	if(p->data != NULL)
 		memcpy(&p->data[((SUIArraySection *)section)->vertex_start * p->vertex_size], reference, length * sizeof(uint32));
 
@@ -575,10 +573,10 @@ void r_array_section_draw(void *pool, void *section, uint primitive_type, uint v
 	{	
 		SUIArraySection *s;
 		s = section;
-		if(vertex_count > ((SUIArraySection *)section)->vertex_count)
-			vertex_count = ((SUIArraySection *)section)->vertex_count;
-	
-		glDrawArrays(primitive_type, ((SUIArraySection *)section)->vertex_start + vertex_start, vertex_count);
+		if(vertex_count > s->vertex_count)
+			vertex_count = s->vertex_count;
+
+		glDrawArrays(primitive_type, s->vertex_start + vertex_start, vertex_count);
 	}else
 	{
 		SUIArrayPool *p;
