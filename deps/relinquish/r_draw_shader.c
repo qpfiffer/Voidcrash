@@ -101,8 +101,6 @@ GLvoid		(APIENTRY *r_glDisableVertexAttribArrayARB)(GLuint index);
 
 GLvoid		(APIENTRY *r_glGetShaderInfoLog)(GLhandleARB object, GLsizei maxLenght, GLsizei *length, char *infoLog);
 GLvoid		(APIENTRY *r_glGetProgramInfoLog)(GLhandleARB object, GLsizei maxLenght, GLsizei *length, char *infoLog);
-GLvoid		(APIENTRY *r_glGenVertexArrays)(GLsizei n, GLuint *arrays);
-GLvoid		(APIENTRY *r_glBindVertexArray)(GLuint array);
 
 RShader *p_current_shader = NULL;
 uint p_current_textures[64] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
@@ -176,8 +174,6 @@ void r_shader_init(void)
 		r_glDisableVertexAttribArrayARB =	r_extension_get_address("glDisableVertexAttribArrayARB");
 		r_glActiveTextureARB =				r_extension_get_address("glActiveTextureARB");
 		r_glGetShaderInfoLog =					r_extension_get_address("glGetInfoLogARB");
-		r_glGenVertexArrays =				r_extension_get_address("glGenVertexArraysARB");
-		r_glBindVertexArray =				r_extension_get_address("glBindVertexArrayARB");
 		r_glGetProgramInfoLog = r_glGetShaderInfoLog;
 	}else
 	{
@@ -309,7 +305,9 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 		r_glGetProgramInfoLog(prog_obj, output_size - size, &size, debug_output);
 		printf("%s", debug_output);
 	}
+
 	r_glUseProgramObjectARB(prog_obj);
+
 	shader->uniform_count = uniform_count;
 	shader->uniforms = malloc((sizeof *shader->uniforms) * uniform_count);
 	for(i = 0; i < uniform_count; i++)

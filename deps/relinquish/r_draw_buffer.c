@@ -21,6 +21,8 @@ GLvoid		(APIENTRY *r_glGetBufferSubDataARB)(uint target, uint offset, uint size,
 GLvoid		(APIENTRY *r_glEnableVertexAttribArrayARB)(GLuint  index);
 GLvoid		(APIENTRY *r_glDisableVertexAttribArrayARB)(GLuint  index);
 GLvoid		(APIENTRY *r_glVertexAttribPointerARB)(GLuint  index,  GLint  size,  GLenum  type,  GLboolean  normalized,  GLsizei  stride,  const GLvoid *  pointer);
+GLvoid		(APIENTRY *r_glGenVertexArrays)(GLsizei n, GLuint *arrays);
+GLvoid		(APIENTRY *r_glBindVertexArray)(GLuint array);
 
 boolean r_array_attrib_mode[64] = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
 									FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
@@ -54,6 +56,7 @@ typedef struct{
 }SUIArrayPool;
 
 SUIArrayPool *r_array_pool_bound = NULL;
+static uint gl_vertex_array_object = 0;
 
 uint r_array_vertex_size(SUIFormats *vertex_format_types, uint *vertex_format_size, uint vertex_format_count)
 {
@@ -88,8 +91,11 @@ void *r_array_allocate(uint vertex_count, SUIFormats *vertex_format_types, uint 
 
 	if(r_buffer_extension)
 	{
+		r_glBindVertexArray(gl_vertex_array_object);
+
 		r_glGenBuffersARB(1, &p->gl_buffer);
 		r_glBindBufferARB(GL_ARRAY_BUFFER_ARB, p->gl_buffer);
+
 		r_glBufferDataARB(GL_ARRAY_BUFFER_ARB, vertex_count * size, NULL, GL_DYNAMIC_DRAW_ARB);
 		r_glBindBufferARB(GL_ARRAY_BUFFER_ARB, r_array_bound);
 		p->data = NULL;
@@ -330,13 +336,20 @@ void  r_array_init(void)
 		r_glBufferDataARB = r_extension_get_address("glBufferDataARB");
 		r_glBufferSubDataARB = r_extension_get_address("glBufferSubDataARB");
 		r_glGetBufferSubDataARB = r_extension_get_address("glGetBufferSubDataARB");
-
 	}
+	if (r_extension_test("GL_ARB_vertex_array_object")) {
+		r_glGenVertexArrays = r_extension_get_address("glGenVertexArraysARB");
+		r_glBindVertexArray = r_extension_get_address("glBindVertexArrayARB");
+	}
+
 	r_glVertexAttribPointerARB = r_extension_get_address("glVertexAttribPointerARB");
 	r_glEnableVertexAttribArrayARB = r_extension_get_address("glEnableVertexAttribArrayARB");
 	r_glDisableVertexAttribArrayARB = r_extension_get_address("glDisableVertexAttribArrayARB");
 #endif
 	r_array_bound = 0;
+	r_glGenVertexArrays(1, &gl_vertex_array_object);
+	r_glEnableVertexAttribArrayARB(gl_vertex_array_object);
+
 	for(i = 0; i < 64; i++)
 		r_array_attrib_mode[i] = FALSE;
 }

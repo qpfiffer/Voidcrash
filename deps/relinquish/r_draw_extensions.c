@@ -32,6 +32,7 @@ boolean r_extension_test(const char *string)
 	glGetIntegerv(GL_NUM_EXTENSIONS, &maximum);
 	for (i = 0; i < maximum; i++) {
 		const unsigned char *extension = glGetStringi(GL_EXTENSIONS, i);
+		printf("Extension: %s\n", extension);
 		if (strcmp(string, (char *)extension) == 0)
 			return TRUE;
 	}
