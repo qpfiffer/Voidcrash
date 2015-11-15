@@ -40,7 +40,7 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 	}
 
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 
 	gl_context = SDL_GL_CreateContext(*window);
@@ -81,17 +81,6 @@ void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 	//	const void_game_entity_t *ent = vector_get(game_state->entities, i);
 	//	void_game_render_entity(ent);
 	//}
-	float aspect = 1280 / 720;
-	float view[3] = {0, 0, 0};
-
-	r_matrix_set(NULL);
-	r_matrix_identity(NULL);
-	r_matrix_frustum(NULL,
-			-0.01 - view[0] * 0.01,
-			0.01 - view[0] * 0.01,
-			-0.01 * aspect - view[1] * 0.01,
-			0.01 * aspect - view[1] * 0.01,
-			0.01 * view[2], 100.0);
 
 	//r_primitive_surface(0.0f, -1.0f, -3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
 

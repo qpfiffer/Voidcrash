@@ -91,8 +91,6 @@ void *r_array_allocate(uint vertex_count, SUIFormats *vertex_format_types, uint 
 
 	if(r_buffer_extension)
 	{
-		r_glBindVertexArray(gl_vertex_array_object);
-
 		r_glGenBuffersARB(1, &p->gl_buffer);
 		r_glBindBufferARB(GL_ARRAY_BUFFER_ARB, p->gl_buffer);
 
@@ -348,7 +346,9 @@ void  r_array_init(void)
 #endif
 	r_array_bound = 0;
 	r_glGenVertexArrays(1, &gl_vertex_array_object);
-	r_glEnableVertexAttribArrayARB(gl_vertex_array_object);
+	r_glBindVertexArray(gl_vertex_array_object);
+
+	//r_glEnableVertexAttribArrayARB(gl_vertex_array_object);
 
 	for(i = 0; i < 64; i++)
 		r_array_attrib_mode[i] = FALSE;
