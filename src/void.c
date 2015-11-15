@@ -56,7 +56,6 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 	uint vao = 0;
 	glGenVertexArraysARB(1, &vao);
 	glBindVertexArrayARB(vao);
-	log_msg(LOG_INFO, "Get error is: %s", glGetError());
 
 	return 0;
 }
@@ -88,9 +87,10 @@ void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 
 	//r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
 
-	//r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
 	//r_primitive_line_flush();
-	//r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	//log_msg(LOG_INFO, "Get error is: %s", glGetError());
+	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
 	//r_primitive_line_flush();
 
 	SDL_GL_SwapWindow(window);
