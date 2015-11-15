@@ -8,17 +8,12 @@ void *get_proc_address(const char *name) {
 }
 
 static inline void _void_gl_init() {
-	//glMatrixMode(GL_MODELVIEW);
-
-	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	//glEnable(GL_CULL_FACE);
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+
+	glEnable(GL_CULL_FACE);
 
 	r_init(get_proc_address);
 }
@@ -39,9 +34,9 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 		return -1;
 	}
 
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	gl_context = SDL_GL_CreateContext(*window);
 	if (gl_context == NULL) {
@@ -55,6 +50,13 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 	}
 
 	_void_gl_init();
+
+	PFNGLGENVERTEXARRAYSPROC glGenVertexArraysARB = (PFNGLGENVERTEXARRAYSPROC) SDL_GL_GetProcAddress("glGenVertexArrays");
+	PFNGLBINDVERTEXARRAYPROC glBindVertexArrayARB = (PFNGLBINDVERTEXARRAYPROC) SDL_GL_GetProcAddress("glBindVertexArray");
+	uint vao = 0;
+	glGenVertexArraysARB(1, &vao);
+	glBindVertexArrayARB(vao);
+	log_msg(LOG_INFO, "Get error is: %s", glGetError());
 
 	return 0;
 }
@@ -86,10 +88,10 @@ void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 
 	//r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
 
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
-	r_primitive_line_flush();
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
-	r_primitive_line_flush();
+	//r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	//r_primitive_line_flush();
+	//r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
+	//r_primitive_line_flush();
 
 	SDL_GL_SwapWindow(window);
 }

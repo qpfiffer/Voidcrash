@@ -56,7 +56,6 @@ typedef struct{
 }SUIArrayPool;
 
 SUIArrayPool *r_array_pool_bound = NULL;
-static uint gl_vertex_array_object = 0;
 
 uint r_array_vertex_size(SUIFormats *vertex_format_types, uint *vertex_format_size, uint vertex_format_count)
 {
@@ -345,8 +344,6 @@ void  r_array_init(void)
 	r_glDisableVertexAttribArrayARB = r_extension_get_address("glDisableVertexAttribArrayARB");
 #endif
 	r_array_bound = 0;
-	r_glGenVertexArrays(1, &gl_vertex_array_object);
-	r_glBindVertexArray(gl_vertex_array_object);
 
 	//r_glEnableVertexAttribArrayARB(gl_vertex_array_object);
 
