@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 
 	void_game_entity_t sphere;
+	memset(&sphere, 0, sizeof(sphere));
 	void_asset_import_mesh("./assets/models/sphere.obj", &sphere.mesh);
 	void_asset_import_shader("./assets/shaders/basic.vertex", "./assets/shaders/basic.fragment", &sphere.shader);
 
