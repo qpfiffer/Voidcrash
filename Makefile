@@ -1,8 +1,8 @@
 CFLAGS=-Werror -Wextra -Wall -DF_DOUBLE_PRECISION
 DEBUG_CFLAGS=-O0 -g3 -DF_EXIT_CRASH
 RELEASE_CFLAGS=-O3
-INCLUDES=-pthread -I./deps/Forge -I./deps/Relinquish -I./include/ `pkg-config --cflags sdl2 gl`
-LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2 gl`
+INCLUDES=-pthread -I./deps/Forge -I./deps/Relinquish -I./include/ `pkg-config --cflags sdl2 gl glew`
+LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2 gl glew`
 LIB_DIRS=-L./deps/Forge -L./deps/Relinquish
 NAME=voidstar
 COMMON_OBJ=asset_importer.o vector.o void.o logging.o

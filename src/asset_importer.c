@@ -8,17 +8,17 @@ static inline void_asset_mesh_t *_void_asset_mesh_init(void_asset_mesh_t *mesh) 
 		goto error;
 	}
 
-	mesh->vertices = vector_new(sizeof(unsigned int), 64);
+	mesh->vertices = vector_new(sizeof(void_vector3_t), 64);
 	if (mesh->vertices == NULL) {
 		goto error;
 	}
 
-	mesh->uvs = vector_new(sizeof(unsigned int), 64);
+	mesh->uvs = vector_new(sizeof(void_vector2_t), 64);
 	if (mesh->uvs == NULL) {
 		goto error;
 	}
 
-	mesh->normals = vector_new(sizeof(unsigned int), 64);
+	mesh->normals = vector_new(sizeof(void_vector3_t), 64);
 	if (mesh->normals == NULL) {
 		goto error;
 	}
@@ -99,9 +99,9 @@ int void_asset_import_mesh(const char *path, void_asset_mesh_t *out_mesh) {
 
 			int i = 0;
 			for (i = 0; i < MAX; i++) {
-				vector_append(out_mesh->uvs, &uv_vec[i], sizeof(unsigned int));
-				vector_append(out_mesh->normals, &normal_vec[i], sizeof(unsigned int));
-				vector_append(out_mesh->vertices, &vertex_vec[i], sizeof(unsigned int));
+				vector_append(uv_indices, &uv_vec[i], sizeof(unsigned int));
+				vector_append(normal_indices, &normal_vec[i], sizeof(unsigned int));
+				vector_append(vertex_indices, &vertex_vec[i], sizeof(unsigned int));
 			}
 		}
 	}
@@ -130,6 +130,10 @@ int void_asset_import_mesh(const char *path, void_asset_mesh_t *out_mesh) {
 	vector_free(temp_normals);
 
 	fclose(mesh_file);
+
+	glGenBuffers(1, &out_mesh->vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, out_mesh->vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, out_mesh->vertices->count * sizeof(void_vector3_t), out_mesh->vertices, GL_STATIC_DRAW);
 	return TRUE;
 
 error:

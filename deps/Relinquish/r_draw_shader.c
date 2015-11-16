@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "forge.h"
 #include "r_include.h"
 #include "relinquish.h"
@@ -259,14 +260,11 @@ void r_shader_matrix_parse(RShader	*shader)
 	}
 }
 
-#define GL_COMPILE_STATUS  0x8B81
-#define GL_LINK_STATUS    0x8B82
-
 
 RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, char *fragment, char *name)
 {
 	uint vertex_obj, fragment_obj, prog_obj, i, size = 0, add_size = 0, attribute_count = 0, uniform_count = 0, texture_count = 0;
-	int status;
+	int status = GL_FALSE;
 	RShaderInput input[256];
 	RShader *shader;
     
@@ -288,7 +286,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 
 .*/
 	r_glGetShaderivARB(vertex_obj, GL_COMPILE_STATUS, &status);
-	if(!status)
+	if(status == GL_FALSE)
 	{
 		if(debug_output != NULL)
 		{
@@ -298,6 +296,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 			r_glGetShaderInfoLog(vertex_obj, output_size, (int *)&size, &debug_output[add_size]);
 			add_size += size;
 			output_size -= size;
+			printf("%s", debug_output);
 		}
 		r_glDeleteObjectARB(vertex_obj);
 		return NULL;
@@ -311,7 +310,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	r_glGetShaderivARB(fragment_obj, GL_COMPILE_STATUS, &status);
    	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
 		fprintf(stderr, "r_shader_create E GL Error %u\n", i); 
-	if(!status)
+	if(status == GL_FALSE)
 	{
 		if(debug_output != NULL)
 		{
@@ -321,6 +320,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 			r_glGetShaderInfoLog(fragment_obj, output_size, (int *)&size, &debug_output[add_size]);
 			add_size += size;
 			output_size -= size;
+			printf("%s", debug_output);
 		}
 		r_glDeleteObjectARB(vertex_obj);
 		r_glDeleteObjectARB(fragment_obj);
@@ -339,9 +339,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 	shader = malloc(sizeof *shader);
 	shader->textures = NULL;
 	shader->uniforms = NULL; 
-	for(i = 0; i < 31 && name[i] != 0; i++)
-		shader->name[i] = name[i];
-	shader->name[i] = 0;
+	strncpy(shader->name, name, 32);
 
 	shader->program = prog_obj = r_glCreateProgramObjectARB();
 	r_glAttachObjectARB(prog_obj, vertex_obj);
@@ -358,15 +356,15 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 		r_glBindAttribLocationARB(prog_obj, i, shader->attributes[i].name);
 	}
 	
-   	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
-		fprintf(stderr, "r_shader_create H GL Error %u\n", i); 
+	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
+		fprintf(stderr, "r_shader_create H GL Error %u\n", i);
 	r_glLinkProgramARB(prog_obj);
-   	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
-		fprintf(stderr, "r_shader_create II GL Error %u\n", i); 
-	r_glGetProgramivARB(prog_obj, 0x8B82, &status);
-   	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
-		fprintf(stderr, "r_shader_create III GL Error %u\n", i);
-	if(!status)
+	for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
+		fprintf(stderr, "r_shader_create II GL Error %u\n", i);
+	//r_glGetProgramivARB(prog_obj, GL_LINK_STATUS, &status);
+	//for(i = glGetError(); GL_NO_ERROR != i; i = glGetError())
+	//	fprintf(stderr, "r_shader_create III GL Error %u\n", i);
+	if(status == GL_FALSE)
 	{
 		if(debug_output != NULL)
 		{
@@ -376,7 +374,7 @@ RShader	*r_shader_create(char *debug_output, uint output_size, char *vertex, cha
 			r_glGetProgramInfoLog(prog_obj, output_size, (int *)&size, &debug_output[add_size]);
 			add_size += size;
 			output_size -= size;
-			printf(debug_output);
+			printf("%s", debug_output);
 		}
 		r_glDeleteObjectARB(vertex_obj);
 		r_glDeleteObjectARB(fragment_obj);

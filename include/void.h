@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <forge.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <SDL_opengl.h>
@@ -37,6 +38,8 @@ typedef struct {
 	vector *vertices;
 	vector *uvs;
 	vector *normals;
+
+	GLuint vertex_buffer;
 } void_asset_mesh_t;
 
 typedef struct {

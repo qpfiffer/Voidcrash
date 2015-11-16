@@ -1,5 +1,4 @@
 // vim: noet ts=4 sw=4
-#include <SDL_opengl.h>
 #include "void.h"
 
 void *get_proc_address(const char *name) {
@@ -8,12 +7,16 @@ void *get_proc_address(const char *name) {
 }
 
 static inline void _void_gl_init() {
+	glewExperimental = TRUE;
+	if (glewInit() != GLEW_OK)
+		log_msg(LOG_ERR, "Could not init glew.");
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
 	glEnable(GL_CULL_FACE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	r_init(get_proc_address);
 }
@@ -34,8 +37,8 @@ int void_init(SDL_Window **window, SDL_GLContext **gl_context) {
 		return -1;
 	}
 
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	gl_context = SDL_GL_CreateContext(*window);
@@ -69,29 +72,27 @@ void void_update(void_game_state_t *game_state) {
 	}
 }
 
-//static inline void void_game_render_entity(const void_game_entity_t *ent) {
-//	UNUSED(ent);
-//}
+static inline void void_game_render_entity(const void_game_entity_t *ent) {
+	r_shader_set(ent->shader.r_shader);
+	glEnableVertexAttribArray(ent->mesh.vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, ent->mesh.vertex_buffer);
+	glVertexAttribPointer(ent->mesh.vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glDrawArrays(GL_TRIANGLES, 0, ent->mesh.vertices->count);
+	log_msg(LOG_INFO, "GL Error: %s", glGetError());
+}
 
 void void_draw(SDL_Window *window, const void_game_state_t *game_state) {
 	UNUSED(game_state);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glLoadIdentity();
 
-	//size_t i = 0;
-	//for (i = 0; i < game_state->entities->count; i++) {
-	//	const void_game_entity_t *ent = vector_get(game_state->entities, i);
-	//	void_game_render_entity(ent);
-	//}
+	size_t i = 0;
+	for (i = 0; i < game_state->entities->count; i++) {
+		const void_game_entity_t *ent = vector_get(game_state->entities, i);
+		void_game_render_entity(ent);
+	}
 
-	//r_primitive_surface(0.0f, -1.0f, -3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
-
-	//r_primitive_surface(0.0f, 1.0f, 3.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
-
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, -10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
-	//r_primitive_line_flush();
-	//log_msg(LOG_INFO, "Get error is: %s", glGetError());
-	r_primitive_line_3d(-1.0f, 1.0f, -10.0f, 1.0f, -1.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0.5f);
-	//r_primitive_line_flush();
 
 	SDL_GL_SwapWindow(window);
 }
