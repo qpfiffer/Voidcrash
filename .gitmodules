@@ -1,0 +1,3 @@
+[submodule "deps/Corange"]
+	path = deps/Corange
+	url = https://github.com/orangeduck/Corange.git

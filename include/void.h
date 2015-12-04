@@ -9,3 +9,6 @@
 
 #include "constants.h"
 #include "logging.h"
+
+int void_init(const char *assets_dir);
+int void_game();
