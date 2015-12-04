@@ -1,33 +1,17 @@
-CFLAGS=-Werror -Wextra -Wall -DF_DOUBLE_PRECISION
-DEBUG_CFLAGS=-O0 -g3 -DF_EXIT_CRASH
+CFLAGS=-Werror -Wextra -Wall
+DEBUG_CFLAGS=-O0 -g3
 RELEASE_CFLAGS=-O3
-INCLUDES=-pthread -I./deps/Forge -I./deps/Relinquish -I./include/ `pkg-config --cflags sdl2 gl glew`
-LIBS=-lm -lrt -lSDL2 `pkg-config --libs sdl2 gl glew`
-LIB_DIRS=-L./deps/Forge -L./deps/Relinquish
-NAME=voidstar
-COMMON_OBJ=asset_importer.o vector.o void.o logging.o
+INCLUDES=-I./include `pkg-config --cflags sdl2 gl`
+LIBS=-pthread -lm -lrt -lSDL2 `pkg-config --libs sdl2 gl`
+LIB_DIRS=
+NAME=voidcrash
+COMMON_OBJ=
 
 debug: CFLAGS += $(DEBUG_CFLAGS)
-debug: forge_debug relinquish_debug $(NAME)
+debug: $(NAME)
 
 release: CFLAGS += $(RELEASE_CFLAGS)
-release: forge_release relinquish_release $(NAME)
-
-forge_debug:
-	@echo "Building Forge in in debug mode."
-	@cd ./deps/Forge/; make debug
-
-forge_release:
-	@echo "Building Forge in in release mode."
-	@cd ./deps/Forge/; make release
-
-relinquish_debug:
-	@echo "Building Relinquish in in debug mode."
-	@cd ./deps/Relinquish/; make debug
-
-relinquish_release:
-	@echo "Building Relinquish in in release mode."
-	@cd ./deps/Relinquish/; make release
+release: $(NAME)
 
 clean:
 	rm -f *.o
@@ -36,5 +20,5 @@ clean:
 %.o: ./src/%.c
 	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -c $<
 
-$(NAME): $(COMMON_OBJ) ./deps/Relinquish/librelinquish.a ./deps/Forge/libforge.a main.o
+$(NAME): $(COMMON_OBJ) main.o
 	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -o $(NAME) $^ $(LIBS)
