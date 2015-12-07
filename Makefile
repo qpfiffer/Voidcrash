@@ -25,4 +25,4 @@ clean:
 	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -c $<
 
 $(NAME): $(COMMON_OBJ) main.o
-	$(CC) $(CFLAGS) $(LIB_INCLUDES) $(INCLUDES) -o $(NAME) $^ $(LIBS)
+	$(CC) $(CFLAGS) $(LIB_DIRS) $(INCLUDES) -o $(NAME) $^ $(LIBS)

@@ -6,5 +6,5 @@ int main(int argc, char *argv[]) {
 	UNUSED(argv);
 
 	void_init("./assets/");
-	return void_game();
+	return void_draw();
 }
