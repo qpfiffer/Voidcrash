@@ -16,7 +16,7 @@ static inline int void_init(const char *assets_dir, void_game_state_t *game_stat
 
 	game_state->renderer = renderer_new(game_state->config);
 	renderer_set_camera(game_state->renderer, default_camera);
-	renderer_set_tod(game_state->renderer, 0.15, 0);
+	renderer_set_skydome_enabled(game_state->renderer, false);
 
 	return 0;
 }
