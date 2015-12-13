@@ -1,4 +1,4 @@
-CFLAGS=-Werror -Wextra -Wall
+CFLAGS=-Werror -Wextra -Wall -Wno-missing-field-initializers
 DEBUG_CFLAGS=-O0 -g3
 RELEASE_CFLAGS=-O3
 INCLUDES=-I./include -I./deps/Corange/include/ `pkg-config --cflags sdl2 gl`

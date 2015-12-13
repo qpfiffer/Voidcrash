@@ -8,12 +8,15 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <corange.h>
+
 #include "constants.h"
 #include "logging.h"
 
 typedef struct {
 	bool should_quit;
+	renderer *renderer;
+	asset_hndl config;
 } void_game_state_t;
 
-int void_init(const char *assets_dir);
-int void_draw();
+int void_game();
