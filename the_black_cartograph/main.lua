@@ -67,10 +67,11 @@ function set_color(color_name)
     love.graphics.setColor(current_color[1], current_color[2], current_color[3], 255)
 end
 
-function draw_string(str, row, col)
+function draw_raw_numbers(array, row, col)
     local cur_iter = col
     local roffset = row
-    for c in str:gmatch"." do
+    for i=1,#array do
+        local c = array[i]
         local row_and_col = _row_and_column_for_char(c)
         local skull_quad = _skull_quad(row_and_col[1], row_and_col[2])
         love.graphics.draw(skull_font, skull_quad,
@@ -80,6 +81,14 @@ function draw_string(str, row, col)
         cur_iter = cur_iter + 1
     end
     return cur_iter - col
+end
+
+function draw_string(str, row, col)
+    local numbers = {}
+    for i=1,#str do
+        numbers[i] = str:sub(i, i)
+    end
+    return draw_raw_numbers(numbers, row, col)
 end
 
 function draw_breadcrumbs()
@@ -103,6 +112,13 @@ function draw_breadcrumbs()
     accum = accum + draw_string("1x", 0, accum)
 end
 
+function draw_map()
+    map_data = { {0,0,0,0,3,3,5,6},
+                 {0,0,0,3,3,3,4,4},
+               }
+end
+
 function love.draw()
     draw_breadcrumbs()
+    draw_map()
 end
