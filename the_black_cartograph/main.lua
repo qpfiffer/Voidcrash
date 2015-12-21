@@ -117,20 +117,18 @@ function draw_breadcrumbs()
 end
 
 function draw_map()
-    map_data = { {0,0,0,0,3,3,5,6},
-                 {0,0,0,3,3,3,4,4},
-                 {0,0,3,3,3,3,4,3},
-                 {0,3,2,2,2,2,3,2},
-                 {0,3,2,2,2,2,3,2},
-                 {0,0,0,2,2,2,3,2},
-                 {0,3,2,2,2,2,3,2},
-                 {0,0,0,2,2,2,3,2},
-               }
-
-    set_color("white")
-    local row_offset = 6
-    for row=1,#map_data do
-        draw_raw_numbers(map_data[row], row + row_offset, 6)
+    local row_offset = 1
+    local column_offset = 6
+    for x=0,24 do
+        for y=0,32 do
+            local noise_val = love.math.noise(x, y)
+            if noise_val < 0.5 then
+                set_color("red")
+            else
+                set_color("blood")
+            end
+            draw_raw_numbers({math.floor(noise_val * 8)}, x + row_offset, y + column_offset)
+        end
     end
 end
 
