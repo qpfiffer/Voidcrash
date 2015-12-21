@@ -21,12 +21,16 @@ function _skull_quad(row, column)
         skull_font_width, skull_font_height, skull_font:getWidth(), skull_font:getHeight())
 end
 
-function _row_and_column_for_char(char)
+function _row_and_column_for_num(num)
     -- Everything greater than 20 is ASCII
-    local byte = string.byte(char)
-    local row = math.floor(byte / 32)
-    local column = byte % 32
+    local row = math.floor(num / 32)
+    local column = num % 32
     return {row, column}
+end
+
+function _row_and_column_for_char(char)
+    local byte = string.byte(char)
+    return _row_and_column_for_num(byte)
 end
 
 function love.load(arg)
@@ -72,7 +76,7 @@ function draw_raw_numbers(array, row, col)
     local roffset = row
     for i=1,#array do
         local c = array[i]
-        local row_and_col = _row_and_column_for_char(c)
+        local row_and_col = _row_and_column_for_num(c)
         local skull_quad = _skull_quad(row_and_col[1], row_and_col[2])
         love.graphics.draw(skull_font, skull_quad,
             cur_iter * (skull_font_width - kern_offset) + padding_x,
@@ -86,7 +90,7 @@ end
 function draw_string(str, row, col)
     local numbers = {}
     for i=1,#str do
-        numbers[i] = str:sub(i, i)
+        numbers[i] = string.byte(str:sub(i, i))
     end
     return draw_raw_numbers(numbers, row, col)
 end
@@ -115,7 +119,19 @@ end
 function draw_map()
     map_data = { {0,0,0,0,3,3,5,6},
                  {0,0,0,3,3,3,4,4},
+                 {0,0,3,3,3,3,4,3},
+                 {0,3,2,2,2,2,3,2},
+                 {0,3,2,2,2,2,3,2},
+                 {0,0,0,2,2,2,3,2},
+                 {0,3,2,2,2,2,3,2},
+                 {0,0,0,2,2,2,3,2},
                }
+
+    set_color("white")
+    local row_offset = 6
+    for row=1,#map_data do
+        draw_raw_numbers(map_data[row], row + row_offset, 6)
+    end
 end
 
 function love.draw()
