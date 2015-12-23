@@ -68,9 +68,10 @@ function love.keypressed(key)
     end
     if key == "pagedown" then
         zoom_level = zoom_level + 1
-        if zoom_level <= 0 then
-            zoom_level = 1
-        end
+    end
+
+    if zoom_level <= 0 then
+        zoom_level = 1
     end
     --if key == "backspace" then
     --    local byteoffset = utf8.offset(_build_skull_str(), -1)
