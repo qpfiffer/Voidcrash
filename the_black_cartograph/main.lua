@@ -6,6 +6,7 @@ skull_pallette = {
     ["white"] = {255,255,255},
     ["gray"] = {170,170,170},
     ["grayer"] = {85,85,85},
+    ["grayest"] = {35,35,35},
     ["red"] = {255,82,82},
     ["blood"] = {170,0,0}
 }
@@ -15,6 +16,9 @@ window_height = 480
 
 padding_x = 0
 padding_y = 0
+
+current_x_offset = 0
+current_y_offset = 0
 
 function _skull_quad(row, column)
     return love.graphics.newQuad(column * skull_font_width, row * skull_font_height + (3 * row),
@@ -44,8 +48,17 @@ function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
     end
-    if key == "pagedown" then
-        current_offset = current_offset + (16 * max_rows)
+    if key == "left" then
+        current_x_offset = current_x_offset - 1
+    end
+    if key == "right" then
+        current_x_offset = current_x_offset + 1
+    end
+    if key == "up" then
+        current_y_offset = current_y_offset - 1
+    end
+    if key == "down" then
+        current_y_offset = current_y_offset + 1
     end
     if key == "pageup" then
         current_offset = current_offset - (16 * max_rows)
@@ -119,15 +132,24 @@ end
 function draw_map()
     local row_offset = 1
     local column_offset = 6
-    for x=0,24 do
-        for y=0,32 do
-            local noise_val = love.math.noise(x, y)
-            if noise_val < 0.5 then
-                set_color("red")
+    local multiplier = 100
+    for x=0,68 do
+        for y=0,28 do
+            local raw_noise_val = love.math.noise(0.02 * (x + current_x_offset), 0.02 * (y + current_y_offset))
+            local noise_val = raw_noise_val * 1000
+
+            if noise_val < 250 then
+                set_color("grayest")
+            elseif noise_val < 500 then
+                set_color("grayer")
+            elseif noise_val < 750 then
+                set_color("gray")
             else
-                set_color("blood")
+                set_color("white")
             end
-            draw_raw_numbers({math.floor(noise_val * 8)}, x + row_offset, y + column_offset)
+            --if math.floor(noise_val) % 10 == 0 then
+                draw_raw_numbers({178}, y + 1, x + row_offset)
+            --end
         end
     end
 end
