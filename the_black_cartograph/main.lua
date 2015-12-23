@@ -20,6 +20,8 @@ padding_y = 0
 current_x_offset = 0
 current_y_offset = 0
 
+zoom_level = 1
+
 function _skull_quad(row, column)
     return love.graphics.newQuad(column * skull_font_width, row * skull_font_height + (3 * row),
         skull_font_width, skull_font_height, skull_font:getWidth(), skull_font:getHeight())
@@ -60,10 +62,14 @@ function love.keypressed(key)
     if key == "down" then
         current_y_offset = current_y_offset + 1
     end
+
     if key == "pageup" then
-        current_offset = current_offset - (16 * max_rows)
-        if current_offset < 0 then
-            current_offset = 0
+        zoom_level = zoom_level - 1
+    end
+    if key == "pagedown" then
+        zoom_level = zoom_level + 1
+        if zoom_level <= 0 then
+            zoom_level = 1
         end
     end
     --if key == "backspace" then
@@ -126,7 +132,7 @@ function draw_breadcrumbs()
     set_color("gray")
     accum = accum + draw_string("Z: ", 0, accum)
     set_color("red")
-    accum = accum + draw_string("1x", 0, accum)
+    accum = accum + draw_string(tostring(zoom_level), 0, accum)
 end
 
 function draw_map()
@@ -135,7 +141,7 @@ function draw_map()
     local multiplier = 100
     for x=0,68 do
         for y=0,28 do
-            local raw_noise_val = love.math.noise(0.02 * (x + current_x_offset), 0.02 * (y + current_y_offset))
+            local raw_noise_val = love.math.noise((zoom_level * 0.02) * (x + current_x_offset), (zoom_level * 0.02) * (y + current_y_offset))
             local noise_val = raw_noise_val * 1000
 
             if noise_val < 250 then
