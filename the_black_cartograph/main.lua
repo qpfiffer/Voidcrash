@@ -136,13 +136,18 @@ function draw_breadcrumbs()
     accum = accum + draw_string(tostring(zoom_level), 0, accum)
 end
 
+step = 0
 function draw_map()
     local row_offset = 1
     local column_offset = 6
     local multiplier = 100
+    step = step + 0.25
     for x=0,68 do
         for y=0,28 do
-            local raw_noise_val = love.math.noise((zoom_level * 0.02) * (x + current_x_offset), (zoom_level * 0.02) * (y + current_y_offset))
+            local raw_noise_val = love.math.noise(
+                (zoom_level * 0.02) * (x + current_x_offset),
+                (zoom_level * 0.02) * (y + current_y_offset),
+                (step % 1000) * 0.1)
             local noise_val = raw_noise_val * 1000
 
             if noise_val < 250 then
