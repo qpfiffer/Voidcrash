@@ -1,4 +1,5 @@
 local utf8 = require("utf8")
+scale = love.window.getDPIScale()
 skull_font_width = 12
 skull_font_height = 16
 kern_offset = 3
@@ -11,8 +12,8 @@ skull_pallette = {
     ["blood"] = {170,0,0}
 }
 
-window_width = 640
-window_height = 480
+window_width = 640 * scale
+window_height = 480 * scale
 
 padding_x = 0
 padding_y = 0
