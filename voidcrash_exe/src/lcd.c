@@ -3,9 +3,10 @@
 #include "gd32vf103.h"
 
 #include "lcd.h"
+#include "oledfont.h"
 
 static void spi_config() {
-	spi_parameter_struct spi_init_struct;
+	spi_parameter_struct spi_init_struct = {0};
 	/* deinitilize SPI and the parameters */
 	OLED_CS_set();
 	spi_struct_para_init(&spi_init_struct);
@@ -20,7 +21,7 @@ static void spi_config() {
 	spi_init_struct.endian				 = SPI_ENDIAN_MSB;
 	spi_init(SPI0, &spi_init_struct);
 
-	spi_crc_polynomial_set(SPI0,7);
+	spi_crc_polynomial_set(SPI0, 7);
 	spi_enable(SPI0);
 }
 
@@ -156,11 +157,11 @@ void lcd_init() {
 
 	lcd_write_reg(0xC3);
 	lcd_write_char(0x8D);
-	lcd_write_char(0x6A);   
+	lcd_write_char(0x6A);
 
 	lcd_write_reg(0xC4);
-	lcd_write_char(0x8D); 
-	lcd_write_char(0xEE); 
+	lcd_write_char(0x8D);
+	lcd_write_char(0xEE);
 
 	lcd_write_reg(0xC5);  /*VCOM*/
 	lcd_write_char(0x0E);
@@ -212,6 +213,62 @@ void lcd_init() {
 
 	lcd_write_reg(0x29);	// Display On
 }
+
+void LCD_ShowChar(uint16_t x,uint16_t y,uint8_t num,uint8_t mode,uint16_t color)
+{
+    uint8_t temp;
+    uint8_t pos,t;
+	  uint16_t x0=x;    
+    if(x>LCD_W-16||y>LCD_H-16)return;	    //设置窗口		   
+	num=num-' ';//得到偏移后的值
+	lcd_address_set(x,y,x+8-1,y+16-1);      //设置光标位置 
+	if(!mode) //非叠加方式
+	{
+		for(pos=0;pos<16;pos++)
+		{ 
+			temp=asc2_1608[(uint16_t)num*16+pos];		 //调用1608字体
+			for(t=0;t<8;t++)
+		    {                 
+		        if(temp&0x01)lcd_write_int(color);
+				else lcd_write_int(0xFFFF);
+				temp>>=1;
+				x++;
+		    }
+			x=x0;
+			y++;
+		}	
+	}else//叠加方式
+	{
+		for(pos=0;pos<16;pos++)
+		{
+		    temp=asc2_1608[(uint16_t)num*16+pos];		 //调用1608字体
+			for(t=0;t<8;t++)
+		    {                 
+		        if(temp&0x01)LCD_DrawPoint(x+t,y+pos,color);//画一个点     
+		        temp>>=1; 
+		    }
+		}
+	}   	   	 	  
+}
+
+void LCD_DrawPoint(uint16_t x,uint16_t y,uint16_t color)
+{
+	lcd_address_set(x,y,x,y);//设置光标位置 
+	lcd_write_int(color);
+} 
+
+void LCD_ShowString(uint16_t x,uint16_t y,const u8 *p,uint16_t color)
+{         
+    while(*p!='\0')
+    {       
+        if(x>LCD_W-16){x=0;y+=16;}
+        if(y>LCD_H-16){y=x=0;lcd_clear(0xF800);}
+        LCD_ShowChar(x,y,*p,0,color);
+        x+=8;
+        p++;
+    }  
+}
+
 
 void lcd_clear(const uint16_t buf) {
 	uint16_t i = 0;

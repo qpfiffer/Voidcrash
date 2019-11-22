@@ -1,4 +1,5 @@
 This is a fantastic resource: [clicky.](https://pramode.in/2019/10/07/rust-on-riscv-board-sipeed-longan-nano/)
+Also very useful: [here.](https://www.susa.net/wordpress/2019/10/longan-nano-gd32vf103/)
 
 Pre-Install
 ===========

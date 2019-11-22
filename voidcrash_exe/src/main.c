@@ -6,7 +6,11 @@
 
 void init() {
 	rcu_periph_clock_enable(RCU_GPIOA);
+	rcu_periph_clock_enable(RCU_GPIOC);
 	rcu_periph_clock_enable(RCU_USART0);
+
+	gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_13);
+	gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1|GPIO_PIN_2);
 
 	/* connect port to USARTx_Tx */
 	gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_9);
@@ -30,6 +34,20 @@ void init() {
 
 int main() {
 	init();
-	lcd_init();
-	lcd_clear(0x00FF);
+	//lcd_init();
+	//lcd_clear(0xFFFF);
+
+	//while (1) {
+	//	LCD_ShowString(24,  0, (uint8_t *)("no card found!"), 0xF800);
+	//	LCD_ShowString(24, 16, (uint8_t *)("no card found!"), 0xF800);
+	//	LCD_ShowString(24, 32, (uint8_t *)("no card found!"), 0xF800);
+	//	LCD_ShowString(24, 48, (uint8_t *)("no card found!"), 0xF800);
+	//	LCD_ShowString(24, 64, (uint8_t *)("no card found!"), 0xF800);
+	while (1) {
+		GPIO_BOP(GPIOC) = GPIO_PIN_13;
+		delay_1ms(500);
+		GPIO_BC(GPIOC) = GPIO_PIN_13;
+		delay_1ms(500);
+	}
+	//}
 }
