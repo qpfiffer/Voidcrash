@@ -22,4 +22,8 @@ function GameState:render_current_state(renderer)
     return self.current_state:render(renderer)
 end
 
+function GameState:update_current_state(dt)
+    return self.current_state:update(dt)
+end
+
 return GameState

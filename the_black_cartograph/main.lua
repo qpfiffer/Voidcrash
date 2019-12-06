@@ -58,6 +58,10 @@ end
 function love.textinput(key)
 end
 
+function love.update(dt)
+    game_state:update_current_state(dt)
+end
+
 function draw_breadcrumbs()
     -- Vector
     local accum = 0
