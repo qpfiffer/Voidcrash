@@ -25,8 +25,6 @@ function love.load(arg)
     canvas = love.graphics.newCanvas()
     local str = love.filesystem.read("assets/CRT-moonshine.frag")
     shader = love.graphics.newShader(str)
-    shader:send("inputSize", {love.graphics.getWidth(), love.graphics.getHeight()})
-    shader:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
 
     local initial_state = InitialState:init()
     game_state = GameState:init(initial_state)
@@ -70,13 +68,15 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.clear(love.graphics.getBackgroundColor())
     love.graphics.setCanvas(canvas)
 
     game_state:render_current_state(renderer)
 
     love.graphics.setCanvas()
     love.graphics.setShader(shader)
-    shader:send('tex0', tex)
+    --shader:send("inputSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    --shader:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
     love.graphics.draw(canvas)
     love.graphics.setShader()
 end
