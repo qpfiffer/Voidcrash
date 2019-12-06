@@ -1,7 +1,7 @@
 local MapState = {}
 MapState.__index = MapState
 
-local TICKER_RATE = 1/60
+local constants = require("src/Constants")
 
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 28
@@ -36,18 +36,21 @@ function MapState:_draw_breadcrumbs(renderer)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("Z: ", 0, accum)
     renderer:set_color("red")
-    accum = accum + renderer:draw_string(tostring(self.zoom_level), 0, accum)
+    accum = accum + renderer:draw_string(tostring(math.floor(self.zoom_level)), 0, accum)
 end
 
 function MapState:_draw_map(renderer)
     local row_offset = 1
     local column_offset = 6
     local multiplier = 100
+
+    local floored_zoom = math.floor(self.zoom_level) * 0.02
+
     for x=0, MAP_X_MAX do
         for y=0, MAP_Y_MAX do
             local raw_noise_val = love.math.noise(
-                (self.zoom_level * 0.02) * (x + self.current_x_offset),
-                (self.zoom_level * 0.02) * (y + self.current_y_offset),
+                floored_zoom * (x + self.current_x_offset),
+                floored_zoom * (y + self.current_y_offset),
                 0)
             local noise_val = raw_noise_val * 1000
 
@@ -72,8 +75,8 @@ end
 
 function MapState:update(game_state, dt)
     self.dtotal = self.dtotal + dt
-    if self.dtotal >= TICKER_RATE then
-        self.dtotal = self.dtotal - TICKER_RATE
+    if self.dtotal >= constants.TICKER_RATE then
+        self.dtotal = self.dtotal - constants.TICKER_RATE
         if love.keyboard.isDown("left") then
             self.current_x_offset = self.current_x_offset - 1
         end
@@ -87,14 +90,15 @@ function MapState:update(game_state, dt)
             self.current_y_offset = self.current_y_offset + 1
         end
 
+        local ZOOM_MOD = 0.25
         if love.keyboard.isDown("pageup") then
-            self.zoom_level = self.zoom_level - 1
+            self.zoom_level = self.zoom_level - ZOOM_MOD
         end
         if love.keyboard.isDown("pagedown") then
-            self.zoom_level = self.zoom_level + 1
+            self.zoom_level = self.zoom_level + ZOOM_MOD
         end
 
-        if self.zoom_level <= 0 then
+        if self.zoom_level < 1 then
             self.zoom_level = 1
         end
     end

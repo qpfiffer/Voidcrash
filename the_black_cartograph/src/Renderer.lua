@@ -42,9 +42,16 @@ end
 function Renderer:init()
     local this = {
         current_color = SKULL_PALLETTE["white"],
-        skull_font = love.graphics.newImage("assets/font.png")
+        skull_font = love.graphics.newImage("assets/font.png"),
+
+        canvas = nil,
+        shader = nil
     }
     setmetatable(this, self)
+
+    local str = love.filesystem.read("assets/CRT-moonshine.frag")
+    this.canvas = love.graphics.newCanvas()
+    this.shader = love.graphics.newShader(str)
 
     return this
 end
@@ -77,6 +84,23 @@ function Renderer:set_color(color_name)
     local cc = SKULL_PALLETTE[color_name]
     self.current_color = cc
     love.graphics.setColor(cc[1], cc[2], cc[3], 255)
+end
+
+function Renderer:render(game_state)
+    love.graphics.clear({0, 0, 0})
+    love.graphics.setCanvas(self.canvas)
+    love.graphics.clear({0, 0, 0})
+
+    local r, g, b, a = love.graphics.getColor()
+    game_state:render_current_state(self)
+    love.graphics.setColor(r, g, b, a)
+
+    love.graphics.setCanvas()
+    love.graphics.setShader(self.shader)
+    --shader:send("inputSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    --shader:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    love.graphics.draw(self.canvas)
+    love.graphics.setShader()
 end
 
 return Renderer

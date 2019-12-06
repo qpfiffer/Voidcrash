@@ -1,6 +1,8 @@
 local InitialState = {}
 InitialState.__index = InitialState
 
+local constants = require("src/Constants")
+
 local MapState = require("src/states/MapState")
 
 local TICKER_RATE = 1/60
@@ -38,8 +40,8 @@ end
 
 function InitialState:update(game_state, dt)
     self.dtotal = self.dtotal + dt   -- we add the time passed since the last update, probably a very small number like 0.01
-    if self.dtotal >= TICKER_RATE then
-        self.dtotal = self.dtotal - TICKER_RATE   -- reduce our timer by a second, but don't discard the change... what if our framerate is 2/3 of a second?
+    if self.dtotal >= constants.TICKER_RATE then
+        self.dtotal = self.dtotal - constants.TICKER_RATE   -- reduce our timer by a second, but don't discard the change... what if our framerate is 2/3 of a second?
         self.current_text_idx = self.current_text_idx + 1
         self.ticks_since_change = self.ticks_since_change + 1
 
