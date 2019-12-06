@@ -45,13 +45,24 @@ function Renderer:init()
         skull_font = love.graphics.newImage("assets/font.png"),
 
         canvas = nil,
-        shader = nil
+        canvas2 = nil,
+        crt_shader = nil,
+        scanlines_shader = nil,
+        anaglyph_shader = nil
     }
     setmetatable(this, self)
 
     local str = love.filesystem.read("assets/CRT-moonshine.frag")
+    this.crt_shader = love.graphics.newShader(str)
+
+    str = love.filesystem.read("assets/anaglyph.frag")
+    this.anaglyph_shader = love.graphics.newShader(str)
+
+    str = love.filesystem.read("assets/scanlines.frag")
+    this.scanlines_shader = love.graphics.newShader(str)
+
     this.canvas = love.graphics.newCanvas()
-    this.shader = love.graphics.newShader(str)
+    this.canvas2 = love.graphics.newCanvas()
 
     return this
 end
@@ -87,19 +98,26 @@ function Renderer:set_color(color_name)
 end
 
 function Renderer:render(game_state)
+    local r, g, b, a = love.graphics.getColor()
+
+    love.graphics.setCanvas(self.canvas2)
     love.graphics.clear({0, 0, 0})
+
     love.graphics.setCanvas(self.canvas)
     love.graphics.clear({0, 0, 0})
 
-    local r, g, b, a = love.graphics.getColor()
     game_state:render_current_state(self)
+
     love.graphics.setColor(r, g, b, a)
 
-    love.graphics.setCanvas()
-    love.graphics.setShader(self.shader)
-    --shader:send("inputSize", {love.graphics.getWidth(), love.graphics.getHeight()})
-    --shader:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
+    -- Render canvas through the shader onto canvas2:
+    love.graphics.setCanvas(self.canvas2)
+    love.graphics.setShader(self.scanlines_shader)
     love.graphics.draw(self.canvas)
+
+    love.graphics.setCanvas()
+    love.graphics.setShader(self.crt_shader)
+    love.graphics.draw(self.canvas2)
     love.graphics.setShader()
 end
 
