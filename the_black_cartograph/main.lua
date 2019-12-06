@@ -4,7 +4,7 @@ local GameState = require("src/GameState")
 local InitialState = require("src/states/InitialState")
 local Renderer = require("src/Renderer")
 
-scale = love.window.getDPIScale()
+scale = 2 -- love.window.getDPIScale()
 window_width = 640 * scale
 window_height = 480 * scale
 

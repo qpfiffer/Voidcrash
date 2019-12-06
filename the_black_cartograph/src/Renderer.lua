@@ -1,6 +1,8 @@
 local Renderer = {}
 Renderer.__index = Renderer
 
+scale = love.window.getDPIScale()
+
 SKULL_FONT_WIDTH = 12
 SKULL_FONT_HEIGHT = 16
 KERN_OFFSET = 3
@@ -10,14 +12,14 @@ PADDING_Y = 0
 
 
 SKULL_PALLETTE = {
-    ["white"] = {255,255,255},
-    ["gray"] = {170,170,170},
-    ["grayer"] = {85,85,85},
-    ["grayest"] = {35,35,35},
-    ["red"] = {255,82,82},
-    ["blood"] = {170,0,0},
+    ["white"] = {1,1,1},
+    ["gray"] = {0.66, 0.66, 0.66},
+    ["grayer"] = {0.33, 0.33, 0.33},
+    ["grayest"] = {0.137, 0.137, 0.137},
+    ["red"] = {1,0.32,0.32},
+    ["blood"] = {0.66,1,1},
 
-    ["green"] = {82,255,82}
+    ["green"] = {0.32,1,0.32}
 }
 
 function _skull_quad(skull_font_img, row, column)
@@ -55,9 +57,9 @@ function Renderer:draw_raw_numbers(array, row, col)
         local row_and_col = _row_and_column_for_num(c)
         local skull_quad = _skull_quad(self.skull_font, row_and_col[1], row_and_col[2])
         love.graphics.draw(self.skull_font, skull_quad,
-            cur_iter * (SKULL_FONT_WIDTH - KERN_OFFSET) + PADDING_X,
-            roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y,
-            0, 1, 1, 0, 0)
+            (cur_iter * (SKULL_FONT_WIDTH - KERN_OFFSET) + PADDING_X) * scale,
+            (roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y) * scale,
+            0, scale, scale, 0, 0)
         cur_iter = cur_iter + 1
     end
     return cur_iter - col
@@ -72,8 +74,9 @@ function Renderer:draw_string(str, row, col)
 end
 
 function Renderer:set_color(color_name)
-    self.current_color = SKULL_PALLETTE[color_name]
-    love.graphics.setColor(self.current_color[1], self.current_color[2], self.current_color[3], 255)
+    local cc = SKULL_PALLETTE[color_name]
+    self.current_color = cc
+    love.graphics.setColor(cc[1], cc[2], cc[3], 255)
 end
 
 return Renderer
