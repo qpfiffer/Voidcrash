@@ -1,6 +1,7 @@
-local dbg = require("debugger")
 local InitialState = {}
 InitialState.__index = InitialState
+
+local MapState = require("src/states/MapState")
 
 local TICKER_RATE = 0.04
 
@@ -13,7 +14,7 @@ local fancy_text = {
     {"Init...", 0, 1.5, "gray"},
     {"Outboard Sensors: ", 2, 1, "gray"},
     {"[online]", 2, 1, "green"},
-    {"Life-support: ", 3, 2, "gray"},
+    {"Life-support:     ", 3, 2, "gray"},
     {"[online]", 3, 1, "green"},
     {"Cargo Bays Functioning: ", 4, 2, "gray"},
     {"A ", 4, 1, "red"},
@@ -35,7 +36,7 @@ function InitialState:init()
     return this
 end
 
-function InitialState:update(dt)
+function InitialState:update(game_state, dt)
     self.dtotal = self.dtotal + dt   -- we add the time passed since the last update, probably a very small number like 0.01
     if self.dtotal >= TICKER_RATE then
         self.dtotal = self.dtotal - TICKER_RATE   -- reduce our timer by a second, but don't discard the change... what if our framerate is 2/3 of a second?
@@ -43,8 +44,8 @@ function InitialState:update(dt)
         self.ticks_since_change = self.ticks_since_change + 1
 
         if self.current_text_item_idx > table.getn(fancy_text) then
-            -- Have we reached the end of the text? Transition screens.
-            -- TBD
+            -- Have we reached the end of the text? Transition states.
+            game_state:push_state(MapState:init())
             return
         end
 

@@ -10,8 +10,13 @@ function GameState:init(initial_state)
     return this
 end
 
-function GameState:set_current_state(new_state)
+function GameState:push_state(new_state)
+    -- TBD
     self.current_state = new_state
+end
+
+function GameState:pop_state()
+    -- TBD
 end
 
 function GameState:get_current_state()
@@ -23,7 +28,7 @@ function GameState:render_current_state(renderer)
 end
 
 function GameState:update_current_state(dt)
-    return self.current_state:update(dt)
+    return self.current_state:update(self, dt)
 end
 
 return GameState
