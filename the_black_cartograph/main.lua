@@ -32,32 +32,7 @@ function love.load(arg)
 end
 
 function love.keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
-    if key == "left" then
-        current_x_offset = current_x_offset - 1
-    end
-    if key == "right" then
-        current_x_offset = current_x_offset + 1
-    end
-    if key == "up" then
-        current_y_offset = current_y_offset - 1
-    end
-    if key == "down" then
-        current_y_offset = current_y_offset + 1
-    end
-
-    if key == "pageup" then
-        zoom_level = zoom_level - 1
-    end
-    if key == "pagedown" then
-        zoom_level = zoom_level + 1
-    end
-
-    if zoom_level <= 0 then
-        zoom_level = 1
-    end
+    game_state:key_pressed(key)
 end
 
 function love.textinput(key)

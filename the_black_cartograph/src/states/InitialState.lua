@@ -3,7 +3,7 @@ InitialState.__index = InitialState
 
 local MapState = require("src/states/MapState")
 
-local TICKER_RATE = 0.04
+local TICKER_RATE = 1/60
 
 -- Text to display, row, and then amount of time to wait before the next one.
 local FT_TEXT = 1
@@ -56,6 +56,9 @@ function InitialState:update(game_state, dt)
             self.current_text_item_idx = self.current_text_item_idx + 1
         end
     end
+end
+
+function InitialState:key_pressed(key)
 end
 
 function InitialState:render(renderer)

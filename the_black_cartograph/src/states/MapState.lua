@@ -1,6 +1,8 @@
 local MapState = {}
 MapState.__index = MapState
 
+local TICKER_RATE = 1/60
+
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 28
 
@@ -65,7 +67,37 @@ function MapState:_draw_map(renderer)
     end
 end
 
+function MapState:key_pressed(key)
+end
+
 function MapState:update(game_state, dt)
+    self.dtotal = self.dtotal + dt
+    if self.dtotal >= TICKER_RATE then
+        self.dtotal = self.dtotal - TICKER_RATE
+        if love.keyboard.isDown("left") then
+            self.current_x_offset = self.current_x_offset - 1
+        end
+        if love.keyboard.isDown("right") then
+            self.current_x_offset = self.current_x_offset + 1
+        end
+        if love.keyboard.isDown("up") then
+            self.current_y_offset = self.current_y_offset - 1
+        end
+        if love.keyboard.isDown("down") then
+            self.current_y_offset = self.current_y_offset + 1
+        end
+
+        if love.keyboard.isDown("pageup") then
+            self.zoom_level = self.zoom_level - 1
+        end
+        if love.keyboard.isDown("pagedown") then
+            self.zoom_level = self.zoom_level + 1
+        end
+
+        if self.zoom_level <= 0 then
+            self.zoom_level = 1
+        end
+    end
 end
 
 function MapState:render(renderer)
