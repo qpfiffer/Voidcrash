@@ -23,7 +23,7 @@ function love.load(arg)
     love.window.setMode(window_width, window_height, {resizable=false, vsync=false})
 
     canvas = love.graphics.newCanvas()
-    local str = love.filesystem.read("assets/CRT.frag")
+    local str = love.filesystem.read("assets/CRT-moonshine.frag")
     shader = love.graphics.newShader(str)
     shader:send("inputSize", {love.graphics.getWidth(), love.graphics.getHeight()})
     shader:send("textureSize", {love.graphics.getWidth(), love.graphics.getHeight()})
