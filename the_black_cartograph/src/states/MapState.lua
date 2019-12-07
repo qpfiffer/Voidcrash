@@ -50,8 +50,7 @@ function MapState:_draw_map(renderer)
         for y=0, MAP_Y_MAX do
             local raw_noise_val = love.math.noise(
                 floored_zoom * (x + self.current_x_offset),
-                floored_zoom * (y + self.current_y_offset),
-                0)
+                floored_zoom * (y + self.current_y_offset))
             local noise_val = raw_noise_val * 1000
 
             if noise_val < 250 then

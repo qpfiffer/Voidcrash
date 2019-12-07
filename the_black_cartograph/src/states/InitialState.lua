@@ -36,6 +36,10 @@ function InitialState:init()
     return this
 end
 
+function _next_state(game_state)
+    game_state:push_state(MapState:init())
+end
+
 function InitialState:update(game_state, dt)
     self.dtotal = self.dtotal + dt   -- we add the time passed since the last update, probably a very small number like 0.01
     if self.dtotal >= constants.TICKER_RATE then
@@ -45,8 +49,7 @@ function InitialState:update(game_state, dt)
 
         if self.current_text_item_idx > table.getn(fancy_text) then
             -- Have we reached the end of the text? Transition states.
-            game_state:push_state(MapState:init())
-            return
+            return _next_state(game_state)
         end
 
         local current_text_item = fancy_text[self.current_text_item_idx]
@@ -59,6 +62,9 @@ function InitialState:update(game_state, dt)
 end
 
 function InitialState:key_pressed(game_state, key)
+    if key == "space" then
+        return _next_state(game_state)
+    end
 end
 
 function InitialState:render(renderer)
