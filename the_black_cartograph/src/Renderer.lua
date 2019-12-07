@@ -10,7 +10,6 @@ KERN_OFFSET = 3
 PADDING_X = 0
 PADDING_Y = 0
 
-
 SKULL_PALLETTE = {
     ["white"] = {1,1,1},
     ["gray"] = {0.66, 0.66, 0.66},
@@ -44,15 +43,16 @@ function Renderer:init()
         current_color = SKULL_PALLETTE["white"],
         skull_font = love.graphics.newImage("assets/font.png"),
 
-        canvas = nil,
-        canvas2 = nil,
+        canvas = love.graphics.newCanvas(),
+        canvas2 = love.graphics.newCanvas(),
+        canvas3 = love.graphics.newCanvas(),
         crt_shader = nil,
         scanlines_shader = nil,
         anaglyph_shader = nil
     }
     setmetatable(this, self)
 
-    local str = love.filesystem.read("assets/CRT-moonshine.frag")
+    local str = love.filesystem.read("assets/CRT.frag")
     this.crt_shader = love.graphics.newShader(str)
 
     str = love.filesystem.read("assets/anaglyph.frag")
@@ -60,9 +60,6 @@ function Renderer:init()
 
     str = love.filesystem.read("assets/scanlines.frag")
     this.scanlines_shader = love.graphics.newShader(str)
-
-    this.canvas = love.graphics.newCanvas()
-    this.canvas2 = love.graphics.newCanvas()
 
     return this
 end
@@ -100,24 +97,34 @@ end
 function Renderer:render(game_state)
     local r, g, b, a = love.graphics.getColor()
 
-    love.graphics.setCanvas(self.canvas2)
-    love.graphics.clear({0, 0, 0})
+    local arr = {self.canvas3, self.canvas2, self.canvas}
+    for i=1, #arr do
+        love.graphics.setCanvas(arr[i])
+        love.graphics.clear({0, 0, 0})
+    end
 
-    love.graphics.setCanvas(self.canvas)
-    love.graphics.clear({0, 0, 0})
-
+    -- Draw the actual stuff:
     game_state:render_current_state(self)
-
     love.graphics.setColor(r, g, b, a)
 
-    -- Render canvas through the shader onto canvas2:
+    -- First pass:
     love.graphics.setCanvas(self.canvas2)
     love.graphics.setShader(self.scanlines_shader)
     love.graphics.draw(self.canvas)
 
+    -- Second pass:
+    love.graphics.setCanvas(self.canvas3)
+    love.graphics.setShader(self.anaglyph_shader)
+    local angle, radius = 30, 1
+    local dx = math.cos(angle) * radius / love.graphics.getWidth()
+    local dy = math.sin(angle) * radius / love.graphics.getHeight()
+    self.anaglyph_shader:send("direction", {dx, dy})
+    love.graphics.draw(self.canvas2)
+
+    -- Final pass
     love.graphics.setCanvas()
     love.graphics.setShader(self.crt_shader)
-    love.graphics.draw(self.canvas2)
+    love.graphics.draw(self.canvas3)
     love.graphics.setShader()
 end
 
