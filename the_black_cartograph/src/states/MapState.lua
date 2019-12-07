@@ -70,7 +70,7 @@ function MapState:_draw_map(renderer)
     end
 end
 
-function MapState:key_pressed(key)
+function MapState:key_pressed(game_state, key)
 end
 
 function MapState:update(game_state, dt)

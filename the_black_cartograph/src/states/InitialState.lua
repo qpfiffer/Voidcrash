@@ -5,8 +5,6 @@ local constants = require("src/Constants")
 
 local MapState = require("src/states/MapState")
 
-local TICKER_RATE = 1/60
-
 -- Text to display, row, and then amount of time to wait before the next one.
 local FT_TEXT = 1
 local FT_ROW = 2
@@ -52,7 +50,7 @@ function InitialState:update(game_state, dt)
         end
 
         local current_text_item = fancy_text[self.current_text_item_idx]
-        if self.ticks_since_change >= (current_text_item[FT_WAIT] / TICKER_RATE) and self.current_text_idx > string.len(current_text_item[1]) then
+        if self.ticks_since_change >= (current_text_item[FT_WAIT] / constants.TICKER_RATE) and self.current_text_idx > string.len(current_text_item[1]) then
             self.ticks_since_change = 0
             self.current_text_idx = 0
             self.current_text_item_idx = self.current_text_item_idx + 1
@@ -60,7 +58,7 @@ function InitialState:update(game_state, dt)
     end
 end
 
-function InitialState:key_pressed(key)
+function InitialState:key_pressed(game_state, key)
 end
 
 function InitialState:render(renderer)

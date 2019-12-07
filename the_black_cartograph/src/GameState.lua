@@ -3,7 +3,9 @@ GameState.__index = GameState
 
 function GameState:init(initial_state)
     local this = {
-        current_state = initial_state
+        current_state = initial_state,
+
+        player_info = nil
     }
     setmetatable(this, self)
 
@@ -16,7 +18,7 @@ function GameState:key_pressed(key)
         love.event.quit()
     end
 
-    return self.current_state:key_pressed(key)
+    return self.current_state:key_pressed(self, key)
 end
 
 function GameState:push_state(new_state)
@@ -30,6 +32,14 @@ end
 
 function GameState:get_current_state()
     return self.current_state
+end
+
+function GameState:set_player_info(pi)
+    self.player_info = pi
+end
+
+function GameState:get_player_info()
+    return self.pi
 end
 
 function GameState:render_current_state(renderer)
