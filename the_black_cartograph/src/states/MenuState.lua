@@ -54,8 +54,10 @@ function MenuState:key_pressed(game_state, key)
         func(game_state)
     end
 
-    local max = table.getn(menu_items)
-    --self.current_menu_item = math.fmod(self.current_menu_item, max) + 1
+    local cmu = self.current_menu_item
+    if cmu > #menu_items or cmu < 1 then
+        self.current_menu_item = math.fmod(cmu, #menu_items)
+    end
 end
 
 function MenuState:render(renderer)
@@ -68,8 +70,9 @@ function MenuState:render(renderer)
         renderer:draw_string(menu_items[i][M_TEXT], i, 0)
     end
 
-    renderer:_draw_raw_numbers(renderer.traumae_font, {0, 1, 2, 3, 4, 5, 6, 7, 8}, 7, 0)
-    renderer:_draw_raw_numbers(renderer.traumae_font, {9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, 8, 0)
+    renderer:_draw_raw_numbers(renderer.traumae_font, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, 7, 0)
+    renderer:_draw_raw_numbers(renderer.traumae_font, {13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}, 8, 0)
+    renderer:_draw_raw_numbers(renderer.traumae_font, {25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36}, 9, 0)
 end
 
 return MenuState
