@@ -5,7 +5,11 @@ scale = love.window.getDPIScale()
 
 SKULL_FONT_WIDTH = 12
 SKULL_FONT_HEIGHT = 16
-KERN_OFFSET = 3
+SKULL_FONT_KERN_OFFSET = 3
+
+T_FONT_WIDTH = 30
+T_FONT_HEIGHT = 25
+T_FONT_KERN_OFFSET = 0
 
 PADDING_X = 0
 PADDING_Y = 0
@@ -27,10 +31,21 @@ function _skull_quad(skull_font_img, row, column)
         SKULL_FONT_WIDTH, SKULL_FONT_HEIGHT, skull_font_img:getWidth(), skull_font_img:getHeight())
 end
 
+function _traumae_quad(traumae_font_img, row, column)
+    return love.graphics.newQuad(math.fmod(column, 12) * T_FONT_WIDTH, (math.fmod(row, 3) * T_FONT_HEIGHT) + (3.25 * row),
+        T_FONT_WIDTH, T_FONT_HEIGHT, traumae_font_img:getWidth(), traumae_font_img:getHeight())
+end
+
 function _row_and_column_for_num(num)
     -- Everything greater than 20 is ASCII
     local row = math.floor(num / 32)
     local column = num % 32
+    return {row, column}
+end
+
+function _traumae_row_and_column_for_num(num)
+    local row = math.floor(num / 3)
+    local column = num % 12
     return {row, column}
 end
 
@@ -71,12 +86,21 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
     local roffset = row
     for i=1,#array do
         local c = array[i]
-        local row_and_col = _row_and_column_for_num(c)
-        local skull_quad = _skull_quad(font, row_and_col[1], row_and_col[2])
-        love.graphics.draw(self.skull_font, skull_quad,
-            (cur_iter * (SKULL_FONT_WIDTH - KERN_OFFSET) + PADDING_X) * scale,
-            (roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y) * scale,
-            0, scale, scale, 0, 0)
+        if font == self.skull_font then
+            local row_and_col = _row_and_column_for_num(c)
+            local skull_quad = _skull_quad(font, row_and_col[1], row_and_col[2])
+            love.graphics.draw(font, skull_quad,
+                (cur_iter * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
+                (roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y) * scale,
+                0, scale, scale, 0, 0)
+        else
+            local row_and_col = _traumae_row_and_column_for_num(c)
+            local quad = _traumae_quad(font, row_and_col[1], row_and_col[2])
+            love.graphics.draw(font, quad,
+                (cur_iter * (T_FONT_WIDTH - T_FONT_KERN_OFFSET) + PADDING_X) * scale,
+                (roffset * T_FONT_HEIGHT + (row * 3) + PADDING_Y) * scale,
+                0, scale, scale, 0, 0)
+        end
         cur_iter = cur_iter + 1
     end
     return cur_iter - col
