@@ -44,13 +44,18 @@ function MapState:_draw_map(renderer)
     local column_offset = 6
     local multiplier = 100
 
-    local floored_zoom = math.floor(self.zoom_level) * 0.02
+    local zoom = self.zoom_level * 0.02
 
     for x=0, MAP_X_MAX do
         for y=0, MAP_Y_MAX do
+            -- This builds a weird scramble:
+            -- local raw_noise_val = love.math.noise(
+            --     x + (zoom * self.current_x_offset),
+            --     y + (zoom * self.current_y_offset))
+            -- local noise_val = raw_noise_val * 1000
             local raw_noise_val = love.math.noise(
-                floored_zoom * (x + self.current_x_offset),
-                floored_zoom * (y + self.current_y_offset))
+                (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset,
+                (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset)
             local noise_val = raw_noise_val * 1000
 
             if noise_val < 250 then
@@ -76,20 +81,22 @@ function MapState:update(game_state, dt)
     self.dtotal = self.dtotal + dt
     if self.dtotal >= constants.TICKER_RATE then
         self.dtotal = self.dtotal - constants.TICKER_RATE
+
+        local move_mod = 0.02
         if love.keyboard.isDown("left") then
-            self.current_x_offset = self.current_x_offset - 1
+            self.current_x_offset = self.current_x_offset - move_mod
         end
         if love.keyboard.isDown("right") then
-            self.current_x_offset = self.current_x_offset + 1
+            self.current_x_offset = self.current_x_offset + move_mod
         end
         if love.keyboard.isDown("up") then
-            self.current_y_offset = self.current_y_offset - 1
+            self.current_y_offset = self.current_y_offset - move_mod
         end
         if love.keyboard.isDown("down") then
-            self.current_y_offset = self.current_y_offset + 1
+            self.current_y_offset = self.current_y_offset + move_mod
         end
 
-        local ZOOM_MOD = 0.25
+        local ZOOM_MOD = 0.02
         if love.keyboard.isDown("pageup") then
             self.zoom_level = self.zoom_level - ZOOM_MOD
         end
