@@ -9,6 +9,10 @@ function _start_game(game_state)
     game_state:push_state(InitialState:init())
 end
 
+function _resume_game(game_state)
+    game_state:push_state(InitialState:init())
+end
+
 function _quit_game()
     love.event.quit()
 end
@@ -16,7 +20,8 @@ end
 local M_TEXT = 1
 local M_FUNC = 2
 local menu_items = {
-    {"Start", _start_game},
+    {"New Game", _start_game},
+    {"Resume", _resume_game},
     {"Quit", _quit_game},
 }
 

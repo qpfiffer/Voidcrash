@@ -42,6 +42,7 @@ function Renderer:init()
     local this = {
         current_color = SKULL_PALLETTE["white"],
         skull_font = love.graphics.newImage("assets/font.png"),
+        traumae_font = love.graphics.newImage("assets/font2.png"),
 
         canvas = love.graphics.newCanvas(),
         canvas2 = love.graphics.newCanvas(),
@@ -64,13 +65,13 @@ function Renderer:init()
     return this
 end
 
-function Renderer:draw_raw_numbers(array, row, col)
+function Renderer:_draw_raw_numbers(font, array, row, col)
     local cur_iter = col
     local roffset = row
     for i=1,#array do
         local c = array[i]
         local row_and_col = _row_and_column_for_num(c)
-        local skull_quad = _skull_quad(self.skull_font, row_and_col[1], row_and_col[2])
+        local skull_quad = _skull_quad(font, row_and_col[1], row_and_col[2])
         love.graphics.draw(self.skull_font, skull_quad,
             (cur_iter * (SKULL_FONT_WIDTH - KERN_OFFSET) + PADDING_X) * scale,
             (roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y) * scale,
@@ -80,12 +81,24 @@ function Renderer:draw_raw_numbers(array, row, col)
     return cur_iter - col
 end
 
-function Renderer:draw_string(str, row, col)
+function Renderer:draw_raw_numbers(array, row, col)
+    self:_draw_raw_numbers(self.skull_font, array, row, col)
+end
+
+function Renderer:_draw_string(font, str, row, col)
     local numbers = {}
     for i=1,#str do
         numbers[i] = string.byte(str:sub(i, i))
     end
-    return self:draw_raw_numbers(numbers, row, col)
+    return self:_draw_raw_numbers(font, numbers, row, col)
+end
+
+function Renderer:draw_string(str, row, col)
+    return self:_draw_string(self.skull_font, str, row, col)
+end
+
+function Renderer:draw_traumae_string(str, row, col)
+    return self:_draw_string(self.traumae_font, str, row, col)
 end
 
 function Renderer:set_color(color_name)
