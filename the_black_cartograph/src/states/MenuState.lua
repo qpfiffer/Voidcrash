@@ -68,9 +68,8 @@ function MenuState:render(renderer)
         renderer:draw_string(menu_items[i][M_TEXT], i, 0)
     end
 
-    renderer:_draw_raw_numbers(renderer.traumae_font, {0, 12, 24}, 7, 5)
-    --renderer:draw_traumae_string("abcdefghijklmnopqrstu", 8, 0)
-    --renderer:draw_traumae_string("vwxyz123456789", 9, 0)
+    renderer:_draw_raw_numbers(renderer.traumae_font, {0, 1, 2, 3, 4, 5, 6, 7, 8}, 7, 0)
+    renderer:_draw_raw_numbers(renderer.traumae_font, {9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, 8, 0)
 end
 
 return MenuState

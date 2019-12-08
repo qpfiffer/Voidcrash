@@ -27,12 +27,19 @@ SKULL_PALLETTE = {
 }
 
 function _skull_quad(skull_font_img, row, column)
-    return love.graphics.newQuad(column * SKULL_FONT_WIDTH, row * SKULL_FONT_HEIGHT + (3 * row),
-        SKULL_FONT_WIDTH, SKULL_FONT_HEIGHT, skull_font_img:getWidth(), skull_font_img:getHeight())
+    return love.graphics.newQuad(
+        column * SKULL_FONT_WIDTH,
+        row * SKULL_FONT_HEIGHT + (3 * row),
+        SKULL_FONT_WIDTH,
+        SKULL_FONT_HEIGHT,
+        skull_font_img:getWidth(),
+        skull_font_img:getHeight())
 end
 
 function _traumae_quad(traumae_font_img, row, column)
-    return love.graphics.newQuad(math.fmod(column, 12) * T_FONT_WIDTH, (math.fmod(row, 3) * T_FONT_HEIGHT) + (3.25 * row),
+    return love.graphics.newQuad(
+        math.fmod(column, 12) * T_FONT_WIDTH,
+        (math.fmod(row, 3) * T_FONT_HEIGHT) + (5 * row),
         T_FONT_WIDTH, T_FONT_HEIGHT, traumae_font_img:getWidth(), traumae_font_img:getHeight())
 end
 
@@ -44,9 +51,10 @@ function _row_and_column_for_num(num)
 end
 
 function _traumae_row_and_column_for_num(num)
-    local row = math.floor(num / 3)
-    local column = num % 12
-    return {row, column}
+    local max_char = math.fmod(num, 32) -- 32 total chars
+    local row = math.floor(max_char / 12) -- 3 rows of twelve
+    local column = math.fmod(max_char, 12)
+    return {row + 1, column + 1}
 end
 
 function _row_and_column_for_char(char)
@@ -95,11 +103,12 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
                 0, scale, scale, 0, 0)
         else
             local row_and_col = _traumae_row_and_column_for_num(c)
+            -- print("ROW AND COL: " .. row_and_col[1] .. ", " .. row_and_col[2])
             local quad = _traumae_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, quad,
-                (cur_iter * (T_FONT_WIDTH - T_FONT_KERN_OFFSET) + PADDING_X) * scale,
-                (roffset * T_FONT_HEIGHT + (row * 3) + PADDING_Y) * scale,
-                0, scale, scale, 0, 0)
+                (cur_iter * (T_FONT_WIDTH - T_FONT_KERN_OFFSET) + PADDING_X) * scale/2,
+                (roffset * T_FONT_HEIGHT + (row * 3) + PADDING_Y) * scale/2,
+                0, scale/2, scale/2, 0, 0)
         end
         cur_iter = cur_iter + 1
     end
