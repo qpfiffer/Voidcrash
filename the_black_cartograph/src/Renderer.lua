@@ -18,7 +18,8 @@ SKULL_PALLETTE = {
     ["red"] = {1,0.32,0.32},
     ["blood"] = {0.66,1,1},
 
-    ["green"] = {0.32,1,0.32}
+    ["green"] = {0.32,1,0.32},
+    ["cyan"] = {0.44,0.87,0.76},
 }
 
 function _skull_quad(skull_font_img, row, column)
