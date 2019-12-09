@@ -56,14 +56,9 @@ function LeftWipeState:update(game_state, dt)
                 local cur_char = self.screen_state[x][y]
                 local should_add = love.math.random()
                 if cur_char == 1 then
-                    local which_char = love.math.random()
-                    if which_char < 0.33 then
-                        self.screen_state[x][y] = 2
-                    elseif which_char < 0.66 then
-                        self.screen_state[x][y] = 3
-                    else
-                        self.screen_state[x][y] = 4
-                    end
+                    local which_char = love.math.random(32)
+                    local which_color = love.math.random(4)
+                    self.screen_state[x][y] = {which_char, which_color}
                 elseif cur_char == nil and total_added_so_far < max_total_added and should_add > 0.8 then
                     self.screen_state[x][y] = 1
                     if y >= MAP_Y_MAX then
@@ -86,30 +81,27 @@ function LeftWipeState:render(renderer)
     local row_offset = 0
     local column_offset = 0
 
-    local CHAR_MATRIX = {
-        {'a'},
-        {'1', '2', '3', '4'},
-        {'!', '@', '#', '$'},
-        {'-', '^', '&', '*'},
+    local color_list = {
+        "cyan",
+        "gray",
+        "grayest",
+        "white"
     }
 
     for x=1, #self.screen_state do
         for y=1, #self.screen_state[x] do
             local ref = self.screen_state[x][y]
             if ref ~= nil then
-                local current_char_list = CHAR_MATRIX[ref]
                 -- local current_char = current_char_list[1 + math.fmod(self.char_update_constant, #current_char_list)]
-                local current_char = current_char_list[1]
                 if ref == 1 then
                     renderer:set_color("grayest")
-                elseif ref == 2 then
-                    renderer:set_color("green")
-                elseif ref == 3 then
-                    renderer:set_color("cyan")
-                elseif ref == 4 then
-                    renderer:set_color("gray")
+                    renderer:draw_traumae_string("" .. ref, y, x + row_offset)
+                else
+                    local char = ref[1]
+                    local color = ref[2]
+                    renderer:set_color(color_list[color])
+                    renderer:_draw_raw_numbers(renderer.traumae_font, {char}, y, x + row_offset)
                 end
-                renderer:draw_traumae_string(current_char, y, x + row_offset)
             end
         end
     end
