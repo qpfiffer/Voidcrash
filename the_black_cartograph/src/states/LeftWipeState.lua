@@ -4,10 +4,10 @@ LeftWipeState.__index = LeftWipeState
 local constants = require("src/Constants")
 
 local MAP_X_MAX = 68
-local MAP_Y_MAX = 28
+local MAP_Y_MAX = 48
 
 local TICKS_ADVANCE_MIN = 1
-local TICKS_ADVANCE_MAX = 5
+local TICKS_ADVANCE_MAX = 3
 
 function LeftWipeState:init(next_state)
     local this = {
@@ -87,10 +87,10 @@ function LeftWipeState:render(renderer)
     local column_offset = 0
 
     local CHAR_MATRIX = {
-        {'%'},
-        {'a', 'b', 'c', 'd'},
-        {'e', 'f', 'g', 'h'},
+        {'a'},
         {'1', '2', '3', '4'},
+        {'!', '@', '#', '$'},
+        {'-', '^', '&', '*'},
     }
 
     for x=1, #self.screen_state do
@@ -98,7 +98,8 @@ function LeftWipeState:render(renderer)
             local ref = self.screen_state[x][y]
             if ref ~= nil then
                 local current_char_list = CHAR_MATRIX[ref]
-                local current_char = current_char_list[1 + math.fmod(self.char_update_constant, #current_char_list)]
+                -- local current_char = current_char_list[1 + math.fmod(self.char_update_constant, #current_char_list)]
+                local current_char = current_char_list[1]
                 if ref == 1 then
                     renderer:set_color("grayest")
                 elseif ref == 2 then

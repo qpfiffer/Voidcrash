@@ -6,10 +6,12 @@ scale = love.window.getDPIScale()
 SKULL_FONT_WIDTH = 12
 SKULL_FONT_HEIGHT = 16
 SKULL_FONT_KERN_OFFSET = 3
+SKULL_FONT_VERTICAL_SPACING = 3
 
-T_FONT_WIDTH = 30
-T_FONT_HEIGHT = 25
-T_FONT_KERN_OFFSET = 0
+T_FONT_WIDTH = 32
+T_FONT_HEIGHT = 26
+T_FONT_KERN_OFFSET = 4
+T_FONT_VERTICAL_SPACING = 12
 
 PADDING_X = 0
 PADDING_Y = 0
@@ -29,7 +31,7 @@ SKULL_PALLETTE = {
 function _skull_quad(skull_font_img, row, column)
     return love.graphics.newQuad(
         column * SKULL_FONT_WIDTH,
-        row * SKULL_FONT_HEIGHT + (3 * row),
+        row * SKULL_FONT_HEIGHT + (SKULL_FONT_VERTICAL_SPACING * row),
         SKULL_FONT_WIDTH,
         SKULL_FONT_HEIGHT,
         skull_font_img:getWidth(),
@@ -38,8 +40,8 @@ end
 
 function _traumae_quad(traumae_font_img, row, column)
     return love.graphics.newQuad(
-        math.fmod(column, 12) * T_FONT_WIDTH,
-        (math.fmod(row, 3) * T_FONT_HEIGHT) + (5 * row),
+        column * T_FONT_WIDTH,
+        (row * T_FONT_HEIGHT) + (T_FONT_VERTICAL_SPACING * row),
         T_FONT_WIDTH, T_FONT_HEIGHT, traumae_font_img:getWidth(), traumae_font_img:getHeight())
 end
 
@@ -106,8 +108,8 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
             --print("ROW AND COL: " .. row_and_col[1] .. ", " .. row_and_col[2])
             local quad = _traumae_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, quad,
-                (cur_iter * (T_FONT_WIDTH - T_FONT_KERN_OFFSET) + PADDING_X) * scale/2,
-                (roffset * T_FONT_HEIGHT + (row * 3) + PADDING_Y) * scale/2,
+                (cur_iter * (T_FONT_WIDTH + T_FONT_KERN_OFFSET) + PADDING_X) * scale/2,
+                (roffset * T_FONT_HEIGHT + row + PADDING_Y) * scale/2,
                 0, scale/2, scale/2, 0, 0)
         end
         cur_iter = cur_iter + 1
