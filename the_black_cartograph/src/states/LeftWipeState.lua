@@ -4,7 +4,7 @@ LeftWipeState.__index = LeftWipeState
 local constants = require("src/Constants")
 
 local MAP_X_MAX = 68
-local MAP_Y_MAX = 48
+local MAP_Y_MAX = 28
 
 local TICKS_ADVANCE_MIN = 1
 local TICKS_ADVANCE_MAX = 3

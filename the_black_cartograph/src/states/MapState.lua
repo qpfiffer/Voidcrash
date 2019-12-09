@@ -18,7 +18,7 @@ function MapState:init()
     return this
 end
 
-function MapState:_draw_breadcrumbs(renderer)
+function MapState:_draw_breadcrumbs(renderer, player_info)
     -- Vector
     local accum = 0
     renderer:set_color("gray")
@@ -28,9 +28,16 @@ function MapState:_draw_breadcrumbs(renderer)
 
     -- Distance
     renderer:set_color("gray")
-    accum = accum + renderer:draw_string("D: ", 0, accum)
+    accum = accum + renderer:draw_string("X: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string("0 ", 0, accum)
+    accum = accum + renderer:draw_string("" .. player_info.overmap_x, 0, accum)
+    accum = accum + renderer:draw_string(" ", 0, accum)
+
+    renderer:set_color("gray")
+    accum = accum + renderer:draw_string("Y: ", 0, accum)
+    renderer:set_color("white")
+    accum = accum + renderer:draw_string("" .. player_info.overmap_y, 0, accum)
+    accum = accum + renderer:draw_string(" ", 0, accum)
 
     -- Zoom level
     renderer:set_color("gray")
@@ -110,9 +117,11 @@ function MapState:update(game_state, dt)
     end
 end
 
-function MapState:render(renderer)
-    self:_draw_breadcrumbs(renderer)
-    self:_draw_map(renderer)
+function MapState:render(renderer, game_state)
+    local player_info = game_state:get_player_info()
+
+    self:_draw_breadcrumbs(renderer, player_info)
+    self:_draw_map(renderer, player_info)
 end
 
 return MapState

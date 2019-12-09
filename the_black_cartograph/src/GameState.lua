@@ -1,11 +1,13 @@
 local GameState = {}
 GameState.__index = GameState
 
+local PlayerInfo = require("src/PlayerInfo")
+
 function GameState:init(initial_state)
     local this = {
         current_state = initial_state,
 
-        player_info = nil
+        player_info = PlayerInfo:init()
     }
     setmetatable(this, self)
 
@@ -39,11 +41,11 @@ function GameState:set_player_info(pi)
 end
 
 function GameState:get_player_info()
-    return self.pi
+    return self.player_info
 end
 
 function GameState:render_current_state(renderer)
-    return self.current_state:render(renderer)
+    return self.current_state:render(renderer, self)
 end
 
 function GameState:update_current_state(dt)
