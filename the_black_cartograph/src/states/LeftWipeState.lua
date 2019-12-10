@@ -4,7 +4,7 @@ LeftWipeState.__index = LeftWipeState
 local constants = require("src/Constants")
 
 local MAP_X_MAX = 68
-local MAP_Y_MAX = 28
+local MAP_Y_MAX = 35
 
 local TICKS_ADVANCE_MIN = 1
 local TICKS_ADVANCE_MAX = 3
@@ -23,6 +23,7 @@ function LeftWipeState:init(next_state)
 end
 
 function LeftWipeState:key_pressed(game_state, key)
+    game_state:push_state(self.next_state)
 end
 
 function _random_tick_count()

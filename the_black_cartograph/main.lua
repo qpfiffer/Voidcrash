@@ -13,6 +13,9 @@ window_height = 480 * scale
 local game_state = nil
 local renderer = nil
 
+-- Yeah whatever nerd:
+math.randomseed(os.time())
+
 function love.load(arg)
     love.mouse.setVisible(false)
     love.window.setTitle("black_cartograph.exe")
