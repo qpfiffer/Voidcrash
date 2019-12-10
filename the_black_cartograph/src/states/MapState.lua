@@ -81,14 +81,14 @@ function MapState:_draw_map(renderer, player_info)
 
             if self.blink_cursor_on and deproj_player_x == noise_x and deproj_player_y == noise_y then
                 renderer:set_color("cyan")
-            elseif noise_val < 250 then
-                renderer:set_color("grayest")
-            elseif noise_val < 500 then
-                renderer:set_color("grayer")
+            elseif noise_val < 550 then
+                renderer:set_color("white")
             elseif noise_val < 750 then
                 renderer:set_color("gray")
+            elseif noise_val < 900 then
+                renderer:set_color("grayer")
             else
-                renderer:set_color("white")
+                renderer:set_color("grayest")
             end
             --if math.floor(noise_val) % 10 == 0 then
                 renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
