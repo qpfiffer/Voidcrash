@@ -83,7 +83,7 @@ function LeftWipeState:render(renderer)
     local column_offset = 0
 
     local color_list = {
-        "cyan",
+        "red",
         "gray",
         "grayest",
         "white"

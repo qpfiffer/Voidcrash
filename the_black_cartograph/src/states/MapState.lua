@@ -8,15 +8,17 @@ local MAP_X_MAX = 68
 local MAP_Y_MAX = 28
 
 local move_mod = 0.02
+local ZOOM_MOD = 0.02
 
 local BLINK_TICK_COUNT = 20
 
 function MapState:init()
+    local zoom = ZOOM_MOD -- Actually zoom * ZOOM_MOD, but 1 *... whatever you get it.
     local this = {
         dtotal = 0,             -- Delta time total
         zoom_level = 1,         -- Zoom level is how far into the map we are looking.
-        current_x_offset = 0,
-        current_y_offset = 0,
+        current_x_offset = zoom * (-MAP_X_MAX/2),
+        current_y_offset = zoom * (-MAP_Y_MAX/2),
         blink_cursor_on = true,
         ticks_advanced = BLINK_TICK_COUNT,
     }
@@ -58,7 +60,7 @@ function MapState:_draw_map(renderer, player_info)
     local column_offset = 6
     local multiplier = 100
 
-    local zoom = self.zoom_level * 0.02
+    local zoom = self.zoom_level * ZOOM_MOD
 
     -- Player's location on the overmap
     local deproj_player_x = zoom * -(MAP_X_MAX/2) + player_info.overmap_x
@@ -96,6 +98,13 @@ function MapState:_draw_map(renderer, player_info)
 end
 
 function MapState:key_pressed(game_state, key)
+    local zoom = self.zoom_level * ZOOM_MOD
+    if key == "h" then
+        -- Snap to home
+        self.current_x_offset = zoom * (-MAP_X_MAX/2)
+        self.current_y_offset = zoom * (-MAP_Y_MAX/2)
+        self.zoom_level = 1
+    end
 end
 
 function MapState:update(game_state, dt)
@@ -123,7 +132,6 @@ function MapState:update(game_state, dt)
             self.current_y_offset = self.current_y_offset + move_mod
         end
 
-        local ZOOM_MOD = 0.02
         if love.keyboard.isDown("pageup") then
             self.zoom_level = self.zoom_level - ZOOM_MOD
         end
