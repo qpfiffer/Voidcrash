@@ -10,6 +10,9 @@ local MAP_Y_MAX = 28
 local move_mod = 0.02
 local ZOOM_MOD = 0.02
 
+local LATTICE_NOISE_OFFSET_X = 48765
+local LATTICE_NOISE_OFFSET_Y = 32455
+
 local BLINK_TICK_COUNT = 20
 
 local O_NONE = 1
@@ -31,7 +34,9 @@ function MapState:init()
         blink_cursor_on = true,
         ticks_advanced = BLINK_TICK_COUNT,
 
-        current_map_overlay = MAP_OVERLAYS[1]
+        current_map_overlay = MAP_OVERLAYS[1],
+
+        current_lattice_step = 1
 
     }
     setmetatable(this, self)
@@ -135,6 +140,8 @@ function MapState:update(game_state, dt)
             self.blink_cursor_on = not self.blink_cursor_on
         end
 
+        self.current_lattice_step = self.current_lattice_step + 0.0002
+
         if love.keyboard.isDown("left") then
             self.current_x_offset = self.current_x_offset - move_mod
         end
@@ -161,11 +168,48 @@ function MapState:update(game_state, dt)
     end
 end
 
+function MapState:_draw_weather(renderer, player_info)
+end
+
+function MapState:_draw_lattice(renderer, player_info)
+    local row_offset = 1
+    local column_offset = 6
+    local multiplier = 100
+
+    local zoom = self.zoom_level * ZOOM_MOD
+
+    for x=0, MAP_X_MAX do
+        for y=0, MAP_Y_MAX do
+            -- This builds a weird scramble:
+            local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x + LATTICE_NOISE_OFFSET_X
+            local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y + LATTICE_NOISE_OFFSET_Y
+            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
+            local noise_val = raw_noise_val * 1000
+
+            if noise_val < 250 then
+                renderer:set_color("green")
+                local char = 182 + math.fmod(noise_val, 6)
+                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+            elseif noise_val < 300 then
+                renderer:set_color("cyan")
+                local char = 178 + math.fmod(noise_val, 6)
+                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+            end
+        end
+    end
+end
+
 function MapState:render(renderer, game_state)
     local player_info = game_state:get_player_info()
 
     self:_draw_breadcrumbs(renderer, player_info)
     self:_draw_map(renderer, player_info)
+
+    if self.current_map_overlay == O_WEATHER then
+        self:_draw_weather(renderer, player_info)
+    elseif self.current_map_overlay == O_LATTICE then
+        self:_draw_lattice(renderer, player_info)
+    end
 end
 
 return MapState
