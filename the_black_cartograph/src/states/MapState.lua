@@ -13,6 +13,9 @@ local ZOOM_MOD = 0.02
 local LATTICE_NOISE_OFFSET_X = 48765
 local LATTICE_NOISE_OFFSET_Y = 32455
 
+local WEATHER_NOISE_OFFSET_X = 48765
+local WEATHER_NOISE_OFFSET_Y = 32455
+
 local BLINK_TICK_COUNT = 20
 
 local O_NONE = 1
@@ -77,7 +80,6 @@ end
 function MapState:_draw_map(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
-    local multiplier = 100
 
     local zoom = self.zoom_level * ZOOM_MOD
 
@@ -169,12 +171,46 @@ function MapState:update(game_state, dt)
 end
 
 function MapState:_draw_weather(renderer, player_info)
+    local row_offset = 1
+    local column_offset = 6
+
+    local zoom = self.zoom_level * ZOOM_MOD
+
+    local WEATHER_MAP_DIVISOR = 1600
+    for x=0, MAP_X_MAX do
+        for y=0, MAP_Y_MAX do
+            local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
+            local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
+            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
+            local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
+
+            renderer:set_color("grayest")
+            renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+
+            if noise_val < WEATHER_MAP_DIVISOR/2 then
+                if math.fmod(x, 2) == 0 and math.fmod(y, 2) == 0 then
+                    for i=0,8 do
+                        if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
+                            renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
+                            break
+                        end
+                    end
+                end
+            else
+                for i=0,8 do
+                    if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
+                        renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
+                        break
+                    end
+                end
+            end
+        end
+    end
 end
 
 function MapState:_draw_lattice(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
-    local multiplier = 100
 
     local zoom = self.zoom_level * ZOOM_MOD
 
@@ -184,14 +220,14 @@ function MapState:_draw_lattice(renderer, player_info)
             local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x + LATTICE_NOISE_OFFSET_X
             local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y + LATTICE_NOISE_OFFSET_Y
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
-            local noise_val = raw_noise_val * 1000
+            local noise_val = math.floor(raw_noise_val * 1000)
 
             if noise_val < 250 then
-                renderer:set_color("green")
+                renderer:set_color("blood")
                 local char = 182 + math.fmod(noise_val, 6)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             elseif noise_val < 300 then
-                renderer:set_color("cyan")
+                renderer:set_color("red")
                 local char = 178 + math.fmod(noise_val, 6)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             end
