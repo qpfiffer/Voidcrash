@@ -1,13 +1,15 @@
 local GameState = {}
 GameState.__index = GameState
 
+local constants= require("src/Constants")
 local PlayerInfo = require("src/PlayerInfo")
 
 function GameState:init(initial_state)
     local this = {
         current_state = initial_state,
 
-        player_info = PlayerInfo:init()
+        player_info = PlayerInfo:init(),
+        paused = false
     }
     setmetatable(this, self)
 
@@ -44,8 +46,26 @@ function GameState:get_player_info()
     return self.player_info
 end
 
+function GameState:set_paused(new)
+    self.paused = new
+end
+
+function GameState:get_paused()
+    return self.paused
+end
+
+function GameState:_render_paused(renderer)
+    if not self.paused then
+        return
+    end
+
+    local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
+    renderer:render_window_with_text(constants.MAP_X_MAX/2, constants.MAP_Y_MAX, "PAUSED")
+end
+
 function GameState:render_current_state(renderer)
-    return self.current_state:render(renderer, self)
+    self.current_state:render(renderer, self)
+    self:_render_paused(renderer)
 end
 
 function GameState:update_current_state(dt)

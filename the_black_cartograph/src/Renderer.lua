@@ -1,4 +1,5 @@
 local Renderer = {}
+local dbg = require("debugger")
 Renderer.__index = Renderer
 
 scale = love.window.getDPIScale()
@@ -141,6 +142,37 @@ function Renderer:set_color(color_name)
     local cc = SKULL_PALLETTE[color_name]
     self.current_color = cc
     love.graphics.setColor(cc[1], cc[2], cc[3], 255)
+end
+
+function Renderer:render_window_with_text(x, y, text)
+    local row_offset = y
+    local column_offset = x
+
+    local window_width = string.len(text) + 4
+    local window_height = 3 -- Only support one line of text right now
+
+    local top_str = {201, 205}
+    local text_str = {186, 32}
+    local bottom_str = {200, 205}
+    for i=1, string.len(text) do
+        local byte = string.byte(text:sub(i, i))
+        table.insert(top_str, 205)
+        table.insert(text_str, byte)
+        table.insert(bottom_str, 205)
+    end
+
+    table.insert(top_str, 205)
+    table.insert(top_str, 187)
+    table.insert(text_str, 32)
+    table.insert(text_str, 186)
+    table.insert(bottom_str, 205)
+    table.insert(bottom_str, 188)
+
+    self:set_color("white")
+    self:_draw_raw_numbers(self.skull_font, top_str, row_offset, column_offset)
+    self:_draw_raw_numbers(self.skull_font, text_str, row_offset + 1, column_offset)
+    self:_draw_raw_numbers(self.skull_font, bottom_str, row_offset + 2, column_offset)
+
 end
 
 function Renderer:render(game_state)

@@ -4,9 +4,6 @@ MapState.__index = MapState
 
 local constants = require("src/Constants")
 
-local MAP_X_MAX = 68
-local MAP_Y_MAX = 28
-
 local move_mod = 0.02
 local ZOOM_MOD = 0.02
 
@@ -32,8 +29,8 @@ function MapState:init()
     local this = {
         dtotal = 0,             -- Delta time total
         zoom_level = 1,         -- Zoom level is how far into the map we are looking.
-        current_x_offset = zoom * (-MAP_X_MAX/2),
-        current_y_offset = zoom * (-MAP_Y_MAX/2),
+        current_x_offset = zoom * (-constants.MAP_X_MAX/2),
+        current_y_offset = zoom * (-constants.MAP_Y_MAX/2),
         blink_cursor_on = true,
         ticks_advanced = BLINK_TICK_COUNT,
 
@@ -84,18 +81,18 @@ function MapState:_draw_map(renderer, player_info)
     local zoom = self.zoom_level * ZOOM_MOD
 
     -- Player's location on the overmap
-    local deproj_player_x = zoom * -(MAP_X_MAX/2) + player_info.overmap_x
-    local deproj_player_y = zoom * -(MAP_Y_MAX/2) + player_info.overmap_y
+    local deproj_player_x = zoom * -(constants.MAP_X_MAX/2) + player_info.overmap_x
+    local deproj_player_y = zoom * -(constants.MAP_Y_MAX/2) + player_info.overmap_y
 
-    for x=0, MAP_X_MAX do
-        for y=0, MAP_Y_MAX do
+    for x=0, constants.MAP_X_MAX do
+        for y=0, constants.MAP_Y_MAX do
             -- This builds a weird scramble:
             -- local raw_noise_val = love.math.noise(
             --     x + (zoom * self.current_x_offset),
             --     y + (zoom * self.current_y_offset))
             -- local noise_val = raw_noise_val * 1000
-            local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
-            local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
 
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
@@ -123,10 +120,38 @@ function MapState:key_pressed(game_state, key)
         -- Snap to home
         self.zoom_level = 1
         local zoom = self.zoom_level * ZOOM_MOD
-        self.current_x_offset = zoom * (-MAP_X_MAX/2)
-        self.current_y_offset = zoom * (-MAP_Y_MAX/2)
+        self.current_x_offset = zoom * (-constants.MAP_X_MAX/2)
+        self.current_y_offset = zoom * (-constants.MAP_Y_MAX/2)
     elseif key == "tab" then
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
+    elseif key == "space" then
+        game_state:set_paused(not game_state:get_paused())
+    end
+end
+
+function MapState:_handle_keys(game_state, dt)
+    if love.keyboard.isDown("left") then
+        self.current_x_offset = self.current_x_offset - move_mod
+    end
+    if love.keyboard.isDown("right") then
+        self.current_x_offset = self.current_x_offset + move_mod
+    end
+    if love.keyboard.isDown("up") then
+        self.current_y_offset = self.current_y_offset - move_mod
+    end
+    if love.keyboard.isDown("down") then
+        self.current_y_offset = self.current_y_offset + move_mod
+    end
+
+    if love.keyboard.isDown("pageup") then
+        self.zoom_level = self.zoom_level - ZOOM_MOD
+    end
+    if love.keyboard.isDown("pagedown") then
+        self.zoom_level = self.zoom_level + ZOOM_MOD
+    end
+
+    if self.zoom_level < 1 then
+        self.zoom_level = 1
     end
 end
 
@@ -142,31 +167,11 @@ function MapState:update(game_state, dt)
             self.blink_cursor_on = not self.blink_cursor_on
         end
 
-        self.current_lattice_step = self.current_lattice_step + 0.0002
-
-        if love.keyboard.isDown("left") then
-            self.current_x_offset = self.current_x_offset - move_mod
-        end
-        if love.keyboard.isDown("right") then
-            self.current_x_offset = self.current_x_offset + move_mod
-        end
-        if love.keyboard.isDown("up") then
-            self.current_y_offset = self.current_y_offset - move_mod
-        end
-        if love.keyboard.isDown("down") then
-            self.current_y_offset = self.current_y_offset + move_mod
+        if not game_state:get_paused() then
+            self.current_lattice_step = self.current_lattice_step + 0.0002
         end
 
-        if love.keyboard.isDown("pageup") then
-            self.zoom_level = self.zoom_level - ZOOM_MOD
-        end
-        if love.keyboard.isDown("pagedown") then
-            self.zoom_level = self.zoom_level + ZOOM_MOD
-        end
-
-        if self.zoom_level < 1 then
-            self.zoom_level = 1
-        end
+        self:_handle_keys(game_state, dt)
     end
 end
 
@@ -177,10 +182,10 @@ function MapState:_draw_weather(renderer, player_info)
     local zoom = self.zoom_level * ZOOM_MOD
 
     local WEATHER_MAP_DIVISOR = 1600
-    for x=0, MAP_X_MAX do
-        for y=0, MAP_Y_MAX do
-            local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
-            local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
+    for x=0, constants.MAP_X_MAX do
+        for y=0, constants.MAP_Y_MAX do
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
             local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
@@ -214,21 +219,21 @@ function MapState:_draw_lattice(renderer, player_info)
 
     local zoom = self.zoom_level * ZOOM_MOD
 
-    for x=0, MAP_X_MAX do
-        for y=0, MAP_Y_MAX do
+    for x=0, constants.MAP_X_MAX do
+        for y=0, constants.MAP_Y_MAX do
             -- This builds a weird scramble:
-            local noise_x = (zoom * (x - MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x + LATTICE_NOISE_OFFSET_X
-            local noise_y = (zoom * (y - MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y + LATTICE_NOISE_OFFSET_Y
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x + LATTICE_NOISE_OFFSET_X
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y + LATTICE_NOISE_OFFSET_Y
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
             local noise_val = math.floor(raw_noise_val * 1000)
 
             if noise_val < 250 then
                 renderer:set_color("blood")
-                local char = 182 + math.fmod(noise_val, 12)
+                local char = 194 + math.fmod(noise_val, 4)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             elseif noise_val < 300 then
                 renderer:set_color("red")
-                local char = 178 + math.fmod(noise_val, 12)
+                local char = 196 + math.fmod(noise_val, 10)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             end
         end
