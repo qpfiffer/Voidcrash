@@ -119,12 +119,12 @@ function MapState:_draw_map(renderer, player_info)
 end
 
 function MapState:key_pressed(game_state, key)
-    local zoom = self.zoom_level * ZOOM_MOD
     if key == "h" then
         -- Snap to home
+        self.zoom_level = 1
+        local zoom = self.zoom_level * ZOOM_MOD
         self.current_x_offset = zoom * (-MAP_X_MAX/2)
         self.current_y_offset = zoom * (-MAP_Y_MAX/2)
-        self.zoom_level = 1
     elseif key == "tab" then
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
     end
@@ -224,11 +224,11 @@ function MapState:_draw_lattice(renderer, player_info)
 
             if noise_val < 250 then
                 renderer:set_color("blood")
-                local char = 182 + math.fmod(noise_val, 6)
+                local char = 182 + math.fmod(noise_val, 12)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             elseif noise_val < 300 then
                 renderer:set_color("red")
-                local char = 178 + math.fmod(noise_val, 6)
+                local char = 178 + math.fmod(noise_val, 12)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             end
         end
