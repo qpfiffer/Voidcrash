@@ -12,6 +12,15 @@ local ZOOM_MOD = 0.02
 
 local BLINK_TICK_COUNT = 20
 
+local O_NONE = 1
+local O_WEATHER = 2
+local O_LATTICE = 3
+local MAP_OVERLAYS = {
+    O_NONE,
+    O_WEATHER,
+    O_LATTICE,
+}
+
 function MapState:init()
     local zoom = ZOOM_MOD -- Actually zoom * ZOOM_MOD, but 1 *... whatever you get it.
     local this = {
@@ -21,6 +30,9 @@ function MapState:init()
         current_y_offset = zoom * (-MAP_Y_MAX/2),
         blink_cursor_on = true,
         ticks_advanced = BLINK_TICK_COUNT,
+
+        current_map_overlay = MAP_OVERLAYS[1]
+
     }
     setmetatable(this, self)
 
@@ -31,9 +43,11 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     -- Vector
     local accum = 0
     renderer:set_color("gray")
-    accum = accum + renderer:draw_string("V: ", 0, accum)
+    accum = accum + renderer:draw_string("O: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string("\4 ", 0, accum)
+    accum = accum + renderer:draw_string(tostring(self.current_map_overlay) .. " ", 0, accum)
+    -- renderer:set_color("white")
+    -- accum = accum + renderer:draw_string("\4 ", 0, accum)
 
     -- Distance
     renderer:set_color("gray")
@@ -104,6 +118,8 @@ function MapState:key_pressed(game_state, key)
         self.current_x_offset = zoom * (-MAP_X_MAX/2)
         self.current_y_offset = zoom * (-MAP_Y_MAX/2)
         self.zoom_level = 1
+    elseif key == "tab" then
+        self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
     end
 end
 
