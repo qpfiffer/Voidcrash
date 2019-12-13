@@ -71,9 +71,11 @@ function Renderer:init()
         canvas = love.graphics.newCanvas(),
         canvas2 = love.graphics.newCanvas(),
         canvas3 = love.graphics.newCanvas(),
+        canvas4 = love.graphics.newCanvas(),
         crt_shader = nil,
         scanlines_shader = nil,
-        anaglyph_shader = nil
+        anaglyph_shader = nil,
+        bloom_shader = nil
     }
     setmetatable(this, self)
 
@@ -85,6 +87,9 @@ function Renderer:init()
 
     str = love.filesystem.read("assets/scanlines.frag")
     this.scanlines_shader = love.graphics.newShader(str)
+
+    str = love.filesystem.read("assets/bloom.frag")
+    this.bloom_shader = love.graphics.newShader(str)
 
     return this
 end
@@ -159,19 +164,24 @@ function Renderer:render(game_state)
     love.graphics.setShader(self.scanlines_shader)
     love.graphics.draw(self.canvas)
 
-    -- Second pass:
+    -- Third pass:
     love.graphics.setCanvas(self.canvas3)
+    love.graphics.setShader(self.bloom_shader)
+    love.graphics.draw(self.canvas2)
+
+    -- Second pass:
+    love.graphics.setCanvas(self.canvas4)
     love.graphics.setShader(self.anaglyph_shader)
     local angle, radius = 30, 1
     local dx = math.cos(angle) * radius / love.graphics.getWidth()
     local dy = math.sin(angle) * radius / love.graphics.getHeight()
     self.anaglyph_shader:send("direction", {dx, dy})
-    love.graphics.draw(self.canvas2)
+    love.graphics.draw(self.canvas3)
 
     -- Final pass
     love.graphics.setCanvas()
     love.graphics.setShader(self.crt_shader)
-    love.graphics.draw(self.canvas3)
+    love.graphics.draw(self.canvas4)
     love.graphics.setShader()
 end
 
