@@ -1,5 +1,4 @@
 local Renderer = {}
-local dbg = require("debugger")
 Renderer.__index = Renderer
 
 scale = love.window.getDPIScale()

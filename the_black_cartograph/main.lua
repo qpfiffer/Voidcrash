@@ -1,6 +1,7 @@
 local utf8 = require("utf8")
 
 local GameState = require("src/GameState")
+local LatticeState = require("src/states/Lattice")
 local MenuState = require("src/states/MenuState")
 local Renderer = require("src/Renderer")
 
@@ -21,7 +22,7 @@ function love.load(arg)
     love.window.setTitle("black_cartograph.exe")
     love.window.setMode(window_width, window_height, {resizable=false, vsync=false})
 
-    local initial_state = MenuState:init()
+    local initial_state = LatticeState:init()
     game_state = GameState:init(initial_state)
     renderer = Renderer:init()
 end
