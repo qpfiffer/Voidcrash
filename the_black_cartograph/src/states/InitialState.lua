@@ -7,23 +7,34 @@ local MapState = require("src/states/MapState")
 local LeftWipeState = require("src/states/LeftWipeState")
 
 
--- Text to display, row, and then amount of time to wait before the next one.
+-- Text to display, row, and then amount of time to wait before the next one, offset
 local FT_TEXT = 1
 local FT_ROW = 2
 local FT_WAIT = 3
 local FT_COLOR = 4
+local FT_OFFSET = 5
 local fancy_text = {
-    {"Init...", 0, 1.5, "gray"},
-    {"Outboard Sensors: ", 2, 1, "gray"},
-    {"[online]", 2, 1, "green"},
-    {"Life-support:     ", 3, 2, "gray"},
-    {"[online]", 3, 1, "green"},
-    {"Cargo Bays Functioning: ", 4, 2, "gray"},
-    {"A ", 4, 1, "red"},
-    {"B ", 4, 1, "green"},
-    {"C ", 4, 1, "green"},
-    {"D", 4, 1, "red"},
-    {"Next..?", 6, 1, "gray"}
+    {"Init...", 0, 1.5, "gray", 0},
+
+    {"Diag core internals", 2, 1, "gray", 0},
+    {"- RAM OK!", 3, 1, "gray", 4},
+    {"- VGATE OK!", 4, 1, "gray", 4},
+
+    {"Diag ship internals (critical systems)", 6, 1, "gray", 0},
+    {"- Cargo: ", 7, 1, "gray", 4},
+    {"[pods secure]", 7, 1, "green", 4},
+
+    {"Diag ship internals (non-critical)", 9, 1, "gray", 0},
+    {"- Life Support", 10, 1, "gray", 4},
+
+    {"AI Connection...", 12, 1, "gray", 0},
+    {"- Acknowledged", 13, 1, "gray", 4},
+
+    {"Tap current lucid state", 15, 1, "gray", 0},
+
+    -- Glyphs here for two seconds
+
+    {"", 11, 1, "gray", 0},
 }
 
 function InitialState:init()
@@ -108,7 +119,7 @@ function InitialState:render(renderer)
         if i + 1 < table.getn(fancy_text) then
             local next_row = fancy_text[i + 1]
             if next_row[FT_ROW] ~= current_text_item[FT_ROW] then
-                column_accum = 0
+                column_accum = next_row[FT_OFFSET]
             end
         end
     end
