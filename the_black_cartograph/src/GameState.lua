@@ -9,7 +9,8 @@ function GameState:init(initial_state)
         current_state = initial_state,
 
         player_info = PlayerInfo:init(),
-        paused = false
+        paused = false,
+        menu_open = false
     }
     setmetatable(this, self)
 
@@ -17,10 +18,10 @@ function GameState:init(initial_state)
 end
 
 function GameState:key_pressed(key)
-    if key == "escape" then
-        -- TODO: push_state menu
-        love.event.quit()
-    end
+    -- if key == "escape" then
+    --     -- TODO: push_state menu
+    --     love.event.quit()
+    -- end
 
     return self.current_state:key_pressed(self, key)
 end
@@ -52,6 +53,14 @@ end
 
 function GameState:get_paused()
     return self.paused
+end
+
+function GameState:set_menu_open(new)
+    self.menu_open = new
+end
+
+function GameState:get_menu_open()
+    return self.menu_open
 end
 
 function GameState:_render_paused(renderer)

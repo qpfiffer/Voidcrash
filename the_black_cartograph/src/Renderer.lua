@@ -27,6 +27,8 @@ SKULL_PALLETTE = {
 
     ["green"] = {0.32,1,0.32},
     ["cyan"] = {0.44,0.87,0.76},
+
+    ["black"] = {0, 0, 0},
 }
 
 function _skull_quad(skull_font_img, row, column)
@@ -144,6 +146,47 @@ function Renderer:set_color(color_name)
     love.graphics.setColor(cc[1], cc[2], cc[3], 255)
 end
 
+function Renderer:render_window(x, y, w, h, bg_color, fg_color)
+    local row_offset = y
+    local column_offset = x
+
+    local window_width = w
+    local window_height = 3 -- Only support one line of text right now
+
+    local top_str = {201, 205}
+    local text_str = {186, 32}
+    local bottom_str = {200, 205}
+    for i=1, w do
+        local byte = string.byte(" ")
+        table.insert(top_str, 205)
+        table.insert(text_str, byte)
+        table.insert(bottom_str, 205)
+    end
+
+    table.insert(top_str, 205)
+    table.insert(top_str, 187)
+    table.insert(text_str, 32)
+    table.insert(text_str, 186)
+    table.insert(bottom_str, 205)
+    table.insert(bottom_str, 188)
+
+    -- Clear BG to bg_color:
+    self:set_color(bg_color)
+    love.graphics.rectangle('fill',
+    (x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
+    y * (SKULL_FONT_HEIGHT + PADDING_Y) * scale,
+    SKULL_FONT_WIDTH * (w + 1) * scale,
+    SKULL_FONT_HEIGHT * (h + 1) * scale)
+
+    -- Draw FG:
+    self:set_color(fg_color)
+    self:_draw_raw_numbers(self.skull_font, top_str, row_offset, column_offset)
+    for j=1, h do
+        self:_draw_raw_numbers(self.skull_font, text_str, row_offset + j, column_offset)
+    end
+    self:_draw_raw_numbers(self.skull_font, bottom_str, row_offset + 1 + h, column_offset)
+end
+
 function Renderer:render_window_with_text(x, y, text)
     local row_offset = y
     local column_offset = x
@@ -172,7 +215,6 @@ function Renderer:render_window_with_text(x, y, text)
     self:_draw_raw_numbers(self.skull_font, top_str, row_offset, column_offset)
     self:_draw_raw_numbers(self.skull_font, text_str, row_offset + 1, column_offset)
     self:_draw_raw_numbers(self.skull_font, bottom_str, row_offset + 2, column_offset)
-
 end
 
 function Renderer:render(game_state)

@@ -126,6 +126,8 @@ function MapState:key_pressed(game_state, key)
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
     elseif key == "space" then
         game_state:set_paused(not game_state:get_paused())
+    elseif key == "escape" then
+        game_state:set_menu_open(not game_state:get_menu_open())
     end
 end
 
@@ -240,11 +242,29 @@ function MapState:_draw_lattice(renderer, player_info)
     end
 end
 
+function MapState:_draw_menu(renderer, player_info)
+    -- local x = 1
+    -- local y = 1
+    --local w = constants.MAP_X_MAX/4
+    --local h = constants.MAP_Y_MAX - y
+    local x = 5
+    local y = 5
+    local w = 10
+    local h = 10
+    renderer:render_window(x, y, w, h, "black", "white")
+    renderer:render_window(1, 1, 2, 2, "black", "white")
+    renderer:render_window(15, 1, 2, 2, "black", "white")
+    renderer:render_window(x + 20, y + 10, w + 5, h + 5, "black", "white")
+end
+
 function MapState:render(renderer, game_state)
     local player_info = game_state:get_player_info()
 
     self:_draw_breadcrumbs(renderer, player_info)
     self:_draw_map(renderer, player_info)
+    if game_state:get_menu_open() then
+        self:_draw_menu(renderer, player_info)
+    end
 
     if self.current_map_overlay == O_WEATHER then
         self:_draw_weather(renderer, player_info)
