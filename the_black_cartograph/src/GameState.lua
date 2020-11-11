@@ -1,16 +1,21 @@
 local GameState = {}
 GameState.__index = GameState
 
-local constants= require("src/Constants")
+local constants = require("src/Constants")
 local PlayerInfo = require("src/PlayerInfo")
+
+local MapState = require("src/states/MapState")
+local LatticeState = require("src/states/Lattice")
 
 function GameState:init(initial_state)
     local this = {
         current_state = initial_state,
+        active_states = {},
 
         player_info = PlayerInfo:init(),
-        paused = false,
-        menu_open = false
+        paused = false, -- Whether or not ticks advance game objects
+        menu_open = false, -- Show the menu
+        game_started = false, -- Whether we've reached the game screens, map, lattice, etc.
     }
     setmetatable(this, self)
 
@@ -22,6 +27,14 @@ function GameState:key_pressed(key)
     --     -- TODO: push_state menu
     --     love.event.quit()
     -- end
+    if self:get_game_started() then
+        if key == "1" then
+            self:push_state(MapState:init())
+        elseif key == "2" then
+            self:push_state(LatticeState:init())
+        elseif key == 3 then
+        end
+    end
 
     return self.current_state:key_pressed(self, key)
 end
@@ -61,6 +74,14 @@ end
 
 function GameState:get_menu_open()
     return self.menu_open
+end
+
+function GameState:set_game_started(new)
+    self.game_started = new
+end
+
+function GameState:get_game_started()
+    return self.game_started
 end
 
 function GameState:_render_paused(renderer)

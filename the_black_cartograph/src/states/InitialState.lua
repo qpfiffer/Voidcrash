@@ -50,7 +50,7 @@ function InitialState:init()
 end
 
 function _next_state(game_state)
-    game_state:push_state(LeftWipeState:init(MapState:init(game_state.player_info.overmap_x, game_state.player_info.overmap_y)))
+    game_state:push_state(LeftWipeState:init(MapState:init()))
 end
 
 function InitialState:update(game_state, dt)
