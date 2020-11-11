@@ -7,6 +7,8 @@ function PlayerInfo:init()
     local this = {
         ship_name = "AZM-12",
 
+        cur_tick = math.random(constants.GENESIS),
+
         overmap_x = math.random(constants.OVERMAP_MAX_X),
         overmap_y = math.random(constants.OVERMAP_MAX_Y),
 

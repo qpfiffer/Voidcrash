@@ -11,5 +11,8 @@ constants.LOCALMAP_MAX_Y = 1024
 constants.MAP_X_MAX = 68
 constants.MAP_Y_MAX = 28
 
+constants.GENESIS = 65536
+constants.TICK_SLOW_FACTOR = 53
+
 
 return constants

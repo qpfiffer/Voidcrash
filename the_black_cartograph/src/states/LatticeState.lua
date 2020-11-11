@@ -43,50 +43,53 @@ function LatticeState:update(game_state, dt)
     end
 end
 
-function LatticeState:render(renderer)
-        local block_width = 128
-        local block_height = 72
-        local grid_size = 3
+function LatticeState:render(renderer, game_state)
+    renderer:draw_traumae_string("LATTICE CONN", 1, 0)
+    renderer:draw_string("Lattice Sleeper Conn.", 2, 0)
 
-        local width = love.graphics.getWidth()
-        local height = love.graphics.getHeight()
-        local multiplier = 2
+    local block_width = 128
+    local block_height = 72
+    local grid_size = 3
 
-        local y_padding = 64
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local multiplier = 2
 
-        renderer:set_color("white")
-        love.graphics.translate(width/2, height/8)
-        for x = 1, grid_size do
-           for y = 1, grid_size do
-               for z = 1, grid_size do
-                    -- Top
-                    love.graphics.line(
-                        (x - z) * block_width,
-                        (y + z) * block_height + (y * y_padding),
-                        (x - z + 1) * block_width,
-                        (y + z) * block_height + (y * y_padding))
-                    -- Left
-                    love.graphics.line(
-                        (x - z - 1) * block_width,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        (x - z) * block_width,
-                        (y + z) * block_height + (y * y_padding))
-                    -- Right
-                    love.graphics.line(
-                        (x - z) * block_width,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        (x - z + 1) * block_width,
-                        (y + z) * block_height + (y * y_padding))
-                    -- Bottom
-                    love.graphics.line(
-                        (x - z - 1) * block_width,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        (x - z) * block_width,
-                        (y + z + 1) * block_height + (y * y_padding))
-               end
+    local y_padding = 64
+
+    renderer:set_color("white")
+    love.graphics.translate(width/2, height/8)
+    for x = 1, grid_size do
+       for y = 1, grid_size do
+           for z = 1, grid_size do
+                -- Top
+                love.graphics.line(
+                    (x - z) * block_width,
+                    (y + z) * block_height + (y * y_padding),
+                    (x - z + 1) * block_width,
+                    (y + z) * block_height + (y * y_padding))
+                -- Left
+                love.graphics.line(
+                    (x - z - 1) * block_width,
+                    (y + z + 1) * block_height + (y * y_padding),
+                    (x - z) * block_width,
+                    (y + z) * block_height + (y * y_padding))
+                -- Right
+                love.graphics.line(
+                    (x - z) * block_width,
+                    (y + z + 1) * block_height + (y * y_padding),
+                    (x - z + 1) * block_width,
+                    (y + z) * block_height + (y * y_padding))
+                -- Bottom
+                love.graphics.line(
+                    (x - z - 1) * block_width,
+                    (y + z + 1) * block_height + (y * y_padding),
+                    (x - z) * block_width,
+                    (y + z + 1) * block_height + (y * y_padding))
            end
-        end
-        love.graphics.origin()
+       end
+    end
+    love.graphics.origin()
 end
 
 return LatticeState

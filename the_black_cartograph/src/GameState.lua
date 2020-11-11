@@ -107,6 +107,7 @@ function GameState:render_current_state(renderer)
 end
 
 function GameState:update_current_state(dt)
+    self.player_info.cur_tick = self.player_info.cur_tick + (dt / constants.TICK_SLOW_FACTOR)
     for i in pairs(self.active_states) do
         if self.active_states[i] ~= self.current_state then
             self.active_states[i]:update(self, dt)

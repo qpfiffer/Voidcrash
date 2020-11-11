@@ -35,6 +35,7 @@ function MapState:init()
         ticks_advanced = BLINK_TICK_COUNT,
 
         current_map_overlay = MAP_OVERLAYS[1],
+        current_time = GENESIS,
 
         current_lattice_step = 1
 
@@ -72,6 +73,13 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     accum = accum + renderer:draw_string("Z: ", 0, accum)
     renderer:set_color("red")
     accum = accum + renderer:draw_string(tostring(math.floor(self.zoom_level)), 0, accum)
+    accum = accum + renderer:draw_string(" ", 0, accum)
+
+    -- Tick time
+    renderer:set_color("gray")
+    accum = accum + renderer:draw_string("T: ", 0, accum)
+    renderer:set_color("white")
+    accum = accum + renderer:draw_traumae_string(tostring(math.floor(player_info.cur_tick)), 0, accum/2)
 end
 
 function MapState:_draw_map(renderer, player_info)
@@ -255,15 +263,16 @@ function MapState:render(renderer, game_state)
 
     self:_draw_breadcrumbs(renderer, player_info)
     self:_draw_map(renderer, player_info)
-    if game_state:get_menu_open() then
-        self:_draw_menu(renderer, player_info)
-    end
-
     if self.current_map_overlay == O_WEATHER then
         self:_draw_weather(renderer, player_info)
     elseif self.current_map_overlay == O_LATTICE then
         self:_draw_lattice(renderer, player_info)
     end
+
+    if game_state:get_menu_open() then
+        self:_draw_menu(renderer, player_info)
+    end
+
 end
 
 return MapState
