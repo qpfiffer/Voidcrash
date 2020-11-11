@@ -243,18 +243,11 @@ function MapState:_draw_lattice(renderer, player_info)
 end
 
 function MapState:_draw_menu(renderer, player_info)
-    -- local x = 1
-    -- local y = 1
-    --local w = constants.MAP_X_MAX/4
-    --local h = constants.MAP_Y_MAX - y
-    local x = 5
-    local y = 5
-    local w = 10
-    local h = 10
+    local x = 1
+    local y = 1
+    local w = constants.MAP_X_MAX/4
+    local h = constants.MAP_Y_MAX - y
     renderer:render_window(x, y, w, h, "black", "white")
-    renderer:render_window(1, 1, 2, 2, "black", "white")
-    renderer:render_window(15, 1, 2, 2, "black", "white")
-    renderer:render_window(x + 20, y + 10, w + 5, h + 5, "black", "white")
 end
 
 function MapState:render(renderer, game_state)

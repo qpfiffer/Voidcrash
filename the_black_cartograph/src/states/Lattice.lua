@@ -45,17 +45,17 @@ end
 
 function LatticeState:render(renderer)
         local block_width = 128
-        local block_height = 64
+        local block_height = 72
         local grid_size = 3
 
         local width = love.graphics.getWidth()
         local height = love.graphics.getHeight()
         local multiplier = 2
 
-        local y_padding = 56
+        local y_padding = 64
 
         renderer:set_color("white")
-        love.graphics.translate(width/2, height/4)
+        love.graphics.translate(width/2, height/8)
         for x = 1, grid_size do
            for y = 1, grid_size do
                for z = 1, grid_size do
