@@ -3,7 +3,7 @@ InitialState.__index = InitialState
 
 local constants = require("src/Constants")
 
-local MapState = require("src/states/MapState")
+local GameStartState = require("src/states/GameStartState")
 local LeftWipeState = require("src/states/LeftWipeState")
 
 
@@ -50,7 +50,7 @@ function InitialState:init()
 end
 
 function _next_state(game_state)
-    game_state:push_state(LeftWipeState:init(MapState:init()))
+    game_state:push_state(LeftWipeState:init(GameStartState:init()))
 end
 
 function InitialState:update(game_state, dt)

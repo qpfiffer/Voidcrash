@@ -4,9 +4,6 @@ GameState.__index = GameState
 local constants = require("src/Constants")
 local PlayerInfo = require("src/PlayerInfo")
 
-local MapState = require("src/states/MapState")
-local LatticeState = require("src/states/Lattice")
-
 function GameState:init(initial_state)
     local this = {
         current_state = initial_state,
@@ -29,19 +26,30 @@ function GameState:key_pressed(key)
     -- end
     if self:get_game_started() then
         if key == "1" then
-            self:push_state(MapState:init())
+            self.current_state = self.active_states[1]
         elseif key == "2" then
-            self:push_state(LatticeState:init())
-        elseif key == 3 then
+            self.current_state = self.active_states[2]
+        elseif key == "3" then
+            self.current_state = self.active_states[3]
         end
     end
 
     return self.current_state:key_pressed(self, key)
 end
 
-function GameState:push_state(new_state)
-    -- TBD
+function GameState:add_active_state(state)
+    table.insert(self.active_states, state)
+end
+
+function GameState:switch_active_state(idx)
+    self.current_state = self.active_states[idx]
+end
+
+function GameState:push_state(new_state, is_active)
     self.current_state = new_state
+    if is_active then
+        table.insert(self.active_states, new_state)
+    end
 end
 
 function GameState:pop_state()
@@ -99,6 +107,11 @@ function GameState:render_current_state(renderer)
 end
 
 function GameState:update_current_state(dt)
+    for i in pairs(self.active_states) do
+        if self.active_states[i] ~= self.current_state then
+            self.active_states[i]:update(self, dt)
+        end
+    end
     return self.current_state:update(self, dt)
 end
 

@@ -158,10 +158,6 @@ function MapState:_handle_keys(game_state, dt)
 end
 
 function MapState:update(game_state, dt)
-    if not game_state:get_game_started() then
-        game_state:set_game_started(true)
-    end
-
     self.dtotal = self.dtotal + dt
     if self.dtotal >= constants.TICKER_RATE then
         self.dtotal = self.dtotal - constants.TICKER_RATE
