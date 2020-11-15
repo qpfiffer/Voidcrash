@@ -20,10 +20,10 @@ function GameState:init(initial_state)
 end
 
 function GameState:key_pressed(key)
-    -- if key == "escape" then
-    --     -- TODO: push_state menu
-    --     love.event.quit()
-    -- end
+    if key == "escape" then
+        -- TODO: push_state menu
+        love.event.quit()
+    end
     if self:get_game_started() then
         if key == "1" then
             self.current_state = self.active_states[1]
