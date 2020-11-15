@@ -15,3 +15,5 @@ end
 function SleeperObject:get_power_usage()
     return self.power_usage
 end
+
+return SleeperObject

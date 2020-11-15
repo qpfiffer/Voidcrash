@@ -39,7 +39,15 @@ function HullState:update(game_state, dt)
     end
 end
 
-function HullState:render(renderer)
+function HullState:_draw_power_used_pane(renderer, game_state)
+    local accum = 2
+    renderer:set_color("gray")
+    accum = accum + renderer:draw_string("PWR: ", 2, accum)
+    renderer:set_color("white")
+    accum = accum + renderer:draw_string(tostring(game_state.player_info:get_power_usage()), 2, accum)
+end
+
+function HullState:render(renderer, game_state)
     local x = 1
     local y = 1
     local w = constants.MAP_X_MAX/3
@@ -48,6 +56,8 @@ function HullState:render(renderer)
     renderer:render_window(x, y, w, h, "black", "white")
     renderer:render_window(constants.MAP_X_MAX/3, y, w, h, "black", "white")
     renderer:render_window(2 * (constants.MAP_X_MAX/3), y, w, h, "black", "white")
+
+    self:_draw_power_used_pane(renderer, game_state)
 end
 
 return HullState

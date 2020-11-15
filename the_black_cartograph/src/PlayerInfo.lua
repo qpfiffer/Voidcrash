@@ -3,6 +3,8 @@ PlayerInfo.__index = PlayerInfo
 
 local constants = require("src/Constants")
 
+local SleeperObject = require("src/objects/Sleeper")
+
 function PlayerInfo:init()
     local this = {
         ship_name = "AZM-12",
@@ -14,10 +16,23 @@ function PlayerInfo:init()
 
         local_x = math.random(constants.LOCALMAP_MAX_X),
         local_y = math.random(constants.LOCALMAP_MAX_Y),
+
+        full_power = constants.MAX_POWER,
+        powered_on = {SleeperObject:init(),},
     }
     setmetatable(this, self)
 
     return this
+end
+
+function PlayerInfo:get_power_usage()
+    local total_used = 0
+    for i in pairs(self.powered_on) do
+        local active_power_item = self.powered_on[i]
+        total_used = total_used + active_power_item:get_power_usage()
+    end
+
+    return total_used
 end
 
 return PlayerInfo

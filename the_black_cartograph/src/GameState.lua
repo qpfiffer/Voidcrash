@@ -31,6 +31,8 @@ function GameState:key_pressed(key)
             self.current_state = self.active_states[2]
         elseif key == "3" then
             self.current_state = self.active_states[3]
+        elseif key == "4" then
+            self.current_state = self.active_states[4]
         end
     end
 
