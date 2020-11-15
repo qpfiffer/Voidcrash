@@ -3,7 +3,8 @@ PlayerInfo.__index = PlayerInfo
 
 local constants = require("src/Constants")
 
-local SleeperObject = require("src/objects/Sleeper")
+local EMFieldObject = require("src/objects/hull/EMFieldObject")
+local SleeperObject = require("src/objects/hull/SleeperObject")
 
 function PlayerInfo:init()
     local this = {
@@ -18,7 +19,10 @@ function PlayerInfo:init()
         local_y = math.random(constants.LOCALMAP_MAX_Y),
 
         full_power = constants.MAX_POWER,
-        powered_on = {SleeperObject:init(),},
+        powered_on = {
+            SleeperObject:init(),
+            EMFieldObject:init(),
+        },
     }
     setmetatable(this, self)
 
