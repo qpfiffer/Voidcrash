@@ -12,6 +12,10 @@ function SleeperObject:init(initial_state)
     return this
 end
 
+function SleeperObject:get_name()
+    return "Sleeper"
+end
+
 function SleeperObject:get_power_usage()
     return self.power_usage
 end

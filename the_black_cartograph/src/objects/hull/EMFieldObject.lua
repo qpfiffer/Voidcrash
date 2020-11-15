@@ -12,6 +12,10 @@ function EMFieldObject:init(initial_state)
     return this
 end
 
+function EMFieldObject:get_name()
+    return "EM FIELD"
+end
+
 function EMFieldObject:get_power_usage()
     return self.power_usage
 end

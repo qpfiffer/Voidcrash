@@ -29,6 +29,10 @@ function PlayerInfo:init()
     return this
 end
 
+function PlayerInfo:get_power_items()
+    return self.powered_on
+end
+
 function PlayerInfo:get_power_usage()
     local total_used = 0
     for i in pairs(self.powered_on) do
