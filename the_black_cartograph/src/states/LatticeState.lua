@@ -84,12 +84,13 @@ function LatticeState:render(renderer, game_state)
     local height = love.graphics.getHeight()
 
     renderer:set_color("white")
-    love.graphics.translate(width/2, height/8)
+    love.graphics.translate(width/2, height/16)
     for x = 1, LATTICE_GRID_SIZE do
-        for y = 1, LATTICE_GRID_SIZE do
+        for y = 1, LATTICE_GRID_SIZE + 1 do
             for z = 1, LATTICE_GRID_SIZE do
                 local block_width = 128
                 local block_height = 72
+                local x_tweak = 12
 
                 local y_padding = 64
 
@@ -98,7 +99,7 @@ function LatticeState:render(renderer, game_state)
                     renderer:set_color("red")
                 end
                 love.graphics.line(
-                    (x - z) * block_width,
+                    (x - z) * block_width + x_tweak,
                     (y + z) * block_height + (y * y_padding),
                     (x - z + 1) * block_width,
                     (y + z) * block_height + (y * y_padding))
@@ -111,7 +112,7 @@ function LatticeState:render(renderer, game_state)
                 love.graphics.line(
                     (x - z - 1) * block_width,
                     (y + z + 1) * block_height + (y * y_padding),
-                    (x - z) * block_width,
+                    (x - z) * block_width + x_tweak,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
@@ -120,7 +121,7 @@ function LatticeState:render(renderer, game_state)
                 end
                 -- Right
                 love.graphics.line(
-                    (x - z) * block_width,
+                    (x - z) * block_width - x_tweak,
                     (y + z + 1) * block_height + (y * y_padding),
                     (x - z + 1) * block_width,
                     (y + z) * block_height + (y * y_padding))
@@ -133,11 +134,11 @@ function LatticeState:render(renderer, game_state)
                 love.graphics.line(
                     (x - z - 1) * block_width,
                     (y + z + 1) * block_height + (y * y_padding),
-                    (x - z) * block_width,
+                    (x - z) * block_width - x_tweak,
                     (y + z + 1) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
-                if y ~= 17 *LATTICE_GRID_SIZE then
+                if y ~= LATTICE_GRID_SIZE + 1 then
                     -- Top
                     if self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
                         renderer:set_color("red")
@@ -165,9 +166,9 @@ function LatticeState:render(renderer, game_state)
                     end
                     -- Right
                     love.graphics.line(
-                        (x - z) * block_width,
+                        (x - z) * block_width - x_tweak,
                         (y + z + 1) * block_height + (y * y_padding),
-                        (x - z) * block_width,
+                        (x - z) * block_width - x_tweak,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
 
@@ -176,10 +177,10 @@ function LatticeState:render(renderer, game_state)
                     end
                     -- Bottom
                     love.graphics.line(
-                        (x - z) * block_width,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        (x - z) * block_width,
-                        (y + z + 1) * block_height + ((2 + y) * y_padding))
+                        (x - z) * block_width + x_tweak,
+                        (y + z + 1) * block_height + ((y - 1) * y_padding),
+                        (x - z) * block_width + x_tweak,
+                        (y + z + 1) * block_height + ((y + 1) * y_padding))
                     renderer:set_color("white")
                 end
             end
