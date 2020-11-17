@@ -136,6 +136,52 @@ function LatticeState:render(renderer, game_state)
                     (x - z) * block_width,
                     (y + z + 1) * block_height + (y * y_padding))
                 renderer:set_color("white")
+
+                if y ~= 17 *LATTICE_GRID_SIZE then
+                    -- Top
+                    if self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
+                        renderer:set_color("red")
+                    end
+                    love.graphics.line(
+                        (x - z + 1) * block_width,
+                        (y + z) * block_height + (y * y_padding),
+                        (x - z + 1) * block_width,
+                        (y + z) * block_height + ((2 + y) * y_padding))
+                    renderer:set_color("white")
+
+                    if self.blink_cursor_on and self.select_mode == "x" and (x - 1) == self.selected[1] then
+                        renderer:set_color("red")
+                    end
+                    -- Left
+                    love.graphics.line(
+                        (x - z - 1) * block_width,
+                        (y + z + 1) * block_height + (y * y_padding),
+                        (x - z - 1) * block_width,
+                        (y + z + 1) * block_height + ((2 + y) * y_padding))
+                    renderer:set_color("white")
+
+                    if self.blink_cursor_on and self.select_mode == "x" and x == self.selected[1] then
+                        renderer:set_color("red")
+                    end
+                    -- Right
+                    love.graphics.line(
+                        (x - z) * block_width,
+                        (y + z + 1) * block_height + (y * y_padding),
+                        (x - z) * block_width,
+                        (y + z + 1) * block_height + ((2 + y) * y_padding))
+                    renderer:set_color("white")
+
+                    if self.blink_cursor_on and self.select_mode == "y" and z == self.selected[2] then
+                        renderer:set_color("red")
+                    end
+                    -- Bottom
+                    love.graphics.line(
+                        (x - z) * block_width,
+                        (y + z + 1) * block_height + (y * y_padding),
+                        (x - z) * block_width,
+                        (y + z + 1) * block_height + ((2 + y) * y_padding))
+                    renderer:set_color("white")
+                end
             end
         end
     end
