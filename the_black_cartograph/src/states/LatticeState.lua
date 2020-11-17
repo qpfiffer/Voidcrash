@@ -99,7 +99,7 @@ function LatticeState:render(renderer, game_state)
                     renderer:set_color("red")
                 end
                 love.graphics.line(
-                    (x - z) * block_width + x_tweak,
+                    ((x - z) * block_width) + x_tweak,
                     (y + z) * block_height + (y * y_padding),
                     (x - z + 1) * block_width,
                     (y + z) * block_height + (y * y_padding))
@@ -112,7 +112,7 @@ function LatticeState:render(renderer, game_state)
                 love.graphics.line(
                     (x - z - 1) * block_width,
                     (y + z + 1) * block_height + (y * y_padding),
-                    (x - z) * block_width + x_tweak,
+                    ((x - z) * block_width) + x_tweak,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
@@ -121,7 +121,7 @@ function LatticeState:render(renderer, game_state)
                 end
                 -- Right
                 love.graphics.line(
-                    (x - z) * block_width - x_tweak,
+                    ((x - z) * block_width) - x_tweak,
                     (y + z + 1) * block_height + (y * y_padding),
                     (x - z + 1) * block_width,
                     (y + z) * block_height + (y * y_padding))
@@ -134,7 +134,7 @@ function LatticeState:render(renderer, game_state)
                 love.graphics.line(
                     (x - z - 1) * block_width,
                     (y + z + 1) * block_height + (y * y_padding),
-                    (x - z) * block_width - x_tweak,
+                    ((x - z) * block_width) - x_tweak,
                     (y + z + 1) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
@@ -166,20 +166,20 @@ function LatticeState:render(renderer, game_state)
                     end
                     -- Right
                     love.graphics.line(
-                        (x - z) * block_width - x_tweak,
+                        ((x - z) * block_width) - x_tweak,
                         (y + z + 1) * block_height + (y * y_padding),
-                        (x - z) * block_width - x_tweak,
+                        ((x - z) * block_width) - x_tweak,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
 
-                    if self.blink_cursor_on and self.select_mode == "y" and z == self.selected[2] then
+                    if self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
                         renderer:set_color("red")
                     end
                     -- Bottom
                     love.graphics.line(
-                        (x - z) * block_width + x_tweak,
+                        ((x - z) * block_width) + x_tweak,
                         (y + z + 1) * block_height + ((y - 1) * y_padding),
-                        (x - z) * block_width + x_tweak,
+                        ((x - z) * block_width) + x_tweak,
                         (y + z + 1) * block_height + ((y + 1) * y_padding))
                     renderer:set_color("white")
                 end
