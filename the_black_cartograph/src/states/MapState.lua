@@ -24,13 +24,13 @@ local MAP_OVERLAYS = {
     O_LATTICE,
 }
 
-function MapState:init()
+function MapState:init(game_state)
     local zoom = ZOOM_MOD -- Actually zoom * ZOOM_MOD, but 1 *... whatever you get it.
     local this = {
         dtotal = 0,             -- Delta time total
         zoom_level = 1,         -- Zoom level is how far into the map we are looking.
-        current_x_offset = zoom * (-constants.MAP_X_MAX/2),
-        current_y_offset = zoom * (-constants.MAP_Y_MAX/2),
+        current_x_offset = game_state.player_info.overmap_x,
+        current_y_offset = game_state.player_info.overmap_y,
         blink_cursor_on = true,
         ticks_advanced = BLINK_TICK_COUNT,
 
@@ -59,13 +59,13 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("X: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(player_info.overmap_x + self.current_x_offset), 0, accum)
+    accum = accum + renderer:draw_string(tostring(self.current_x_offset), 0, accum)
     accum = accum + renderer:draw_string(" ", 0, accum)
 
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("Y: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(player_info.overmap_y + self.current_y_offset), 0, accum)
+    accum = accum + renderer:draw_string(tostring(self.current_y_offset), 0, accum)
     accum = accum + renderer:draw_string(" ", 0, accum)
 
     -- Zoom level
@@ -90,13 +90,8 @@ function MapState:_draw_map(renderer, player_info)
 
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
-            -- This builds a weird scramble:
-            -- local raw_noise_val = love.math.noise(
-            --     x + (zoom * self.current_x_offset),
-            --     y + (zoom * self.current_y_offset))
-            -- local noise_val = raw_noise_val * 1000
-            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
-            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
 
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
@@ -110,9 +105,8 @@ function MapState:_draw_map(renderer, player_info)
             else
                 renderer:set_color("grayest")
             end
-            --if math.floor(noise_val) % 10 == 0 then
-                renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
-            --end
+
+            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
         end
     end
 end
@@ -122,8 +116,8 @@ function MapState:key_pressed(game_state, key)
         -- Snap to home
         self.zoom_level = 1
         local zoom = self.zoom_level * ZOOM_MOD
-        self.current_x_offset = zoom * (-constants.MAP_X_MAX/2)
-        self.current_y_offset = zoom * (-constants.MAP_Y_MAX/2)
+        self.current_x_offset = game_state.player_info.overmap_x
+        self.current_y_offset = game_state.player_info.overmap_y
     elseif key == "tab" then
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
     elseif key == "space" then
@@ -190,8 +184,8 @@ function MapState:_draw_weather(renderer, player_info)
     local WEATHER_MAP_DIVISOR = 1600
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
-            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x
-            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
             local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
@@ -228,8 +222,8 @@ function MapState:_draw_lattice(renderer, player_info)
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
             -- This builds a weird scramble:
-            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + player_info.overmap_x + LATTICE_NOISE_OFFSET_X
-            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + player_info.overmap_y + LATTICE_NOISE_OFFSET_Y
+            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + LATTICE_NOISE_OFFSET_X
+            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + LATTICE_NOISE_OFFSET_Y
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
             local noise_val = math.floor(raw_noise_val * 1000)
 
@@ -272,8 +266,8 @@ function MapState:render(renderer, game_state)
         local frame = frames[i]
         local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + frame:get_x()
         local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + frame:get_y()
-        local x = math.floor(((frame:get_x() - self.current_x_offset - player_info.overmap_x) / zoom) + (constants.MAP_X_MAX/2))
-        local y = math.floor(((frame:get_y() - self.current_y_offset - player_info.overmap_y) / zoom) + (constants.MAP_Y_MAX/2))
+        local x = math.floor(((frame:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+        local y = math.floor(((frame:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
 
         if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
             renderer:set_color("red")
@@ -283,8 +277,8 @@ function MapState:render(renderer, game_state)
 
     if self.blink_cursor_on then
         renderer:set_color("cyan")
-        local x = math.floor(((player_info.overmap_x - self.current_x_offset - player_info.overmap_x) / zoom) + (constants.MAP_X_MAX/2))
-        local y = math.floor(((player_info.overmap_y - self.current_y_offset - player_info.overmap_y) / zoom) + (constants.MAP_Y_MAX/2))
+        local x = math.floor(((player_info.overmap_x - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+        local y = math.floor(((player_info.overmap_y - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
         if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
             renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
         end

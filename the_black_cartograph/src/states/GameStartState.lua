@@ -19,7 +19,7 @@ function GameStartState:key_pressed(game_state, key)
 end
 
 function GameStartState:update(game_state, dt)
-    game_state:add_active_state(MapState:init())
+    game_state:add_active_state(MapState:init(game_state))
     game_state:add_active_state(LatticeState:init())
     game_state:add_active_state(FrameState:init())
     game_state:add_active_state(HullState:init())
