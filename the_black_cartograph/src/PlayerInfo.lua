@@ -3,20 +3,21 @@ PlayerInfo.__index = PlayerInfo
 
 local constants = require("src/Constants")
 
+local FrameObject = require("src/objects/FrameObject")
+
 local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local SleeperObject = require("src/objects/hull/SleeperObject")
 
 function PlayerInfo:init()
     local this = {
-        ship_name = "AZM-12",
+        hull_name = "TH-51US",
 
         cur_tick = math.random(constants.GENESIS),
 
         overmap_x = math.random(constants.OVERMAP_MAX_X),
         overmap_y = math.random(constants.OVERMAP_MAX_Y),
 
-        local_x = math.random(constants.LOCALMAP_MAX_X),
-        local_y = math.random(constants.LOCALMAP_MAX_Y),
+        frames = {},
 
         full_power = constants.MAX_POWER,
         powered_on = {
@@ -26,11 +27,21 @@ function PlayerInfo:init()
     }
     setmetatable(this, self)
 
+    this.frames = {
+        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+    }
+
     return this
 end
 
 function PlayerInfo:get_power_items()
     return self.powered_on
+end
+
+function PlayerInfo:get_frames()
+    return self.frames
 end
 
 function PlayerInfo:get_power_usage()

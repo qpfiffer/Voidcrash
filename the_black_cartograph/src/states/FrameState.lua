@@ -36,13 +36,23 @@ function FrameState:update(game_state, dt)
             return
         end
 
-        -- Do something.
-
+        local frames = game_state.player_info:get_frames()
+        for i=1, #frames do
+            frames[i]:update(game_state, dt)
+        end
     end
 end
 
-function FrameState:render(renderer)
-    -- Render something.
+function FrameState:render(renderer, game_state)
+    local frames = game_state.player_info:get_frames()
+    for i=1, #frames do
+        local frame = frames[i]
+        local accum = 1
+        renderer:set_color("gray")
+        accum = accum + renderer:draw_string("Frame " .. tostring(i) .. ": ", i, accum)
+        renderer:set_color("white")
+        accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), i, accum)
+    end
 end
 
 return FrameState

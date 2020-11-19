@@ -88,10 +88,6 @@ function MapState:_draw_map(renderer, player_info)
 
     local zoom = self.zoom_level * ZOOM_MOD
 
-    -- Player's location on the overmap
-    local deproj_player_x = zoom * -(constants.MAP_X_MAX/2) + player_info.overmap_x
-    local deproj_player_y = zoom * -(constants.MAP_Y_MAX/2) + player_info.overmap_y
-
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
             -- This builds a weird scramble:
@@ -105,9 +101,7 @@ function MapState:_draw_map(renderer, player_info)
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
 
-            if self.blink_cursor_on and deproj_player_x == noise_x and deproj_player_y == noise_y then
-                renderer:set_color("cyan")
-            elseif noise_val < 550 then
+            if noise_val < 550 then
                 renderer:set_color("white")
             elseif noise_val < 750 then
                 renderer:set_color("gray")
@@ -165,7 +159,7 @@ function MapState:_handle_keys(game_state, dt)
     end
 end
 
-function MapState:update(game_state, dt)
+function MapState:update(game_state, dt, is_active)
     self.dtotal = self.dtotal + dt
     if self.dtotal >= constants.TICKER_RATE then
         self.dtotal = self.dtotal - constants.TICKER_RATE
@@ -181,7 +175,9 @@ function MapState:update(game_state, dt)
             self.current_lattice_step = self.current_lattice_step + 0.0002
         end
 
-        self:_handle_keys(game_state, dt)
+        if is_active then
+            self:_handle_keys(game_state, dt)
+        end
     end
 end
 
@@ -269,10 +265,34 @@ function MapState:render(renderer, game_state)
         self:_draw_lattice(renderer, player_info)
     end
 
+    local row_offset = 1
+    local frames = game_state.player_info:get_frames()
+    local zoom = self.zoom_level * ZOOM_MOD
+    for i=1, #frames do
+        local frame = frames[i]
+        local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + frame:get_x()
+        local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + frame:get_y()
+        local x = math.floor(((frame:get_x() - self.current_x_offset - player_info.overmap_x) / zoom) + (constants.MAP_X_MAX/2))
+        local y = math.floor(((frame:get_y() - self.current_y_offset - player_info.overmap_y) / zoom) + (constants.MAP_Y_MAX/2))
+
+        if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
+            renderer:set_color("red")
+            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+        end
+    end
+
+    if self.blink_cursor_on then
+        renderer:set_color("cyan")
+        local x = math.floor(((player_info.overmap_x - self.current_x_offset - player_info.overmap_x) / zoom) + (constants.MAP_X_MAX/2))
+        local y = math.floor(((player_info.overmap_y - self.current_y_offset - player_info.overmap_y) / zoom) + (constants.MAP_Y_MAX/2))
+        if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
+            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+        end
+    end
+
     if game_state:get_menu_open() then
         self:_draw_menu(renderer, player_info)
     end
-
 end
 
 return MapState
