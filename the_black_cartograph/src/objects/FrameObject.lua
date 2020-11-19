@@ -3,6 +3,8 @@ FrameObject.__index = FrameObject
 
 local constants = require("src/Constants")
 
+local CollectorObject = require("src/objects/CollectorObject")
+
 local SPEED = 0.0002
 
 function _lerp(a, b, t)
@@ -31,6 +33,9 @@ function FrameObject:init(x, y, dest_x, dest_y)
 
         world_x = x,
         world_y = y,
+
+        cargo_max = 2, -- Tons
+        cargo = {},
     }
     setmetatable(this, self)
 
