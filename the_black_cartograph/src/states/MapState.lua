@@ -96,7 +96,15 @@ function MapState:_draw_map(renderer, player_info)
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
 
-            if noise_val < 550 then
+            if noise_val <= 25 then
+                if noise_val <= 16 then
+                    renderer:set_color("black")
+                elseif noise_val <= 20 then
+                    renderer:set_color("blood")
+                elseif noise_val <= 25 then
+                    renderer:set_color("red")
+                end
+            elseif noise_val < 550 then
                 renderer:set_color("white")
             elseif noise_val < 750 then
                 renderer:set_color("gray")
