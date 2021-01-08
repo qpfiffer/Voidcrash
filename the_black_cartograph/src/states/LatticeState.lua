@@ -58,8 +58,10 @@ end
 
 function LatticeState:update(game_state, dt)
     self.dtotal = self.dtotal + dt
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE
+    local tick_modifier = 16
+    local modified_tick = constants.TICKER_RATE / tick_modifier
+    if self.dtotal >= modified_tick then
+        self.dtotal = self.dtotal - modified_tick
         self.ticks_advanced = self.ticks_advanced - 1
 
         if self.ticks_advanced > 0 then
@@ -72,7 +74,6 @@ function LatticeState:update(game_state, dt)
             player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.0002)
         end
 
-
         self.ticks_advanced = BLINK_TICK_COUNT
         self.blink_cursor_on = not self.blink_cursor_on
     end
@@ -84,7 +85,7 @@ function LatticeState:render(renderer, game_state)
     renderer:draw_string("CONN: ", 3, 0)
 
     local player_info = game_state:get_player_info()
-    local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y)
+    local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
     if connected then
         renderer:set_color("green")
         renderer:draw_string("CONNECTED", 3, 5)
