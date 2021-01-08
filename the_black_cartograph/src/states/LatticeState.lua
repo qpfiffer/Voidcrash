@@ -57,11 +57,6 @@ function LatticeState:key_pressed(game_state, key)
 end
 
 function LatticeState:update(game_state, dt)
-    if not game_state:get_paused() then
-        local player_info = game_state:get_player_info()
-        player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.00002)
-    end
-
     self.dtotal = self.dtotal + dt
     if self.dtotal >= constants.TICKER_RATE then
         self.dtotal = self.dtotal - constants.TICKER_RATE
@@ -71,6 +66,12 @@ function LatticeState:update(game_state, dt)
             -- Wait til next time.
             return
         end
+
+        if not game_state:get_paused() then
+            local player_info = game_state:get_player_info()
+            player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.0002)
+        end
+
 
         self.ticks_advanced = BLINK_TICK_COUNT
         self.blink_cursor_on = not self.blink_cursor_on
