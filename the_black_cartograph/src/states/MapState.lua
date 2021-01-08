@@ -7,9 +7,6 @@ local constants = require("src/Constants")
 local move_mod = 0.02
 local ZOOM_MOD = 0.02
 
-local LATTICE_NOISE_OFFSET_X = 48765
-local LATTICE_NOISE_OFFSET_Y = 32455
-
 local WEATHER_NOISE_OFFSET_X = 55333
 local WEATHER_NOISE_OFFSET_Y = 46464
 
@@ -37,8 +34,7 @@ function MapState:init(game_state)
         current_map_overlay = MAP_OVERLAYS[1],
         current_time = GENESIS,
 
-        current_lattice_step = 1
-
+        current_weather_step = 1,
     }
     setmetatable(this, self)
 
@@ -174,7 +170,7 @@ function MapState:update(game_state, dt, is_active)
         end
 
         if not game_state:get_paused() then
-            self.current_lattice_step = self.current_lattice_step + 0.0002
+            self.current_weather_step = self.current_weather_step + 0.0002
         end
 
         if is_active then
@@ -194,7 +190,7 @@ function MapState:_draw_weather(renderer, player_info)
         for y=0, constants.MAP_Y_MAX do
             local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
             local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
-            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
+            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_weather_step)
             local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
             renderer:set_color("grayest")
@@ -230,16 +226,15 @@ function MapState:_draw_lattice(renderer, player_info)
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
             -- This builds a weird scramble:
-            local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset + LATTICE_NOISE_OFFSET_X
-            local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset + LATTICE_NOISE_OFFSET_Y
-            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_lattice_step)
-            local noise_val = math.floor(raw_noise_val * 1000)
+            local world_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
+            local world_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
+            local noise_val = player_info:get_lattice_intensity(world_x, world_y)
 
-            if noise_val < 250 then
+            if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
                 renderer:set_color("blood")
                 local char = 194 + math.fmod(noise_val, 4)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
-            elseif noise_val < 300 then
+            elseif noise_val < constants.LATTICE_MINUMUM_INTENSITY then
                 renderer:set_color("red")
                 local char = 196 + math.fmod(noise_val, 10)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
