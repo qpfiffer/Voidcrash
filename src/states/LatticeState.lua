@@ -4,6 +4,7 @@ LatticeState.__index = LatticeState
 local constants = require("src/Constants")
 
 local BLINK_TICK_COUNT = 20
+local BLINK_TICKER_COUNTDOWN = 8
 
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 35
@@ -20,6 +21,8 @@ function LatticeState:init()
         screen_state = {},
 
         blink_cursor_on = true,
+        blink_ticker_countdown = BLINK_TICKER_COUNTDOWN,
+
         selected = {1, 1},
         select_mode = "x",
         ticks_advanced = BLINK_TICK_COUNT,
@@ -75,7 +78,12 @@ function LatticeState:update(game_state, dt)
         end
 
         self.ticks_advanced = BLINK_TICK_COUNT
-        self.blink_cursor_on = not self.blink_cursor_on
+
+        self.blink_ticker_countdown = self.blink_ticker_countdown - 1
+        if self.blink_ticker_countdown <= 0 then
+            self.blink_cursor_on = not self.blink_cursor_on
+            self.blink_ticker_countdown = BLINK_TICKER_COUNTDOWN
+        end
     end
 end
 

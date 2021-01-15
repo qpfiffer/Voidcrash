@@ -19,6 +19,7 @@ function PlayerInfo:init()
         overmap_y = math.random(constants.OVERMAP_MAX_Y),
 
         frames = {},
+        cargo = {},
 
         full_power = constants.MAX_POWER,
         powered_on = {
@@ -31,7 +32,7 @@ function PlayerInfo:init()
     }
     setmetatable(this, self)
 
-    this.frames = {
+    this.cargo = {
         FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
         FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
         FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
@@ -46,6 +47,10 @@ end
 
 function PlayerInfo:get_frames()
     return self.frames
+end
+
+function PlayerInfo:get_cargo()
+    return self.cargo
 end
 
 function PlayerInfo:get_power_usage()

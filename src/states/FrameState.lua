@@ -48,10 +48,17 @@ function FrameState:render(renderer, game_state)
     for i=1, #frames do
         local frame = frames[i]
         local accum = 1
+
         renderer:set_color("gray")
         accum = accum + renderer:draw_string("Frame " .. tostring(i) .. ": ", i, accum)
-        renderer:set_color("white")
-        accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), i, accum)
+
+        if frame:get_deployed() then
+            renderer:set_color("white")
+            accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), i, accum)
+        else
+            renderer:set_color("gray")
+            accum = accum + renderer:draw_string("In Hold", i, accum)
+        end
     end
 end
 

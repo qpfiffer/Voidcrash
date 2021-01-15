@@ -267,14 +267,16 @@ function MapState:render(renderer, game_state)
     local zoom = self.zoom_level * ZOOM_MOD
     for i=1, #frames do
         local frame = frames[i]
-        local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + frame:get_x()
-        local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + frame:get_y()
-        local x = math.floor(((frame:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
-        local y = math.floor(((frame:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
+        if frame:get_deployed() then
+            local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + frame:get_x()
+            local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + frame:get_y()
+            local x = math.floor(((frame:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+            local y = math.floor(((frame:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
 
-        if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
-            renderer:set_color("red")
-            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+            if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
+                renderer:set_color("red")
+                renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+            end
         end
     end
 

@@ -20,9 +20,7 @@ end
 function FrameObject:init(x, y, dest_x, dest_y)
     local this = {
         speed = SPEED,
-
         ticks_advanced = SPEED,
-
         progress = 0,
 
         origin_x = x,
@@ -36,6 +34,8 @@ function FrameObject:init(x, y, dest_x, dest_y)
 
         cargo_max = 2, -- Tons
         cargo = {},
+
+        deployed = false,
     }
     setmetatable(this, self)
 
@@ -62,7 +62,15 @@ function FrameObject:get_name()
     return "Frame"
 end
 
+function FrameObject:get_deployed()
+    return self.deployed
+end
+
 function FrameObject:update(game_state, dt)
+    if not deployed then
+        return
+    end
+
     if self.world_x ~= self.dest_x and self.world_y ~= self.dest_y then
         local distance = _dist(self.world_x, self.world_y, self.dest_x, self.dest_y)
         self.progress = self.progress + (self.speed * 1/distance)
