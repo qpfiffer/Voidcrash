@@ -1,2 +1,0 @@
-shader vert = $CORANGE/shaders/deferred/skydome.vs
-shader frag = $CORANGE/shaders/deferred/skydome.fs

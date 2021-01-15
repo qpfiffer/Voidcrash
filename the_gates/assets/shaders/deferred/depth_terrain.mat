@@ -1,2 +1,0 @@
-shader vertex = $CORANGE/shaders/deferred/depth_terrain.vs
-shader fragment = $CORANGE/shaders/deferred/depth_terrain.fs

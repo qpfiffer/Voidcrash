@@ -1,2 +1,0 @@
-shader vert = $CORANGE/shaders/deferred/tonemap.vs
-shader frag = $CORANGE/shaders/deferred/tonemap.fs

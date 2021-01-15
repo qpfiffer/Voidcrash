@@ -1,2 +1,0 @@
-shader vertex = $CORANGE/shaders/ui.vs
-shader fragment = $CORANGE/shaders/ui.fs
