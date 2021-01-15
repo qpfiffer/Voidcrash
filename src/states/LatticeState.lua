@@ -23,7 +23,7 @@ function LatticeState:init()
         blink_cursor_on = true,
         blink_ticker_countdown = BLINK_TICKER_COUNTDOWN,
 
-        selected = {1, 1},
+        selected = {1, 1, 1},
         select_mode = "x",
         ticks_advanced = BLINK_TICK_COUNT,
     }
@@ -54,7 +54,7 @@ function LatticeState:key_pressed(game_state, key)
             self.selected[1] = self.selected[1] + 1
             self.blink_cursor_on = true
         end
-    else
+    elseif self.select_mode == "y" then
         if key == "up" then
             self.selected[2] = self.selected[2] - 1
             self.blink_cursor_on = true
