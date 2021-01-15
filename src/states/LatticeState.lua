@@ -41,18 +41,27 @@ function LatticeState:_ensure_grid_size_selected(idx)
 end
 
 function LatticeState:key_pressed(game_state, key)
-    if key == "left" then
-        self.select_mode = "x"
-        self.selected[1] = self.selected[1] - 1
-    elseif key == "right" then
-        self.select_mode = "x"
-        self.selected[1] = self.selected[1] + 1
-    elseif key == "up" then
+    if key == "return" then
         self.select_mode = "y"
-        self.selected[2] = self.selected[2] - 1
-    elseif key == "down" then
-        self.select_mode = "y"
-        self.selected[2] = self.selected[2] + 1
+        return
+    end
+
+    if self.select_mode == "x" then
+        if key == "left" then
+            self.selected[1] = self.selected[1] - 1
+            self.blink_cursor_on = true
+        elseif key == "right" then
+            self.selected[1] = self.selected[1] + 1
+            self.blink_cursor_on = true
+        end
+    else
+        if key == "up" then
+            self.selected[2] = self.selected[2] - 1
+            self.blink_cursor_on = true
+        elseif key == "down" then
+            self.selected[2] = self.selected[2] + 1
+            self.blink_cursor_on = true
+        end
     end
 
     self:_ensure_grid_size_selected(1)
@@ -93,7 +102,8 @@ function LatticeState:render(renderer, game_state)
     renderer:draw_string("CONN: ", 3, 0)
 
     local player_info = game_state:get_player_info()
-    local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
+    --local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
+    local connected = true
     if connected then
         renderer:set_color("green")
         renderer:draw_string("CONNECTED", 3, 5)
