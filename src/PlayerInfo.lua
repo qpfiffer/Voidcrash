@@ -9,6 +9,8 @@ local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local LatticeCommunicationsArrayObject = require("src/objects/hull/LatticeCommunicationsArray")
 local SleeperObject = require("src/objects/hull/SleeperObject")
 
+local Utils = require("src/Utils")
+
 function PlayerInfo:init()
     local this = {
         hull_name = "TH-51US",
@@ -33,9 +35,15 @@ function PlayerInfo:init()
     setmetatable(this, self)
 
     this.cargo = {
-        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
-        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
-        FrameObject:init(this.overmap_x, this.overmap_y, math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+        FrameObject:init(Utils.generate_frame_name(),
+            this.overmap_x, this.overmap_y,
+            math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+        FrameObject:init(Utils.generate_frame_name(),
+            this.overmap_x, this.overmap_y,
+            math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+        FrameObject:init(Utils.generate_frame_name(),
+            this.overmap_x, this.overmap_y,
+            math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
     }
 
     return this
@@ -58,6 +66,16 @@ function PlayerInfo:get_power_usage()
     for i in pairs(self.powered_on) do
         local active_power_item = self.powered_on[i]
         total_used = total_used + active_power_item:get_power_usage()
+    end
+
+    return total_used
+end
+
+function PlayerInfo:get_cargo_usage()
+    local total_used = 0
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        total_used = total_used + cargo_item:get_tonnage()
     end
 
     return total_used

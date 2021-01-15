@@ -6,6 +6,7 @@ local constants = require("src/Constants")
 local CollectorObject = require("src/objects/CollectorObject")
 
 local SPEED = 0.0002
+local BASE_WEIGHT_TONS = 0.2
 
 function _lerp(a, b, t)
     return a * (1-t) + b * t
@@ -17,7 +18,7 @@ function _dist(x1, y1, x2, y2)
     return math.sqrt(dx * dx + dy * dy)
 end
 
-function FrameObject:init(x, y, dest_x, dest_y)
+function FrameObject:init(name, x, y, dest_x, dest_y)
     local this = {
         speed = SPEED,
         ticks_advanced = SPEED,
@@ -32,6 +33,7 @@ function FrameObject:init(x, y, dest_x, dest_y)
         world_x = x,
         world_y = y,
 
+        name = name,
         cargo_max = 2, -- Tons
         cargo = {},
 
@@ -59,11 +61,21 @@ function FrameObject:set_y(val)
 end
 
 function FrameObject:get_name()
-    return "Frame"
+    return self.name
 end
 
 function FrameObject:get_deployed()
     return self.deployed
+end
+
+function FrameObject:get_tonnage()
+    local total_used = 0
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        total_used = total_used + cargo_item:get_tonnage()
+    end
+
+    return total_used + BASE_WEIGHT_TONS
 end
 
 function FrameObject:update(game_state, dt)

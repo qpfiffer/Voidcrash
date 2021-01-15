@@ -43,6 +43,10 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     local accum = 2
     local row = 2
 
+    renderer:set_color("white")
+    renderer:draw_string("POWER", row, accum)
+    row = row + 1
+
     local items = game_state.player_info:get_power_items()
     for i in pairs(items) do
         local active_power_item = items[i]
@@ -60,23 +64,28 @@ function HullState:_draw_power_used_pane(renderer, game_state)
 end
 
 function HullState:_draw_cargo_pane(renderer, game_state)
-    local w = constants.MAP_X_MAX/3
+    local accum_start = constants.MAP_X_MAX/3 + 1
+    local accum = accum_start
     local row = 2
 
-    local items = game_state.player_info:get_power_items()
+    renderer:set_color("white")
+    renderer:draw_string("CARGO", row, accum)
+    row = row + 1
+
+    local items = game_state.player_info:get_cargo()
     for i in pairs(items) do
-        local active_power_item = items[i]
+        local cargo_item = items[i]
         renderer:set_color("gray")
-        accum = accum + renderer:draw_string("* " .. active_power_item:get_name(), row, accum)
+        accum = accum + renderer:draw_string("* " .. cargo_item:get_name(), row, accum)
 
         row = row + 1
-        accum = 2
+        accum = accum_start
     end
 
     renderer:set_color("gray")
-    accum = accum + renderer:draw_string("PWR: ", row, accum)
+    accum = accum + renderer:draw_string("TON: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info:get_power_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(game_state.player_info:get_cargo_usage()), row, accum)
 end
 
 function HullState:render(renderer, game_state)
