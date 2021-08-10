@@ -14,6 +14,8 @@ local TICKS_ADVANCE_MAX = 3
 
 local LATTICE_GRID_SIZE = 3
 
+local SELECT_MODES = {"x", "y", "z"}
+
 function LatticeState:init()
     local this = {
         dtotal = 0,
@@ -24,7 +26,7 @@ function LatticeState:init()
         blink_ticker_countdown = BLINK_TICKER_COUNTDOWN,
 
         selected = {1, 1, 1},
-        select_mode = "x",
+        select_mode_idx = 1,
         ticks_advanced = BLINK_TICK_COUNT,
     }
     setmetatable(this, self)
@@ -42,11 +44,11 @@ end
 
 function LatticeState:key_pressed(game_state, key)
     if key == "return" then
-        self.select_mode = "y"
+        self.select_mode_idx = self.select_mode_idx + 1
         return
     end
 
-    if self.select_mode == "x" then
+    if SELECT_MODES[self.select_mode_idx] == "x" then
         if key == "left" then
             self.selected[1] = self.selected[1] - 1
             self.blink_cursor_on = true
@@ -54,7 +56,8 @@ function LatticeState:key_pressed(game_state, key)
             self.selected[1] = self.selected[1] + 1
             self.blink_cursor_on = true
         end
-    elseif self.select_mode == "y" then
+    end
+    if SELECT_MODES[self.select_mode_idx] == "y" then
         if key == "up" then
             self.selected[2] = self.selected[2] - 1
             self.blink_cursor_on = true
@@ -66,6 +69,13 @@ function LatticeState:key_pressed(game_state, key)
 
     self:_ensure_grid_size_selected(1)
     self:_ensure_grid_size_selected(2)
+
+    -- Clamp select_mode_idx to bounds of SELECT_MODES.
+    if self.select_mode_idx > #SELECT_MODES then
+        self.select_mode_idx = 1
+    elseif self.select_mode_idx <= 0 then
+        self.selected[idx] = #SELECT_MODES - 1
+    end
 end
 
 function LatticeState:update(game_state, dt)
@@ -116,102 +126,140 @@ function LatticeState:render(renderer, game_state)
     local height = love.graphics.getHeight()
 
     renderer:set_color("white")
-    love.graphics.translate(width/2, height/16)
+    love.graphics.translate(width/2, height/16 - 150)
+    select_mode = SELECT_MODES[self.select_mode_idx]
     for x = 1, LATTICE_GRID_SIZE do
         for y = 1, LATTICE_GRID_SIZE + 1 do
             for z = 1, LATTICE_GRID_SIZE do
                 local block_width = 128
                 local block_height = 72
-                local x_tweak = 12
 
-                local y_padding = 64
+                local x_tweak = 12
+                local x_move = (x_tweak * 2) * (z - 1)
+
+                local y_padding = 72
 
                 -- Top
-                if connected and self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
-                    renderer:set_color("red")
+                if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
+                    if select_mode == "y" then
+                        renderer:set_color("red")
+                    elseif select_mode == "z" then
+                        renderer:set_color("yellow")
+                    end
                 end
                 love.graphics.line(
-                    ((x - z) * block_width) + x_tweak,
+                    ((x - z) * block_width) + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding),
-                    (x - z + 1) * block_width,
+                    (x - z + 1) * block_width + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
-                if connected and self.blink_cursor_on and self.select_mode == "x" and (x - 1) == self.selected[1] then
-                    renderer:set_color("red")
+                if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
+                    if select_mode == "x" then
+                        renderer:set_color("red")
+                    elseif select_mode == "y" or select_mode == "z" then
+                        renderer:set_color("yellow")
+                    end
                 end
                 -- Left
                 love.graphics.line(
-                    (x - z - 1) * block_width,
+                    (x - z - 1) * block_width - x_tweak - x_move,
                     (y + z + 1) * block_height + (y * y_padding),
-                    ((x - z) * block_width) + x_tweak,
+                    ((x - z) * block_width) + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
-                if connected and self.blink_cursor_on and self.select_mode == "x" and x == self.selected[1] then
-                    renderer:set_color("red")
+                if connected and self.blink_cursor_on and x == self.selected[1] then
+                    if select_mode == "x" then
+                        renderer:set_color("red")
+                    elseif select_mode == "y" or select_mode == "z" then
+                        renderer:set_color("yellow")
+                    end
                 end
                 -- Right
                 love.graphics.line(
-                    ((x - z) * block_width) - x_tweak,
+                    ((x - z) * block_width) - x_tweak - x_move,
                     (y + z + 1) * block_height + (y * y_padding),
-                    (x - z + 1) * block_width,
+                    (x - z + 1) * block_width + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
-                if connected and self.blink_cursor_on and self.select_mode == "y" and z == self.selected[2] then
-                    renderer:set_color("red")
+                if connected and self.blink_cursor_on and z == self.selected[2] then
+                    if select_mode == "y" then
+                        renderer:set_color("red")
+                    elseif select_mode == "z" then
+                        renderer:set_color("yellow")
+                    end
                 end
                 -- Bottom
                 love.graphics.line(
-                    (x - z - 1) * block_width,
+                    (x - z - 1) * block_width - x_tweak - x_move,
                     (y + z + 1) * block_height + (y * y_padding),
-                    ((x - z) * block_width) - x_tweak,
+                    ((x - z) * block_width) - x_tweak - x_move,
                     (y + z + 1) * block_height + (y * y_padding))
                 renderer:set_color("white")
 
                 if y ~= LATTICE_GRID_SIZE + 1 then
                     -- Top
-                    if connected and self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
-                        renderer:set_color("red")
+                    if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
+                        if select_mode == "y" then
+                            renderer:set_color("red")
+                        elseif select_mode == "z" then
+                            renderer:set_color("yellow")
+                        end
                     end
                     love.graphics.line(
-                        (x - z + 1) * block_width,
+                        (x - z + 1) * block_width + x_tweak - x_move,
                         (y + z) * block_height + (y * y_padding),
-                        (x - z + 1) * block_width,
+                        (x - z + 1) * block_width + x_tweak - x_move,
                         (y + z) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
 
-                    if connected and self.blink_cursor_on and self.select_mode == "x" and (x - 1) == self.selected[1] then
-                        renderer:set_color("red")
+                    if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
+                        if select_mode == "x" then
+                            renderer:set_color("red")
+                        elseif select_mode == "y" or select_mode == "z" then
+                            renderer:set_color("yellow")
+                        end
                     end
                     -- Left
                     love.graphics.line(
-                        (x - z - 1) * block_width,
+                        (x - z - 1) * block_width - x_tweak - x_move,
                         (y + z + 1) * block_height + (y * y_padding),
-                        (x - z - 1) * block_width,
+                        (x - z - 1) * block_width - x_tweak - x_move,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
 
-                    if connected and self.blink_cursor_on and self.select_mode == "x" and x == self.selected[1] then
-                        renderer:set_color("red")
+                    if connected and self.blink_cursor_on and x == self.selected[1] then
+                        if select_mode == "x" then
+                            renderer:set_color("red")
+                        elseif select_mode == "y" or select_mode == "z" then
+                            renderer:set_color("yellow")
+                        end
                     end
                     -- Right
                     love.graphics.line(
-                        ((x - z) * block_width) - x_tweak,
+                        ((x - z) * block_width) - x_tweak - x_move,
                         (y + z + 1) * block_height + (y * y_padding),
-                        ((x - z) * block_width) - x_tweak,
+                        ((x - z) * block_width) - x_tweak - x_move,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
 
-                    if connected and self.blink_cursor_on and self.select_mode == "y" and (z - 1) == self.selected[2] then
-                        renderer:set_color("red")
+                    -- XXX: This needs to flash on both self.selected[2] and self.selected[1].
+                    if connected and self.blink_cursor_on then
+                        if select_mode == "x" and (x - 1) == self.selected[1] then
+                            renderer:set_color("red")
+                        elseif select_mode == "y" and (z - 1) == self.selected[2] then
+                            renderer:set_color("red")
+                        elseif select_mode == "z" then
+                            renderer:set_color("yellow")
+                        end
                     end
                     -- Bottom
                     love.graphics.line(
-                        ((x - z) * block_width) + x_tweak,
+                        ((x - z) * block_width) + x_tweak - x_move,
                         (y + z + 1) * block_height + ((y - 1) * y_padding),
-                        ((x - z) * block_width) + x_tweak,
+                        ((x - z) * block_width) + x_tweak - x_move,
                         (y + z + 1) * block_height + ((y + 1) * y_padding))
                     renderer:set_color("white")
                 end
