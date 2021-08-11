@@ -106,22 +106,7 @@ function LatticeState:update(game_state, dt)
     end
 end
 
-function LatticeState:render(renderer, game_state)
-    renderer:draw_traumae_string("LATTICE CONN", 1, 0)
-    renderer:draw_string("Lattice Sleeper Conn.", 2, 0)
-    renderer:draw_string("CONN: ", 3, 0)
-
-    local player_info = game_state:get_player_info()
-    --local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
-    local connected = true
-    if connected then
-        renderer:set_color("green")
-        renderer:draw_string("CONNECTED", 3, 5)
-    else
-        renderer:set_color("red")
-        renderer:draw_string("DISCONNECTED", 3, 5)
-    end
-
+function LatticeState:_render_lattice(renderer, game_state, connected)
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
 
@@ -266,6 +251,25 @@ function LatticeState:render(renderer, game_state)
             end
         end
     end
+end
+
+function LatticeState:render(renderer, game_state)
+    renderer:draw_traumae_string("LATTICE CONN", 1, 0)
+    renderer:draw_string("Lattice Sleeper Conn.", 2, 0)
+    renderer:draw_string("CONN: ", 3, 0)
+
+    local player_info = game_state:get_player_info()
+    --local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
+    local connected = true
+    if connected then
+        renderer:set_color("green")
+        renderer:draw_string("CONNECTED", 3, 5)
+    else
+        renderer:set_color("red")
+        renderer:draw_string("DISCONNECTED", 3, 5)
+    end
+
+    self:_render_lattice(renderer, game_state, connected)
 
     love.graphics.origin()
 end

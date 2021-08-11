@@ -3,9 +3,12 @@ local dbg = require("debugger")
 MapState.__index = MapState
 
 local constants = require("src/Constants")
+local Utils = require("src/Utils")
 
 local move_mod = 0.02
 local ZOOM_MOD = 0.02
+
+local FOG_OF_WAR_RADIUS = 0.75
 
 local WEATHER_NOISE_OFFSET_X = 55333
 local WEATHER_NOISE_OFFSET_Y = 46464
@@ -84,6 +87,9 @@ function MapState:_draw_map(renderer, player_info)
 
     local zoom = self.zoom_level * ZOOM_MOD
 
+    local player_x = math.floor(((player_info.overmap_x - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+    local player_y = math.floor(((player_info.overmap_y - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
+
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
             local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
@@ -92,22 +98,30 @@ function MapState:_draw_map(renderer, player_info)
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
 
-            if noise_val <= 25 then
-                if noise_val <= 16 then
-                    renderer:set_color("black")
-                elseif noise_val <= 20 then
-                    renderer:set_color("blood")
-                elseif noise_val <= 25 then
-                    renderer:set_color("red")
+            local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, noise_x, noise_y)
+            --print("distance_from_home: " .. tostring(player_info.overmap_x) .. " " .. tostring(player_info.overmap_y) 
+            --    .. ", " .. noise_x .. " " .. noise_y)
+
+            if distance_from_home < FOG_OF_WAR_RADIUS then
+                if noise_val <= 25 then
+                    if noise_val <= 16 then
+                        renderer:set_color("black")
+                    elseif noise_val <= 20 then
+                        renderer:set_color("blood")
+                    elseif noise_val <= 25 then
+                        renderer:set_color("red")
+                    end
+                elseif noise_val < 550 then
+                    renderer:set_color("white")
+                elseif noise_val < 750 then
+                    renderer:set_color("gray")
+                elseif noise_val < 900 then
+                    renderer:set_color("grayer")
+                else
+                    renderer:set_color("grayest")
                 end
-            elseif noise_val < 550 then
-                renderer:set_color("white")
-            elseif noise_val < 750 then
-                renderer:set_color("gray")
-            elseif noise_val < 900 then
-                renderer:set_color("grayer")
             else
-                renderer:set_color("grayest")
+                renderer:set_color("black")
             end
 
             renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
