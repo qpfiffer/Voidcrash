@@ -6,6 +6,7 @@ local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
 local move_mod = 0.02
+local cursor_move_mod = 0.4
 local ZOOM_MOD = 0.02
 
 local FOG_OF_WAR_RADIUS = 0.75
@@ -38,6 +39,10 @@ function MapState:init(game_state)
         current_time = GENESIS,
 
         current_weather_step = 1,
+
+        cursor_mode = false,
+        cursor_x = 0,
+        cursor_y = 0,
     }
     setmetatable(this, self)
 
@@ -140,6 +145,11 @@ function MapState:key_pressed(game_state, key)
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
     elseif key == "space" then
         game_state:set_paused(not game_state:get_paused())
+    elseif key == "return" then
+        self.cursor_mode = not self.cursor_mode
+        self.cursor_x = constants.MAP_X_MAX/2
+        self.cursor_y = constants.MAP_Y_MAX/2 - 1
+        print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
     elseif key == "escape" then
         game_state:set_menu_open(not game_state:get_menu_open())
     end
@@ -147,16 +157,44 @@ end
 
 function MapState:_handle_keys(game_state, dt)
     if love.keyboard.isDown("left") then
-        self.current_x_offset = self.current_x_offset - move_mod
+        if self.cursor_mode then
+            self.cursor_x = self.cursor_x - cursor_move_mod
+        else
+            self.current_x_offset = self.current_x_offset - move_mod
+        end
     end
     if love.keyboard.isDown("right") then
-        self.current_x_offset = self.current_x_offset + move_mod
+        if self.cursor_mode then
+            self.cursor_x = self.cursor_x + cursor_move_mod
+        else
+            self.current_x_offset = self.current_x_offset + move_mod
+        end
     end
     if love.keyboard.isDown("up") then
-        self.current_y_offset = self.current_y_offset - move_mod
+        if self.cursor_mode then
+            self.cursor_y = self.cursor_y - cursor_move_mod
+        else
+            self.current_y_offset = self.current_y_offset - move_mod
+        end
     end
     if love.keyboard.isDown("down") then
-        self.current_y_offset = self.current_y_offset + move_mod
+        if self.cursor_mode then
+            self.cursor_y = self.cursor_y + cursor_move_mod
+        else
+            self.current_y_offset = self.current_y_offset + move_mod
+        end
+    end
+
+    if self.cursor_x > constants.MAP_X_MAX then
+        self.cursor_x = constants.MAP_X_MAX
+    elseif self.cursor_x < 0 then
+        self.cursor_x = 0
+    end
+
+    if self.cursor_y > constants.MAP_Y_MAX then
+        self.cursor_y = constants.MAP_Y_MAX
+    elseif self.cursor_y < 0 then
+        self.cursor_y = 0
     end
 
     if love.keyboard.isDown("pageup") then
@@ -301,6 +339,14 @@ function MapState:render(renderer, game_state)
         if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
             renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
         end
+    end
+
+    if self.cursor_mode then
+        local x = math.floor(self.cursor_x)
+        local y = math.floor(self.cursor_y)
+
+        renderer:set_color("red")
+        renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
     end
 
     if game_state:get_menu_open() then
