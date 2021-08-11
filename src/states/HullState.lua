@@ -64,7 +64,7 @@ function HullState:_draw_power_used_pane(renderer, game_state)
 end
 
 function HullState:_draw_cargo_pane(renderer, game_state)
-    local accum_start = constants.MAP_X_MAX/3 + 1
+    local accum_start = constants.MAP_X_MAX/3 + 2
     local accum = accum_start
     local row = 2
 
@@ -92,11 +92,11 @@ function HullState:render(renderer, game_state)
     local x = 1
     local y = 1
     local w = constants.MAP_X_MAX/3
-    local h = constants.MAP_Y_MAX - y
+    local h = constants.MAP_Y_MAX - y - 10
 
-    renderer:render_window(x, y, w, h, "black", "white")
-    renderer:render_window(constants.MAP_X_MAX/3, y, w, h, "black", "white")
-    renderer:render_window(2 * (constants.MAP_X_MAX/3), y, w, h, "black", "white")
+    renderer:render_window(x, y, w - 4, h, "black", "white")
+    renderer:render_window(constants.MAP_X_MAX/3 + 1, y, w - 3, h, "black", "white")
+    renderer:render_window(2 * (constants.MAP_X_MAX/3) + 2, y, w - 3, h, "black", "white")
 
     self:_draw_power_used_pane(renderer, game_state)
     self:_draw_cargo_pane(renderer, game_state)
