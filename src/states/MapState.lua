@@ -58,13 +58,13 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("X: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(self.current_x_offset), 0, accum)
+    accum = accum + renderer:draw_string(string.format("%.2f",self.current_x_offset), 0, accum)
     accum = accum + renderer:draw_string(" ", 0, accum)
 
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("Y: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(self.current_y_offset), 0, accum)
+    accum = accum + renderer:draw_string(string.format("%.2f",self.current_y_offset), 0, accum)
     accum = accum + renderer:draw_string(" ", 0, accum)
 
     -- Zoom level
