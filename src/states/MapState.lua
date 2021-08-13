@@ -26,7 +26,6 @@ local MAP_OVERLAYS = {
 }
 
 function MapState:init(game_state)
-    local zoom = ZOOM_MOD -- Actually zoom * ZOOM_MOD, but 1 *... whatever you get it.
     local this = {
         dtotal = 0,             -- Delta time total
         zoom_level = 1,         -- Zoom level is how far into the map we are looking.
@@ -43,6 +42,8 @@ function MapState:init(game_state)
         cursor_mode = false,
         cursor_x = 0,
         cursor_y = 0,
+
+        menus = {},
     }
     setmetatable(this, self)
 
