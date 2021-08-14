@@ -1,9 +1,10 @@
 local MapState = {}
-local dbg = require("debugger")
 MapState.__index = MapState
 
 local constants = require("src/Constants")
 local Utils = require("src/Utils")
+
+local ModalMenu = require("src/ui/ModalMenu")
 
 local move_mod = 0.02
 local cursor_move_mod = 0.4
@@ -39,7 +40,7 @@ function MapState:init(game_state)
 
         current_weather_step = 1,
 
-        cursor_mode = false,
+        cursor_mode = nil,
         cursor_x = 0,
         cursor_y = 0,
 
@@ -136,6 +137,10 @@ function MapState:_draw_map(renderer, player_info)
 end
 
 function MapState:key_pressed(game_state, key)
+    if #self.menus >= 1 then
+        return self.menus[1]:key_pressed(game_state, key)
+    end
+
     if key == "h" then
         -- Snap to home
         self.zoom_level = 1
@@ -147,16 +152,26 @@ function MapState:key_pressed(game_state, key)
     elseif key == "space" then
         game_state:set_paused(not game_state:get_paused())
     elseif key == "return" then
-        self.cursor_mode = not self.cursor_mode
-        self.cursor_x = constants.MAP_X_MAX/2
-        self.cursor_y = constants.MAP_Y_MAX/2 - 1
-        print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
+        if self.cursor_mode == nil then
+            self.cursor_mode = "cursor"
+            self.cursor_x = constants.MAP_X_MAX/2
+            self.cursor_y = constants.MAP_Y_MAX/2 - 1
+            print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
+        elseif self.cursor_mode == "cursor" then
+            new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, {}, function () table.remove(self.menus, 1) end)
+            table.insert(self.menus, new_menu)
+            self.cursor_mode = nil
+        end
     elseif key == "escape" then
         game_state:set_menu_open(not game_state:get_menu_open())
     end
 end
 
 function MapState:_handle_keys(game_state, dt)
+    if #self.menus >= 1 then
+        return self.menus[1]:handle_keys(game_state, dt)
+    end
+
     if love.keyboard.isDown("left") then
         if self.cursor_mode then
             self.cursor_x = self.cursor_x - cursor_move_mod
@@ -348,6 +363,11 @@ function MapState:render(renderer, game_state)
 
         renderer:set_color("red")
         renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+    end
+
+    for i=1, #self.menus do
+        local menu = self.menus[i]
+        menu:render(renderer, player_info)
     end
 
     if game_state:get_menu_open() then
