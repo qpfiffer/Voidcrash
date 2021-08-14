@@ -32,7 +32,6 @@ function PlayerInfo:init()
 
         current_lattice_step = 1,
     }
-    setmetatable(this, self)
 
     this.cargo = {
         FrameObject:init(Utils.generate_frame_name(),
@@ -46,6 +45,7 @@ function PlayerInfo:init()
             math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
     }
 
+    setmetatable(this, self)
     return this
 end
 

@@ -136,6 +136,15 @@ function MapState:_draw_map(renderer, player_info)
     end
 end
 
+function MapState:insert_frame_nav_menu()
+    exit_callback = function () table.remove(self.menus, 1) end
+    cancel_item = {["name"]="Cancel", ["callback"]=exit_callback}
+
+    items = {cancel_item}
+    new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback)
+    table.insert(self.menus, new_menu)
+end
+
 function MapState:key_pressed(game_state, key)
     if #self.menus >= 1 then
         return self.menus[1]:key_pressed(game_state, key)
@@ -158,8 +167,7 @@ function MapState:key_pressed(game_state, key)
             self.cursor_y = constants.MAP_Y_MAX/2 - 1
             print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
         elseif self.cursor_mode == "cursor" then
-            new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, {}, function () table.remove(self.menus, 1) end)
-            table.insert(self.menus, new_menu)
+            self:insert_frame_nav_menu()
             self.cursor_mode = nil
         end
     elseif key == "escape" then

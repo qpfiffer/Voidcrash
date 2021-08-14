@@ -8,6 +8,7 @@ function ModalMenu:init(game_state, x, y, items, exit_callback)
         x = x,
         y = y,
         items = items,
+        selected_idx = 1,
         exit_callback = exit_callback
     }
     setmetatable(this, self)
@@ -25,9 +26,30 @@ function ModalMenu:key_pressed(game_state, key)
 end
 
 function ModalMenu:render(renderer, game_state)
-    local w = 10
-    local h = 5
+    local max_width_item = 0
+    local w = 0
+    local h = 2 + #self.items
+
+    for i=1, #self.items do
+        local item = self.items[i]
+        local len = string.len(item["name"])
+        if len > max_width_item then
+            max_width_item = len
+        end
+    end
+
+    w = max_width_item + 2
     renderer:render_window(self.x, self.y, w, h, "black", "white")
+
+    local row = self.y + 1
+    local accum = self.x + 1
+    for i=1, #self.items do
+        local item = self.items[i]
+        accum = accum + renderer:draw_string(item["name"], row, accum)
+
+        row = row + 1
+        accum = self.x
+    end
 end
 
 return ModalMenu
