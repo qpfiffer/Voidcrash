@@ -44,6 +44,10 @@ function ModalMenu:render(renderer, game_state)
     local accum = accum_initial
     for i=1, #self.items do
         local item = self.items[i]
+        renderer:set_color("white")
+        if not item["enabled"] then
+            renderer:set_color("grayer")
+        end
         accum = accum + renderer:draw_string(item["name"], row, accum)
 
         row = row + 1
