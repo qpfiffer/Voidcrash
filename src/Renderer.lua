@@ -147,6 +147,14 @@ function Renderer:set_color(color_name)
     love.graphics.setColor(cc[1], cc[2], cc[3], 255)
 end
 
+function Renderer:render_window_with_text(x, y, text)
+    local w = 0
+    local h = string.len(text)
+
+    self:render_window(x, y, w, h, "black", "white")
+    self:draw_string(text, y + 1, x + 2)
+end
+
 function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     local top_str = {201, 205}
     local text_str = {186, 32}

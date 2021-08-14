@@ -39,14 +39,15 @@ function ModalMenu:render(renderer, game_state)
 
     renderer:render_window(self.x, self.y, w, h, "black", "white")
 
+    local accum_initial = self.x + 2
     local row = self.y + 1
-    local accum = self.x + 1
+    local accum = accum_initial
     for i=1, #self.items do
         local item = self.items[i]
-        accum = accum + renderer:draw_string(" " .. item["name"], row, accum)
+        accum = accum + renderer:draw_string(item["name"], row, accum)
 
         row = row + 1
-        accum = self.x
+        accum = accum_initial
     end
 end
 

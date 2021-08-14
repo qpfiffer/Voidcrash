@@ -138,9 +138,10 @@ end
 
 function MapState:insert_frame_nav_menu()
     exit_callback = function () table.remove(self.menus, 1) end
-    cancel_item = {["name"]="Cancel", ["callback"]=exit_callback}
+    dispatch_item = {["name"]="Dispatch", ["enabled"] = false, ["callback"]=exit_callback}
+    cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
-    items = {cancel_item}
+    items = {dispatch_item, cancel_item}
     new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback)
     table.insert(self.menus, new_menu)
 end
