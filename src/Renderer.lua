@@ -98,7 +98,6 @@ end
 
 function Renderer:_draw_raw_numbers(font, array, row, col)
     local cur_iter = col
-    local roffset = row
     for i=1,#array do
         local c = array[i]
         if font == self.skull_font then
@@ -106,7 +105,7 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
             local skull_quad = _skull_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, skull_quad,
                 (cur_iter * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
-                (roffset * SKULL_FONT_WIDTH + (row * 3) + PADDING_Y) * scale,
+                (row * SKULL_FONT_HEIGHT + PADDING_Y) * scale,
                 0, scale, scale, 0, 0)
         else
             local row_and_col = _traumae_row_and_column_for_num(c)
@@ -114,7 +113,7 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
             local quad = _traumae_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, quad,
                 (cur_iter * (T_FONT_WIDTH + T_FONT_KERN_OFFSET) + PADDING_X) * scale/2,
-                (roffset * T_FONT_HEIGHT + row + PADDING_Y) * scale/2,
+                (row * T_FONT_HEIGHT + row + PADDING_Y) * scale/2,
                 0, scale/2, scale/2, 0, 0)
         end
         cur_iter = cur_iter + 1
@@ -170,9 +169,9 @@ function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     self:set_color(bg_color)
     love.graphics.rectangle('fill',
     (x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
-    (y * (SKULL_FONT_HEIGHT + SKULL_FONT_VERTICAL_SPACING + PADDING_Y)) * scale,
-    SKULL_FONT_WIDTH * (w + 1) * scale,
-    SKULL_FONT_HEIGHT * (h + 1) * scale)
+    (y * SKULL_FONT_HEIGHT + PADDING_Y) * scale,
+    SKULL_FONT_WIDTH * (w + 2) * scale,
+    SKULL_FONT_HEIGHT * (h + 2) * scale)
 
     -- Draw FG:
     local row_offset = y
@@ -184,36 +183,6 @@ function Renderer:render_window(x, y, w, h, bg_color, fg_color)
         self:_draw_raw_numbers(self.skull_font, text_str, row_offset + j, column_offset)
     end
     self:_draw_raw_numbers(self.skull_font, bottom_str, row_offset + 1 + h, column_offset)
-end
-
-function Renderer:render_window_with_text(x, y, text)
-    local row_offset = y
-    local column_offset = x
-
-    local window_width = string.len(text) + 4
-    local window_height = 3 -- Only support one line of text right now
-
-    local top_str = {201, 205}
-    local text_str = {186, 32}
-    local bottom_str = {200, 205}
-    for i=1, string.len(text) do
-        local byte = string.byte(text:sub(i, i))
-        table.insert(top_str, 205)
-        table.insert(text_str, byte)
-        table.insert(bottom_str, 205)
-    end
-
-    table.insert(top_str, 205)
-    table.insert(top_str, 187)
-    table.insert(text_str, 32)
-    table.insert(text_str, 186)
-    table.insert(bottom_str, 205)
-    table.insert(bottom_str, 188)
-
-    self:set_color("white")
-    self:_draw_raw_numbers(self.skull_font, top_str, row_offset, column_offset)
-    self:_draw_raw_numbers(self.skull_font, text_str, row_offset + 1, column_offset)
-    self:_draw_raw_numbers(self.skull_font, bottom_str, row_offset + 2, column_offset)
 end
 
 function Renderer:render(game_state)

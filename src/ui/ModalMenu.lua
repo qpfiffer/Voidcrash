@@ -26,19 +26,17 @@ function ModalMenu:key_pressed(game_state, key)
 end
 
 function ModalMenu:render(renderer, game_state)
-    local max_width_item = 0
     local w = 0
-    local h = 2 + #self.items
+    local h = #self.items
 
     for i=1, #self.items do
         local item = self.items[i]
         local len = string.len(item["name"])
-        if len > max_width_item then
-            max_width_item = len
+        if len > w then
+            w = len
         end
     end
 
-    w = max_width_item + 2
     renderer:render_window(self.x, self.y, w, h, "black", "white")
 
     local row = self.y + 1
