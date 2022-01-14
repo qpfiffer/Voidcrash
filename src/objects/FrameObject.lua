@@ -5,12 +5,14 @@ local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
 local CollectorObject = require("src/objects/CollectorObject")
+local ObjectType = require("src/objects/ObjectType")
 
 local SPEED = 0.0002
 local BASE_WEIGHT_TONS = 0.2
 
 function FrameObject:init(name, x, y, dest_x, dest_y)
     local this = {
+        object_type = ObjectType.DISPATCHABLE + ObjectType.CARGOABLE,
         speed = SPEED,
         ticks_advanced = SPEED,
         progress = 0,
@@ -33,6 +35,10 @@ function FrameObject:init(name, x, y, dest_x, dest_y)
     setmetatable(this, self)
 
     return this
+end
+
+function FrameObject:get_object_type()
+    return self.object_type
 end
 
 function FrameObject:get_x()

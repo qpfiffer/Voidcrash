@@ -1,9 +1,11 @@
 local PlayerInfo = {}
 PlayerInfo.__index = PlayerInfo
 
+local bit32 = require("bit")
 local constants = require("src/Constants")
 
 local FrameObject = require("src/objects/FrameObject")
+local ObjectType = require("src/objects/ObjectType")
 
 local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local LatticeCommunicationsArrayObject = require("src/objects/hull/LatticeCommunicationsArray")
@@ -59,6 +61,17 @@ end
 
 function PlayerInfo:get_cargo()
     return self.cargo
+end
+
+function PlayerInfo:has_dispatchable()
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        if bit.band(cargo_item.object_type, ObjectType.DISPATCHABLE) == ObjectType.DISPATCHABLE then
+            return true
+        end
+    end
+
+    return false
 end
 
 function PlayerInfo:get_power_usage()

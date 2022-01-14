@@ -5,6 +5,7 @@ local constants = require("src/Constants")
 
 function CollectorObject:init(x, y)
     local this = {
+        object_type = ObjectType.DEPLOYABLE + ObjectType.CARGOABLE,
         speed = SPEED,
 
         ticks_advanced = SPEED,

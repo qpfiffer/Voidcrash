@@ -136,9 +136,9 @@ function MapState:_draw_map(renderer, player_info)
     end
 end
 
-function MapState:insert_frame_nav_menu()
+function MapState:insert_frame_nav_menu(game_state)
     exit_callback = function () table.remove(self.menus, 1) end
-    dispatch_item = {["name"]="Dispatch", ["enabled"] = false, ["callback"]=exit_callback}
+    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info:has_dispatchable(), ["callback"]=exit_callback}
     cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
     items = {dispatch_item, cancel_item}
@@ -168,7 +168,7 @@ function MapState:key_pressed(game_state, key)
             self.cursor_y = constants.MAP_Y_MAX/2 - 1
             print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
         elseif self.cursor_mode == "cursor" then
-            self:insert_frame_nav_menu()
+            self:insert_frame_nav_menu(game_state)
             self.cursor_mode = nil
         end
     elseif key == "escape" then
