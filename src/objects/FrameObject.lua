@@ -65,6 +65,19 @@ function FrameObject:get_deployed()
     return self.deployed
 end
 
+function FrameObject:set_deployed(val)
+    self.deployed = val
+end
+
+function FrameObject:deploy_with_destination(start_x, start_y, dest_x, dest_y)
+    self.deployed = true
+    self.world_x = start_x
+    self.world_y = start_y
+    self.dest_x = dest_x
+    self.dest_y = dest_y
+    print(self.name .. " has been deployed!")
+end
+
 function FrameObject:get_tonnage()
     local total_used = 0
     for i in pairs(self.cargo) do
@@ -76,7 +89,7 @@ function FrameObject:get_tonnage()
 end
 
 function FrameObject:update(game_state, dt)
-    if not deployed then
+    if not self.deployed then
         return
     end
 

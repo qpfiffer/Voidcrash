@@ -2,7 +2,8 @@ local ObjectType = {
     BASE = 1,
     DEPLOYABLE = 2,   -- Can exist in the overworld
     DISPATCHABLE = 4, -- Can be "sent" from the ship. Dispatched.
-    CARGOABLE = 8     -- Can be held in cargo.
+    CARGOABLE = 8,    -- Can be held in cargo.
+    FRAME = 16        -- Specific frame-type.
 }
 
 -- All objects have a type, they work as tags for operations upon them:

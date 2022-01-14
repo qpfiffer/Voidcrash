@@ -9,6 +9,7 @@ function ModalMenu:init(game_state, x, y, items, exit_callback)
         y = y,
         items = items,
         selected_idx = 1,
+        first_enabled_idx = 1,
         exit_callback = exit_callback
     }
     setmetatable(this, self)
@@ -17,6 +18,7 @@ function ModalMenu:init(game_state, x, y, items, exit_callback)
         local item = items[i]
         if item["enabled"] then
             this.selected_idx = i
+            this.first_enabled_idx = i
             break
         end
     end
@@ -29,7 +31,17 @@ end
 
 function ModalMenu:key_pressed(game_state, key)
     if key == "return" then
-        return self.exit_callback()
+        self.items[self.selected_idx]["callback"]()
+    elseif key == "up" then
+        self.selected_idx = self.selected_idx - 1
+    elseif key == "down" then
+        self.selected_idx = self.selected_idx + 1
+    end
+
+    if self.selected_idx > #self.items then
+        self.selected_idx = self.first_enabled_idx
+    elseif self.selected_idx < self.first_enabled_idx then
+        self.selected_idx = #items
     end
 end
 

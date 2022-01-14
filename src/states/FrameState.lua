@@ -3,6 +3,9 @@ FrameState.__index = FrameState
 
 local constants = require("src/Constants")
 
+local ObjectType = require("src/objects/ObjectType")
+
+
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 35
 
@@ -36,15 +39,16 @@ function FrameState:update(game_state, dt)
             return
         end
 
-        local frames = game_state.player_info:get_frames()
-        for i=1, #frames do
-            frames[i]:update(game_state, dt)
-        end
+        -- This code should be somewhere else.
+        -- local frames = game_state.player_info:get_frames()
+        -- for i=1, #frames do
+        --     frames[i]:update(game_state, dt)
+        -- end
     end
 end
 
 function FrameState:render(renderer, game_state)
-    local frames = game_state.player_info:get_frames()
+    local frames = game_state.player_info:get_cargo_items_of_type(ObjectType.FRAME)
     for i=1, #frames do
         local frame = frames[i]
         local accum = 1

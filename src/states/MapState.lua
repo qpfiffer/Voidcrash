@@ -5,6 +5,7 @@ local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
 local ModalMenu = require("src/ui/ModalMenu")
+local ObjectType = require("src/objects/ObjectType")
 
 local move_mod = 0.02
 local cursor_move_mod = 0.4
@@ -94,6 +95,7 @@ function MapState:_draw_map(renderer, player_info)
 
     local zoom = self.zoom_level * ZOOM_MOD
 
+    -- World coords to screen coords
     local player_x = math.floor(((player_info.overmap_x - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
     local player_y = math.floor(((player_info.overmap_y - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
 
@@ -138,7 +140,18 @@ end
 
 function MapState:insert_frame_nav_menu(game_state)
     exit_callback = function () table.remove(self.menus, 1) end
-    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info:has_dispatchable(), ["callback"]=exit_callback}
+    dispatch_callback = function ()
+        local zoom = self.zoom_level * ZOOM_MOD
+        local noise_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
+        local noise_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
+        local dispatchable = game_state.player_info:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
+        dispatchable:deploy_with_destination(game_state.player_info.overmap_x, game_state.player_info.overmap_y, noise_x, noise_y)
+        print("DISPATCHING TO " .. noise_x .. ", " .. noise_y)
+        game_state.player_info:add_world_object(dispatchable)
+        exit_callback()
+    end
+
+    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info:has_dispatchable(), ["callback"]=dispatch_callback}
     cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
     items = {dispatch_item, cancel_item}
@@ -253,6 +266,11 @@ function MapState:update(game_state, dt, is_active)
         if is_active then
             self:_handle_keys(game_state, dt)
         end
+
+        local world_objects = game_state.player_info:get_world_objects()
+        for i=1, #world_objects do
+            world_objects[i]:update(game_state, dt)
+        end
     end
 end
 
@@ -340,15 +358,15 @@ function MapState:render(renderer, game_state)
     end
 
     local row_offset = 1
-    local frames = game_state.player_info:get_frames()
+    local world_objects = game_state.player_info:get_world_objects()
     local zoom = self.zoom_level * ZOOM_MOD
-    for i=1, #frames do
-        local frame = frames[i]
-        if frame:get_deployed() then
-            local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + frame:get_x()
-            local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + frame:get_y()
-            local x = math.floor(((frame:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
-            local y = math.floor(((frame:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
+    for i=1, #world_objects do
+        local w_object = world_objects[i]
+        if w_object:get_deployed() then
+            local deproj_frame_x = zoom * -(constants.MAP_X_MAX/2) + w_object:get_x()
+            local deproj_frame_y = zoom * -(constants.MAP_Y_MAX/2) + w_object:get_y()
+            local x = math.floor(((w_object:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+            local y = math.floor(((w_object:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
 
             if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
                 renderer:set_color("red")

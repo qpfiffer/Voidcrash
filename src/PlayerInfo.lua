@@ -22,7 +22,7 @@ function PlayerInfo:init()
         overmap_x = math.random(constants.OVERMAP_MAX_X),
         overmap_y = math.random(constants.OVERMAP_MAX_Y),
 
-        frames = {},
+        world_objects = {},
         cargo = {},
 
         full_power = constants.MAX_POWER,
@@ -55,8 +55,12 @@ function PlayerInfo:get_power_items()
     return self.powered_on
 end
 
-function PlayerInfo:get_frames()
-    return self.frames
+function PlayerInfo:get_world_objects()
+    return self.world_objects
+end
+
+function PlayerInfo:add_world_object(object)
+    table.insert(self.world_objects, object)
 end
 
 function PlayerInfo:get_cargo()
@@ -72,6 +76,31 @@ function PlayerInfo:has_dispatchable()
     end
 
     return false
+end
+
+function PlayerInfo:get_cargo_items_of_type(object_type)
+    local to_return = {}
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        if bit.band(cargo_item.object_type, object_type) == object_type then
+            table.insert(cargo_item)
+        end
+    end
+
+    return to_return
+end
+
+function PlayerInfo:pop_item_from_cargo_of_type(object_type)
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        if bit.band(cargo_item.object_type, object_type) == object_type then
+            table.remove(self.cargo, i)
+            print(#self.cargo)
+            return cargo_item
+        end
+    end
+
+    return nil
 end
 
 function PlayerInfo:get_power_usage()
