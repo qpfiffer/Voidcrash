@@ -46,6 +46,7 @@ function FrameObject:get_x()
 end
 
 function FrameObject:set_x(val)
+    --print("Setting X to " .. val)
     self.world_x = val
 end
 
@@ -54,6 +55,7 @@ function FrameObject:get_y()
 end
 
 function FrameObject:set_y(val)
+    --print("Setting Y to " .. val)
     self.world_y = val
 end
 
@@ -71,6 +73,8 @@ end
 
 function FrameObject:deploy_with_destination(start_x, start_y, dest_x, dest_y)
     self.deployed = true
+    self.origin_x = start_x
+    self.origin_y = start_y
     self.world_x = start_x
     self.world_y = start_y
     self.dest_x = dest_x
@@ -93,15 +97,23 @@ function FrameObject:update(game_state, dt)
         return
     end
 
-    if self.world_x ~= self.dest_x and self.world_y ~= self.dest_y then
-        local distance = Utils.dist(self.world_x, self.world_y, self.dest_x, self.dest_y)
+    local x_not_equal = self.world_x ~= self.dest_x
+    local y_not_equal = self.world_y ~= self.dest_y
+    if x_not_equal or y_not_equal then
+        local distance = Utils.dist(self.origin_x, self.origin_y, self.dest_x, self.dest_y)
         self.progress = self.progress + (self.speed * 1/distance)
 
         if self.progress >= 1 then
             self.progress = 1
         end
-        self:set_x(Utils.lerp(self.origin_x, self.dest_x, self.progress))
-        self:set_y(Utils.lerp(self.origin_y, self.dest_y, self.progress))
+
+        if x_not_equal then
+            self:set_x(Utils.lerp(self.origin_x, self.dest_x, self.progress))
+        end
+
+        if y_not_equal then
+            self:set_y(Utils.lerp(self.origin_y, self.dest_y, self.progress))
+        end
     end
 end
 
