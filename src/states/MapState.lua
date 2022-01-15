@@ -6,6 +6,8 @@ local Utils = require("src/Utils")
 
 local ModalMenu = require("src/ui/ModalMenu")
 local ObjectType = require("src/objects/ObjectType")
+local OrderType = require("src/management/OrderType")
+local UnitCommand = require("src/management/UnitCommand")
 
 local move_mod = 0.02
 local cursor_move_mod = 0.4
@@ -144,9 +146,16 @@ function MapState:insert_frame_nav_menu(game_state)
         local zoom = self.zoom_level * ZOOM_MOD
         local noise_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
         local noise_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
+
         local dispatchable = game_state.player_info:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
-        dispatchable:deploy_with_destination(game_state.player_info.overmap_x, game_state.player_info.overmap_y, noise_x, noise_y)
-        print("DISPATCHING TO " .. noise_x .. ", " .. noise_y)
+        dispatchable:set_deployed(true)
+        dispatchable:add_order(UnitCommand:init(OrderType.MOVEMENT, {
+            start_x = game_state.player_info.overmap_x,
+            start_y = game_state.player_info.overmap_y,
+            dest_x = noise_x,
+            dest_y = noise_y
+        }))
+
         game_state.player_info:add_world_object(dispatchable)
         exit_callback()
     end

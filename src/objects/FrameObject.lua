@@ -6,11 +6,12 @@ local Utils = require("src/Utils")
 
 local CollectorObject = require("src/objects/CollectorObject")
 local ObjectType = require("src/objects/ObjectType")
+local OrderType = require("src/management/OrderType")
 
 local SPEED = 0.0002
 local BASE_WEIGHT_TONS = 0.2
 
-function FrameObject:init(name, x, y, dest_x, dest_y)
+function FrameObject:init(name, x, y, orders)
     local this = {
         object_type = ObjectType.DISPATCHABLE + ObjectType.CARGOABLE,
         speed = SPEED,
@@ -29,6 +30,9 @@ function FrameObject:init(name, x, y, dest_x, dest_y)
         name = name,
         cargo_max = 2, -- Tons
         cargo = {},
+
+        orders = {},
+        current_order = nil,
 
         deployed = false,
     }
@@ -71,15 +75,9 @@ function FrameObject:set_deployed(val)
     self.deployed = val
 end
 
-function FrameObject:deploy_with_destination(start_x, start_y, dest_x, dest_y)
-    self.deployed = true
-    self.origin_x = start_x
-    self.origin_y = start_y
-    self.world_x = start_x
-    self.world_y = start_y
-    self.dest_x = dest_x
-    self.dest_y = dest_y
-    print(self.name .. " has been deployed!")
+function FrameObject:add_order(new_order)
+    table.insert(self.orders, new_order)
+    print(self.name .. " is following new order of type " .. new_order:get_type())
 end
 
 function FrameObject:get_tonnage()
@@ -92,11 +90,17 @@ function FrameObject:get_tonnage()
     return total_used + BASE_WEIGHT_TONS
 end
 
-function FrameObject:update(game_state, dt)
-    if not self.deployed then
-        return
-    end
+function FrameObject:_start_movement_order(game_state, movement_order)
+    self.origin_x = movement_order["data"]["start_x"]
+    self.origin_y = movement_order["data"]["start_y"]
+    self.world_x = movement_order["data"]["start_x"]
+    self.world_y = movement_order["data"]["start_y"]
+    self.dest_x = movement_order["data"]["dest_x"]
+    self.dest_y = movement_order["data"]["dest_y"]
+    print(self.name .. " begins to move.")
+end
 
+function FrameObject:_handle_movement_order(game_state)
     local x_not_equal = self.world_x ~= self.dest_x
     local y_not_equal = self.world_y ~= self.dest_y
     if x_not_equal or y_not_equal then
@@ -114,6 +118,31 @@ function FrameObject:update(game_state, dt)
         if y_not_equal then
             self:set_y(Utils.lerp(self.origin_y, self.dest_y, self.progress))
         end
+    elseif self.progress == 1 then
+        self.current_order = nil
+        self.progress = 0
+        self.origin_x = nil
+        self.origin_y = nil
+        self.dest_x = nil
+        self.dest_y = nil
+    end
+end
+
+function FrameObject:update(game_state, dt)
+    if not self.current_order and #self.orders > 0 then
+        --print("Number of current orders is " .. #self.orders)
+        self.current_order = table.remove(self.orders)
+        if self.current_order:get_type() == OrderType.MOVEMENT then
+            self:_start_movement_order(game_state, self.current_order)
+        end
+    end
+
+    if not self.deployed then
+        return
+    end
+
+    if self.current_order and self.current_order:get_type() == OrderType.MOVEMENT then
+        self:_handle_movement_order(game_state)
     end
 end
 
