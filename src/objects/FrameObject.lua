@@ -75,9 +75,10 @@ function FrameObject:set_deployed(val)
     self.deployed = val
 end
 
-function FrameObject:add_order(new_order)
+function FrameObject:add_order(game_state, new_order)
     table.insert(self.orders, new_order)
-    print(self.name .. " is following new order of type " .. new_order:get_type())
+    local msg = self.name .. " is following new order."
+    game_state.player_info.radio:add_message(msg)
 end
 
 function FrameObject:get_tonnage()
@@ -97,7 +98,9 @@ function FrameObject:_start_movement_order(game_state, movement_order)
     self.world_y = movement_order["data"]["start_y"]
     self.dest_x = movement_order["data"]["dest_x"]
     self.dest_y = movement_order["data"]["dest_y"]
-    print(self.name .. " begins to move.")
+
+    local msg = self.name .. " begins to move."
+    game_state.player_info.radio:add_message(msg)
 end
 
 function FrameObject:_handle_movement_order(game_state)
@@ -125,6 +128,9 @@ function FrameObject:_handle_movement_order(game_state)
         self.origin_y = nil
         self.dest_x = nil
         self.dest_y = nil
+
+        local msg = self.name .. " has arrived at destination."
+        game_state.player_info.radio:add_message(msg)
     end
 end
 

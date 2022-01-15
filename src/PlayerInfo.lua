@@ -9,6 +9,7 @@ local ObjectType = require("src/objects/ObjectType")
 
 local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local LatticeCommunicationsArrayObject = require("src/objects/hull/LatticeCommunicationsArray")
+local RadioObject = require("src/objects/RadioObject")
 local SleeperObject = require("src/objects/hull/SleeperObject")
 
 local Utils = require("src/Utils")
@@ -24,6 +25,8 @@ function PlayerInfo:init()
 
         world_objects = {},
         cargo = {},
+
+        radio = RadioObject:init(),
 
         full_power = constants.MAX_POWER,
         powered_on = {
@@ -46,6 +49,8 @@ function PlayerInfo:init()
             this.overmap_x, this.overmap_y,
             math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
     }
+
+    table.insert(this.powered_on, this.radio)
 
     setmetatable(this, self)
     return this

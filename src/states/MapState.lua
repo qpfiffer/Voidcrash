@@ -149,7 +149,7 @@ function MapState:insert_frame_nav_menu(game_state)
 
         local dispatchable = game_state.player_info:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
         dispatchable:set_deployed(true)
-        dispatchable:add_order(UnitCommand:init(OrderType.MOVEMENT, {
+        dispatchable:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
             start_x = game_state.player_info.overmap_x,
             start_y = game_state.player_info.overmap_y,
             dest_x = noise_x,
