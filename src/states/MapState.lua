@@ -160,10 +160,23 @@ function MapState:insert_frame_nav_menu(game_state)
         exit_callback()
     end
 
+    local closest_object_idx = self:_get_closest_object_index(game_state)
+    local closest_object_context_item = nil
+    if closest_object_idx then
+        local world_objects = game_state.player_info:get_world_objects()
+        local closest_object = world_objects[closest_object_idx]
+        closest_object_context_item = {["name"]=closest_object:get_name(), ["enabled"] = false, ["callback"]=exit_callback}
+    end
+
     dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info:has_dispatchable(), ["callback"]=dispatch_callback}
     cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
-    items = {dispatch_item, cancel_item}
+    local items = nil
+    if closest_object_context_item then
+        items = {closest_object_context_item, dispatch_item, cancel_item}
+    else
+        items = {dispatch_item, cancel_item}
+    end
     new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback)
     table.insert(self.menus, new_menu)
 end
