@@ -355,6 +355,30 @@ function MapState:_draw_menu(renderer, player_info)
     renderer:render_window(x, y, w, h, "black", "white")
 end
 
+function MapState:_get_closest_object_index(game_state)
+    local world_objects = game_state.player_info:get_world_objects()
+    local shortest_distance = nil
+    local zoom = self.zoom_level * ZOOM_MOD
+    local closest_object_idx = nil
+
+    for i=1, #world_objects do
+        local w_object = world_objects[i]
+        if w_object:get_deployed() then
+            local x = math.floor(((w_object:get_x() - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
+            local y = math.floor(((w_object:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
+            local cursor_x = math.floor(self.cursor_x)
+            local cursor_y = math.floor(self.cursor_y)
+            local distance_from_home = Utils.dist(cursor_x, cursor_y, x, y)
+            if not shortest_distance or distance_from_home < shortest_distance then
+                shortest_distance = distance_from_home
+                closest_object_idx = i
+            end
+        end
+    end
+
+    return closest_object_idx
+end
+
 function MapState:render(renderer, game_state)
     local player_info = game_state:get_player_info()
 
@@ -369,6 +393,12 @@ function MapState:render(renderer, game_state)
     local row_offset = 1
     local world_objects = game_state.player_info:get_world_objects()
     local zoom = self.zoom_level * ZOOM_MOD
+
+    local closest_object_idx = nil
+    if self.cursor_mode then
+        closest_object_idx = self:_get_closest_object_index(game_state)
+    end
+
     for i=1, #world_objects do
         local w_object = world_objects[i]
         if w_object:get_deployed() then
@@ -378,8 +408,18 @@ function MapState:render(renderer, game_state)
             local y = math.floor(((w_object:get_y() - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
 
             if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
-                renderer:set_color("red")
-                renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                if not closest_object_idx then
+                    renderer:set_color("red")
+                    renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                else
+                    if not self.cursor_mode or i ~= closest_object_idx then
+                        renderer:set_color("red")
+                        renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                    elseif self.blink_cursor_on and i == closest_object_idx then
+                        renderer:set_color("green")
+                        renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                    end
+                end
             end
         end
     end
