@@ -63,6 +63,10 @@ function FrameObject:set_y(val)
     self.world_y = val
 end
 
+function FrameObject:get_icon()
+    return 178
+end
+
 function FrameObject:get_name()
     return self.name
 end

@@ -6,6 +6,7 @@ local constants = require("src/Constants")
 
 local FrameObject = require("src/objects/FrameObject")
 local ObjectType = require("src/objects/ObjectType")
+local RelayObject = require("src/objects/RelayObject")
 
 local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local LatticeCommunicationsArrayObject = require("src/objects/hull/LatticeCommunicationsArray")
@@ -48,6 +49,10 @@ function PlayerInfo:init()
         FrameObject:init(Utils.generate_frame_name(),
             this.overmap_x, this.overmap_y,
             math.random(constants.OVERMAP_MAX_X), math.random(constants.OVERMAP_MAX_Y)),
+    }
+
+    this.world_objects = {
+        RelayObject:init("RL-01", this.overmap_x + 0.1, this.overmap_y, true)
     }
 
     table.insert(this.powered_on, this.radio)

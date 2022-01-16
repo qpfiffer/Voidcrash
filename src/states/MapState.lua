@@ -379,7 +379,7 @@ function MapState:render(renderer, game_state)
 
             if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
                 renderer:set_color("red")
-                renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+                renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
             end
         end
     end
