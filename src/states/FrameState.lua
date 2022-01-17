@@ -5,7 +5,6 @@ local constants = require("src/Constants")
 
 local ObjectType = require("src/objects/ObjectType")
 
-
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 35
 
@@ -38,30 +37,32 @@ function FrameState:update(game_state, dt)
             -- Wait til next time.
             return
         end
-
-        -- This code should be somewhere else.
-        -- local frames = game_state.player_info:get_frames()
-        -- for i=1, #frames do
-        --     frames[i]:update(game_state, dt)
-        -- end
     end
 end
 
 function FrameState:render(renderer, game_state)
     local frames = game_state.player_info:get_cargo_items_of_type(ObjectType.FRAME)
-    for i=1, #frames do
-        local frame = frames[i]
-        local accum = 1
+    local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
+    local tables = {frames, deployed_frames}
 
-        renderer:set_color("gray")
-        accum = accum + renderer:draw_string("Frame " .. tostring(i) .. ": ", i, accum)
+    local row = 0
+    for i=1, #tables do
+        local table = tables[i]
+        for j=1, #table do
+            local frame = table[j]
+            local accum = 1
+            row = row + 1
 
-        if frame:get_deployed() then
-            renderer:set_color("white")
-            accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), i, accum)
-        else
             renderer:set_color("gray")
-            accum = accum + renderer:draw_string("In Hold", i, accum)
+            accum = accum + renderer:draw_string("* Frame " .. tostring(frame:get_name()) .. ": ", row, accum)
+
+            if frame:get_deployed() then
+                renderer:set_color("white")
+                accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), row, accum)
+            else
+                renderer:set_color("gray")
+                accum = accum + renderer:draw_string("In Hold", row, accum)
+            end
         end
     end
 end

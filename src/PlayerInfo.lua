@@ -91,16 +91,24 @@ function PlayerInfo:has_dispatchable()
     return false
 end
 
-function PlayerInfo:get_cargo_items_of_type(object_type)
+function PlayerInfo:_get_objects_of_type(from, object_type)
     local to_return = {}
-    for i in pairs(self.cargo) do
-        local cargo_item = self.cargo[i]
-        if bit.band(cargo_item.object_type, object_type) == object_type then
-            table.insert(cargo_item)
+    for i in pairs(from) do
+        local item = from[i]
+        if bit.band(item:get_object_type(), object_type) == object_type then
+            table.insert(to_return, item)
         end
     end
 
     return to_return
+end
+
+function PlayerInfo:get_world_objects_of_type(object_type)
+    return self:_get_objects_of_type(self.world_objects, object_type)
+end
+
+function PlayerInfo:get_cargo_items_of_type(object_type)
+    return self:_get_objects_of_type(self.cargo, object_type)
 end
 
 function PlayerInfo:pop_item_from_cargo_of_type(object_type)

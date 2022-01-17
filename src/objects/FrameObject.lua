@@ -13,7 +13,7 @@ local BASE_WEIGHT_TONS = 0.2
 
 function FrameObject:init(name, x, y, orders)
     local this = {
-        object_type = ObjectType.DISPATCHABLE + ObjectType.CARGOABLE,
+        object_type = ObjectType.FRAME + ObjectType.DISPATCHABLE + ObjectType.CARGOABLE,
         speed = SPEED,
         ticks_advanced = SPEED,
         progress = 0,
