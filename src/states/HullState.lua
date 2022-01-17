@@ -33,6 +33,8 @@ function HullState:key_pressed(game_state, key)
         self.selected_idx = self.selected_idx - 1
     end
 
+    self.blink_cursor_on = true
+
     if self.selected_idx > 3 then
         self.selected_idx = 1
     elseif self.selected_idx < 1 then
