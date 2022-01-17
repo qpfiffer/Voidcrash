@@ -54,7 +54,6 @@ function PlayerInfo:init()
     }
 
     this.world_objects = {
-        -- RelayObject:init("RL-01", this.overmap_x + 0.1, this.overmap_y, true)
         --SlimeMold:init(this.overmap_x + 0.1, this.overmap_y, nil, true)
     }
 

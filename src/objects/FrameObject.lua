@@ -7,6 +7,7 @@ local Utils = require("src/Utils")
 local CollectorObject = require("src/objects/CollectorObject")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
+local RelayObject = require("src/objects/RelayObject")
 
 local SPEED = 0.0002
 local BASE_WEIGHT_TONS = 0.2
@@ -37,6 +38,8 @@ function FrameObject:init(name, x, y, orders)
         deployed = false,
     }
     setmetatable(this, self)
+
+    table.insert(this.cargo, RelayObject:init("RL-01, Relay", nil, nil, false))
 
     return this
 end
@@ -93,6 +96,10 @@ function FrameObject:get_tonnage()
     end
 
     return total_used + BASE_WEIGHT_TONS
+end
+
+function FrameObject:get_cargo()
+    return self.cargo
 end
 
 function FrameObject:_start_movement_order(game_state, movement_order)

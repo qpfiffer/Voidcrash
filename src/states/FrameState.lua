@@ -129,13 +129,32 @@ function FrameState:_draw_selected_frame(renderer, game_state, all_frames_in_tab
     row = row + 1
 
     renderer:set_color("gray")
-    accum = accum + renderer:draw_string("* " .. tostring(frame:get_name()) .. ": ", row, accum)
+    accum = accum + renderer:draw_string(" " .. tostring(frame:get_name()) .. ": ", row, accum)
     if frame:get_deployed() then
         renderer:set_color("white")
         accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), row, accum)
     else
         renderer:set_color("gray")
         accum = accum + renderer:draw_string("In Hold", row, accum)
+    end
+
+    row = row + 2
+    accum = 1 + x
+
+    renderer:set_color("white")
+    accum = accum + renderer:draw_string(" Cargo: ", row, accum)
+
+    renderer:set_color("gray")
+    local cargo = frame:get_cargo()
+    if #cargo > 0 then
+        accum = 1 + x
+        for i=1, #cargo do
+            local cargo_item = frame:get_cargo()[i]
+            row = row + 1
+            accum = accum + renderer:draw_string("  * " .. cargo_item:get_name(), row, accum)
+        end
+    else
+        accum = accum + renderer:draw_string("N/A", row, accum)
     end
 end
 
