@@ -259,8 +259,8 @@ function LatticeState:render(renderer, game_state)
     renderer:draw_string("CONN: ", 3, 0)
 
     local player_info = game_state:get_player_info()
-    --local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
-    local connected = true
+    local connected = player_info:get_lattice_intensity(player_info.overmap_x, player_info.overmap_y) < (constants.LATTICE_MINUMUM_INTENSITY + 200)
+    -- local connected = true
     if connected then
         renderer:set_color("green")
         renderer:draw_string("CONNECTED", 3, 5)

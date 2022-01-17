@@ -17,6 +17,7 @@ local FOG_OF_WAR_RADIUS = 0.75
 
 local WEATHER_NOISE_OFFSET_X = 55333
 local WEATHER_NOISE_OFFSET_Y = 46464
+local WEATHER_MAP_DIVISOR = 1600
 
 local BLINK_TICK_COUNT = 20
 
@@ -95,7 +96,7 @@ function MapState:_draw_map(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
 
-    local zoom = self.zoom_level * ZOOM_MOD
+    local zoom = self:_get_zoom()
 
     -- World coords to screen coords
     local player_x = math.floor(((player_info.overmap_x - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
@@ -143,7 +144,7 @@ end
 function MapState:insert_frame_nav_menu(game_state)
     exit_callback = function () table.remove(self.menus, 1) end
     dispatch_callback = function ()
-        local zoom = self.zoom_level * ZOOM_MOD
+        local zoom = self:_get_zoom()
         local noise_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
         local noise_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
 
@@ -189,7 +190,7 @@ function MapState:key_pressed(game_state, key)
     if key == "h" then
         -- Snap to home
         self.zoom_level = 1
-        local zoom = self.zoom_level * ZOOM_MOD
+        local zoom = self:_get_zoom()
         self.current_x_offset = game_state.player_info.overmap_x
         self.current_y_offset = game_state.player_info.overmap_y
     elseif key == "tab" then
@@ -296,13 +297,27 @@ function MapState:update(game_state, dt, is_active)
     end
 end
 
+function MapState:_player_is_in_weather(player_info)
+    local raw_noise_val = love.math.noise(player_info.overmap_x, player_info.overmap_y, self.current_weather_step)
+    local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
+
+    --print("IS IN WEATHER: " .. noise_val)
+
+    if noise_val <= WEATHER_MAP_DIVISOR/2 then
+        return true
+    end
+end
+
+function MapState:_get_zoom()
+    return self.zoom_level * ZOOM_MOD
+end
+
 function MapState:_draw_weather(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
 
-    local zoom = self.zoom_level * ZOOM_MOD
+    local zoom = self:_get_zoom()
 
-    local WEATHER_MAP_DIVISOR = 1600
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
             local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
@@ -338,7 +353,7 @@ function MapState:_draw_lattice(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
 
-    local zoom = self.zoom_level * ZOOM_MOD
+    local zoom = self:_get_zoom()
 
     for x=0, constants.MAP_X_MAX do
         for y=0, constants.MAP_Y_MAX do
@@ -371,7 +386,7 @@ end
 function MapState:_get_closest_object_index(game_state)
     local world_objects = game_state.player_info:get_world_objects()
     local shortest_distance = nil
-    local zoom = self.zoom_level * ZOOM_MOD
+    local zoom = self:_get_zoom()
     local closest_object_idx = nil
 
     for i=1, #world_objects do
@@ -405,7 +420,7 @@ function MapState:render(renderer, game_state)
 
     local row_offset = 1
     local world_objects = game_state.player_info:get_world_objects()
-    local zoom = self.zoom_level * ZOOM_MOD
+    local zoom = self:_get_zoom()
 
     local closest_object_idx = nil
     if self.cursor_mode then
@@ -461,6 +476,22 @@ function MapState:render(renderer, game_state)
 
     if game_state:get_menu_open() then
         self:_draw_menu(renderer, player_info)
+    end
+
+    if self:_player_is_in_weather(player_info) and not player_info.is_in_weather then
+        local warning_text = "* WEATHER WARNING *"
+        local w = string.len(warning_text)
+        local h = 1
+
+
+        local y = constants.MAP_Y_MAX - 5
+        local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
+        local accum_initial = middle_x + 2 -- 2x sides
+        local row = y + 1
+        local accum = accum_initial
+        renderer:render_window(middle_x, y, w, h, "red", "white")
+        renderer:set_color("white")
+        renderer:draw_string(warning_text, row, accum)
     end
 end
 

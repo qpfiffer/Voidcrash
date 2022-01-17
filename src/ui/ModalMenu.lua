@@ -3,14 +3,16 @@ ModalMenu.__index = ModalMenu
 -- This should render a menu with selectable components. Update should move the selected item up and down.
 -- It should take callbacks (Maybe?) So that it can alter state from a calling... thing.
 
-function ModalMenu:init(game_state, x, y, items, exit_callback)
+function ModalMenu:init(game_state, x, y, items, exit_callback, fg_color, bg_color)
     local this = {
         x = x,
         y = y,
         items = items,
         selected_idx = 1,
         first_enabled_idx = 1,
-        exit_callback = exit_callback
+        exit_callback = exit_callback,
+        fg_color = fg_color,
+        bg_color = bg_color
     }
     setmetatable(this, self)
 
@@ -57,7 +59,9 @@ function ModalMenu:render(renderer, game_state)
         end
     end
 
-    renderer:render_window(self.x, self.y, w + 2, h, "black", "white")
+    local fg_color = self.fg_color or "white"
+    local bg_color = self.bg_color or "black"
+    renderer:render_window(self.x, self.y, w + 2, h, bg_color, fg_color)
 
     local accum_initial = self.x + 2 -- 2x sides
     local row = self.y + 1
