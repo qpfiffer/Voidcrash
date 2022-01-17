@@ -43,7 +43,7 @@ function ModalMenu:key_pressed(game_state, key)
     if self.selected_idx > #self.items then
         self.selected_idx = self.first_enabled_idx
     elseif self.selected_idx < self.first_enabled_idx then
-        self.selected_idx = #items
+        self.selected_idx = #self.items
     end
 end
 
