@@ -322,6 +322,12 @@ function MapState:_draw_weather(renderer, player_info)
         for y=0, constants.MAP_Y_MAX do
             local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
             local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
+
+            local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, noise_x, noise_y)
+            if distance_from_home > FOG_OF_WAR_RADIUS then
+                goto continue
+            end
+
             local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_weather_step)
             local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
@@ -345,6 +351,7 @@ function MapState:_draw_weather(renderer, player_info)
                     end
                 end
             end
+            ::continue::
         end
     end
 end
@@ -360,8 +367,13 @@ function MapState:_draw_lattice(renderer, player_info)
             -- This builds a weird scramble:
             local world_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
             local world_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
-            local noise_val = player_info:get_lattice_intensity(world_x, world_y)
 
+            local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, world_x, world_y)
+            if distance_from_home > FOG_OF_WAR_RADIUS then
+                goto continue
+            end
+
+            local noise_val = player_info:get_lattice_intensity(world_x, world_y)
             if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
                 renderer:set_color("blood")
                 local char = 194 + math.fmod(noise_val, 4)
@@ -371,6 +383,7 @@ function MapState:_draw_lattice(renderer, player_info)
                 local char = 196 + math.fmod(noise_val, 10)
                 renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
             end
+            ::continue::
         end
     end
 end

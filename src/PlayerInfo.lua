@@ -8,6 +8,8 @@ local FrameObject = require("src/objects/FrameObject")
 local ObjectType = require("src/objects/ObjectType")
 local RelayObject = require("src/objects/RelayObject")
 
+local SlimeMold = require("src/entities/SlimeMold")
+
 local EMFieldObject = require("src/objects/hull/EMFieldObject")
 local LatticeCommunicationsArrayObject = require("src/objects/hull/LatticeCommunicationsArray")
 local RadioObject = require("src/objects/RadioObject")
@@ -52,7 +54,8 @@ function PlayerInfo:init()
     }
 
     this.world_objects = {
-        RelayObject:init("RL-01", this.overmap_x + 0.1, this.overmap_y, true)
+        -- RelayObject:init("RL-01", this.overmap_x + 0.1, this.overmap_y, true)
+        --SlimeMold:init(this.overmap_x + 0.1, this.overmap_y, nil, true)
     }
 
     table.insert(this.powered_on, this.radio)
