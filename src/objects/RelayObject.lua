@@ -7,6 +7,8 @@ local Utils = require("src/Utils")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
 
+local BASE_WEIGHT_TONS = 0.02
+
 function RelayObject:init(name, x, y, deployed)
     local this = {
         object_type = ObjectType.CARGOABLE,
@@ -52,6 +54,10 @@ end
 
 function RelayObject:get_icon()
     return 8
+end
+
+function RelayObject:get_tonnage()
+    return BASE_WEIGHT_TONS
 end
 
 function RelayObject:get_deployed()
