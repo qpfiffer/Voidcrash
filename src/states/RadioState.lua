@@ -62,7 +62,7 @@ function RadioState:render(renderer, game_state)
     local x = 1
     local y = 1
     local w = constants.MAP_X_MAX
-    local h = constants.MAP_Y_MAX - 10
+    local h = constants.MAP_Y_MAX - 1
 
     renderer:render_window(x, y, w - 4, h, "black", "white")
 
