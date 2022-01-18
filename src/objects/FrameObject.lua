@@ -196,9 +196,19 @@ function FrameObject:get_context_cursor_items(game_state, exit_callback)
         exit_callback()
     end
 
+    return_to_hull_callback = function ()
+        self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
+            start_x = self.world_x,
+            start_y = self.world_y,
+            dest_x = game_state.player_info.overmap_x,
+            dest_y = game_state.player_info.overmap_y,
+        }))
+        exit_callback()
+    end
+
     local list = {
         {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=add_drop_order_callback},
-        {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=exit_callback}
+        {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=return_to_hull_callback}
     }
     return list
 end
