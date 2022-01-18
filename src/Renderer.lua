@@ -80,6 +80,7 @@ function Renderer:init()
         canvas3 = love.graphics.newCanvas(),
         crt_shader = nil,
         scanlines_shader = nil,
+        scanlines2_shader = nil,
         anaglyph_shader = nil
     }
     setmetatable(this, self)
@@ -92,6 +93,9 @@ function Renderer:init()
 
     str = love.filesystem.read("assets/scanlines.frag")
     this.scanlines_shader = love.graphics.newShader(str)
+
+    str = love.filesystem.read("assets/scanlines_2.frag")
+    this.scanlines2_shader = love.graphics.newShader(str)
 
     return this
 end
@@ -207,8 +211,14 @@ function Renderer:render(game_state)
     love.graphics.setColor(r, g, b, a)
 
     -- First pass:
+    --love.graphics.setCanvas(self.canvas2)
+    --love.graphics.setShader(self.scanlines_shader)
+    --love.graphics.draw(self.canvas)
+
+    local dt = love.timer.getTime() % 8
+    self.scanlines2_shader:send("time", dt)
     love.graphics.setCanvas(self.canvas2)
-    love.graphics.setShader(self.scanlines_shader)
+    love.graphics.setShader(self.scanlines2_shader)
     love.graphics.draw(self.canvas)
 
     -- Second pass:
