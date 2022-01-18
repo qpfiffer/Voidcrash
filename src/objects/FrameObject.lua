@@ -7,6 +7,7 @@ local Utils = require("src/Utils")
 local CollectorObject = require("src/objects/CollectorObject")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
+local UnitCommand = require("src/management/UnitCommand")
 local RelayObject = require("src/objects/RelayObject")
 
 local SPEED = 0.0002
@@ -102,6 +103,38 @@ function FrameObject:get_cargo()
     return self.cargo
 end
 
+function FrameObject:_start_drop_order(game_state, movement_order)
+    local msg = self.name .. " will dispatch next available item."
+    game_state.player_info.radio:add_message(msg)
+end
+
+function FrameObject:_handle_drop_order(game_state)
+    --self.world_x = movement_order["data"]["start_x"]
+    --self.world_y = movement_order["data"]["start_y"]
+    self.current_order = nil
+
+    local deployable_cargo = self:_pop_deployable_cargo()
+    deployable_cargo:set_x(self.world_x)
+    deployable_cargo:set_y(self.world_y)
+    deployable_cargo:set_deployed(true)
+    game_state.player_info:add_world_object(deployable_cargo)
+
+    local msg = self.name .. " has deployed " .. deployable_cargo:get_name()
+    game_state.player_info.radio:add_message(msg)
+end
+
+function FrameObject:_pop_deployable_cargo()
+    for i in pairs(self.cargo) do
+        local cargo_item = self.cargo[i]
+        if bit.band(cargo_item:get_object_type(), ObjectType.DEPLOYABLE) == ObjectType.DEPLOYABLE then
+            table.remove(self.cargo, i)
+            return cargo_item
+        end
+    end
+
+    return nil
+end
+
 function FrameObject:_start_movement_order(game_state, movement_order)
     self.origin_x = movement_order["data"]["start_x"]
     self.origin_y = movement_order["data"]["start_y"]
@@ -157,28 +190,40 @@ function FrameObject:get_deployable_cargo()
     return to_return
 end
 
-function FrameObject:get_context_cursor_items(exit_callback)
+function FrameObject:get_context_cursor_items(game_state, exit_callback)
+    add_drop_order_callback = function ()
+        self:add_order(game_state, UnitCommand:init(OrderType.DROP, {}))
+        exit_callback()
+    end
+
     local list = {
-        {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=exit_callback}
+        {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=add_drop_order_callback},
+        {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=exit_callback}
     }
     return list
 end
 
 function FrameObject:update(game_state, dt)
     if not self.current_order and #self.orders > 0 then
-        --print("Number of current orders is " .. #self.orders)
         self.current_order = table.remove(self.orders)
-        if self.current_order:get_type() == OrderType.MOVEMENT then
-            self:_start_movement_order(game_state, self.current_order)
-        end
+
+        local orders_table = {}
+        orders_table[OrderType.MOVEMENT] = function() self:_start_movement_order(game_state, self.current_order) end
+        orders_table[OrderType.DROP] = function() self:_start_drop_order(game_state, self.current_order) end
+
+        orders_table[self.current_order:get_type()]()
     end
 
     if not self.deployed then
         return
     end
 
-    if self.current_order and self.current_order:get_type() == OrderType.MOVEMENT then
-        self:_handle_movement_order(game_state)
+    if self.current_order then
+        local orders_table = {}
+        orders_table[OrderType.MOVEMENT] = function() self:_handle_movement_order(game_state) end
+        orders_table[OrderType.DROP] = function() self:_handle_drop_order(game_state) end
+
+        orders_table[self.current_order:get_type()]()
     end
 end
 

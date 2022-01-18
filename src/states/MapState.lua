@@ -176,7 +176,7 @@ function MapState:insert_frame_nav_menu(game_state)
     local items = nil
     if closest_object then
         items = {closest_object_context_item}
-        local object_items = closest_object:get_context_cursor_items(exit_callback)
+        local object_items = closest_object:get_context_cursor_items(game_state, exit_callback)
         for i=1, #object_items do
             table.insert(items, object_items[i])
         end
