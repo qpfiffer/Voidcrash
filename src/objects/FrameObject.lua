@@ -145,6 +145,25 @@ function FrameObject:_handle_movement_order(game_state)
     end
 end
 
+function FrameObject:get_deployable_cargo()
+    local to_return = {}
+    for i in pairs(self.cargo) do
+        local item = self.cargo[i]
+        if bit.band(item:get_object_type(), ObjectType.DEPLOYABLE) == ObjectType.DEPLOYABLE then
+            table.insert(to_return, item)
+        end
+    end
+
+    return to_return
+end
+
+function FrameObject:get_context_cursor_items(exit_callback)
+    local list = {
+        {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=exit_callback}
+    }
+    return list
+end
+
 function FrameObject:update(game_state, dt)
     if not self.current_order and #self.orders > 0 then
         --print("Number of current orders is " .. #self.orders)

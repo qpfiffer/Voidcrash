@@ -11,7 +11,7 @@ local BASE_WEIGHT_TONS = 0.02
 
 function RelayObject:init(name, x, y, deployed)
     local this = {
-        object_type = ObjectType.CARGOABLE,
+        object_type = ObjectType.DEPLOYABLE + ObjectType.CARGOABLE,
 
         world_x = x,
         world_y = y,
