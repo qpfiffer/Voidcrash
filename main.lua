@@ -1,3 +1,5 @@
+if arg[#arg] == "vsc_debug" then require("lldebugger").start() end
+
 local utf8 = require("utf8")
 
 local GameState = require("src/GameState")
