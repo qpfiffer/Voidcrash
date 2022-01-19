@@ -1,5 +1,6 @@
 local OrderType = {
-    MOVEMENT = 1
+    MOVEMENT = 1,
+    DROP = 2
 }
 
 -- All UnitCommands have a type, which tells a unit how to
