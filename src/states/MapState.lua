@@ -331,19 +331,29 @@ function MapState:_draw_weather(renderer, player_info)
             local noise_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
             local noise_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
 
+            local should_continue = false
             local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, noise_x, noise_y)
             if distance_from_home > FOG_OF_WAR_RADIUS then
-                goto continue
+                should_continue = true
             end
 
-            local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_weather_step)
-            local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
+            if not should_continue then
+                local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_weather_step)
+                local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
-            renderer:set_color("grayest")
-            renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+                renderer:set_color("grayest")
+                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
 
-            if noise_val < WEATHER_MAP_DIVISOR/2 then
-                if math.fmod(x, 2) == 0 and math.fmod(y, 2) == 0 then
+                if noise_val < WEATHER_MAP_DIVISOR/2 then
+                    if math.fmod(x, 2) == 0 and math.fmod(y, 2) == 0 then
+                        for i=0,8 do
+                            if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
+                                renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
+                                break
+                            end
+                        end
+                    end
+                else
                     for i=0,8 do
                         if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
                             renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
@@ -351,15 +361,7 @@ function MapState:_draw_weather(renderer, player_info)
                         end
                     end
                 end
-            else
-                for i=0,8 do
-                    if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
-                        renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
-                        break
-                    end
-                end
             end
-            ::continue::
         end
     end
 end
@@ -376,22 +378,24 @@ function MapState:_draw_lattice(renderer, player_info)
             local world_x = (zoom * (x - constants.MAP_X_MAX/2)) + self.current_x_offset
             local world_y = (zoom * (y - constants.MAP_Y_MAX/2)) + self.current_y_offset
 
+            local should_continue = false
             local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, world_x, world_y)
             if distance_from_home > FOG_OF_WAR_RADIUS then
-                goto continue
+                should_continue = true
             end
 
-            local noise_val = player_info:get_lattice_intensity(world_x, world_y)
-            if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
-                renderer:set_color("blood")
-                local char = 194 + math.fmod(noise_val, 4)
-                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
-            elseif noise_val < constants.LATTICE_MINUMUM_INTENSITY then
-                renderer:set_color("red")
-                local char = 196 + math.fmod(noise_val, 10)
-                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+            if not should_continue then
+                local noise_val = player_info:get_lattice_intensity(world_x, world_y)
+                if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
+                    renderer:set_color("blood")
+                    local char = 194 + math.fmod(noise_val, 4)
+                    renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+                elseif noise_val < constants.LATTICE_MINUMUM_INTENSITY then
+                    renderer:set_color("red")
+                    local char = 196 + math.fmod(noise_val, 10)
+                    renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+                end
             end
-            ::continue::
         end
     end
 end
