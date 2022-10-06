@@ -1,7 +1,8 @@
 local PlayerInfo = {}
 PlayerInfo.__index = PlayerInfo
 
-local bit32 = require("bit")
+local bit = require("src/vendor/bitop-funcs")
+
 local constants = require("src/Constants")
 
 local FrameObject = require("src/objects/FrameObject")

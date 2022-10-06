@@ -1,6 +1,8 @@
 local FrameObject = {}
 FrameObject.__index = FrameObject
 
+local bit = require("src/vendor/bitop-funcs")
+
 local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
