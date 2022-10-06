@@ -28,6 +28,7 @@ function PlayerInfo:init()
         overmap_y = math.random(constants.OVERMAP_MAX_Y),
 
         world_objects = {},
+        world_objects_to_remove = {},
         cargo = {},
 
         radio = RadioObject:init(),
@@ -76,6 +77,23 @@ function PlayerInfo:add_world_object(object)
     table.insert(self.world_objects, object)
 end
 
+function PlayerInfo:remove_world_object(object)
+    self.world_objects_to_remove[object] = true
+end
+
+function PlayerInfo:_remove_tombstoned_world_objects()
+    local new_world_objects = {}
+    for i in pairs(self.world_objects) do
+        local item = self.world_objects[i]
+        if not self.world_objects_to_remove[item] then
+            table.insert(new_world_objects, item)
+        end
+    end
+
+    self.world_objects = new_world_objects
+    self.world_objects_to_remove = {}
+end
+
 function PlayerInfo:get_cargo()
     return self.cargo
 end
@@ -109,6 +127,10 @@ end
 
 function PlayerInfo:get_cargo_items_of_type(object_type)
     return self:_get_objects_of_type(self.cargo, object_type)
+end
+
+function PlayerInfo:add_item_to_cargo(object)
+    table.insert(self.cargo, object)
 end
 
 function PlayerInfo:pop_item_from_cargo_of_type(object_type)

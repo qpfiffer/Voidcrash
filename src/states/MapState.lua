@@ -298,6 +298,7 @@ function MapState:update(game_state, dt, is_active)
             self:_handle_keys(game_state, dt)
         end
 
+        game_state.player_info:_remove_tombstoned_world_objects()
         local world_objects = game_state.player_info:get_world_objects()
         for i=1, #world_objects do
             world_objects[i]:update(game_state, dt)

@@ -110,6 +110,11 @@ function FrameObject:_start_drop_order(game_state, movement_order)
     game_state.player_info.radio:add_message(msg)
 end
 
+function FrameObject:_start_embark_order(game_state, embark_order)
+    local msg = self.name .. " will rejoin the hull."
+    game_state.player_info.radio:add_message(msg)
+end
+
 function FrameObject:_handle_drop_order(game_state)
     --self.world_x = movement_order["data"]["start_x"]
     --self.world_y = movement_order["data"]["start_y"]
@@ -147,6 +152,30 @@ function FrameObject:_start_movement_order(game_state, movement_order)
 
     local msg = self.name .. " begins to move."
     game_state.player_info.radio:add_message(msg)
+end
+
+function FrameObject:_handle_embark_order(game_state)
+    -- XXX: Check if we're close enough to the hull to re-embark.
+    --[[
+    local dispatchable = game_state.player_info:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
+    dispatchable:set_deployed(true)
+    dispatchable:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
+        start_x = game_state.player_info.overmap_x,
+        start_y = game_state.player_info.overmap_y,
+        dest_x = noise_x,
+        dest_y = noise_y
+    }))
+
+    game_state.player_info:add_world_object(dispatchable)
+    --]]
+    self:set_deployed(false)
+    game_state.player_info:remove_world_object(self)
+    game_state.player_info:add_item_to_cargo(self)
+
+    local msg = self.name .. " has rejoined the hull."
+    game_state.player_info.radio:add_message(msg)
+
+    self.current_order = nil
 end
 
 function FrameObject:_handle_movement_order(game_state)
@@ -198,20 +227,32 @@ function FrameObject:get_context_cursor_items(game_state, exit_callback)
         exit_callback()
     end
 
+    add_return_to_hull_callback = function ()
+        self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
+            start_x = self.world_x,
+            start_y = self.world_y,
+            dest_x = game_state.player_info.overmap_x,
+            dest_y = game_state.player_info.overmap_y,
+        }))
+        self:add_order(game_state, UnitCommand:init(OrderType.EMBARK, {}))
+        exit_callback()
+    end
+
     local list = {
         {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=add_drop_order_callback},
-        {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=exit_callback}
+        {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=add_return_to_hull_callback}
     }
     return list
 end
 
 function FrameObject:update(game_state, dt)
     if not self.current_order and #self.orders > 0 then
-        self.current_order = table.remove(self.orders)
+        self.current_order = table.remove(self.orders, 1)
 
         local orders_table = {}
         orders_table[OrderType.MOVEMENT] = function() self:_start_movement_order(game_state, self.current_order) end
         orders_table[OrderType.DROP] = function() self:_start_drop_order(game_state, self.current_order) end
+        orders_table[OrderType.EMBARK] = function() self:_start_embark_order(game_state, self.current_order) end
 
         orders_table[self.current_order:get_type()]()
     end
@@ -224,6 +265,7 @@ function FrameObject:update(game_state, dt)
         local orders_table = {}
         orders_table[OrderType.MOVEMENT] = function() self:_handle_movement_order(game_state) end
         orders_table[OrderType.DROP] = function() self:_handle_drop_order(game_state) end
+        orders_table[OrderType.EMBARK] = function() self:_handle_embark_order(game_state) end
 
         orders_table[self.current_order:get_type()]()
     end
