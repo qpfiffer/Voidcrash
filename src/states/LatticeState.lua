@@ -123,13 +123,16 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                 local x_move = (x_tweak * 2) * (z - 1)
 
                 local y_padding = 72
+                local thick_line = false
 
                 -- Top
                 if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
                     if select_mode == "y" then
                         renderer:set_color("red")
+                        love.graphics.setLineWidth(3)
                     elseif select_mode == "z" then
                         renderer:set_color("yellow")
+                        love.graphics.setLineWidth(3)
                     end
                 end
                 love.graphics.line(
@@ -138,12 +141,15 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                     (x - z + 1) * block_width + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
+                love.graphics.setLineWidth(1)
 
                 if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
                     if select_mode == "x" then
                         renderer:set_color("red")
+                        love.graphics.setLineWidth(3)
                     elseif select_mode == "y" or select_mode == "z" then
                         renderer:set_color("yellow")
+                        love.graphics.setLineWidth(3)
                     end
                 end
                 -- Left
@@ -153,12 +159,15 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                     ((x - z) * block_width) + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
+                love.graphics.setLineWidth(1)
 
                 if connected and self.blink_cursor_on and x == self.selected[1] then
                     if select_mode == "x" then
                         renderer:set_color("red")
+                        love.graphics.setLineWidth(3)
                     elseif select_mode == "y" or select_mode == "z" then
                         renderer:set_color("yellow")
+                        love.graphics.setLineWidth(3)
                     end
                 end
                 -- Right
@@ -168,12 +177,15 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                     (x - z + 1) * block_width + x_tweak - x_move,
                     (y + z) * block_height + (y * y_padding))
                 renderer:set_color("white")
+                love.graphics.setLineWidth(1)
 
                 if connected and self.blink_cursor_on and z == self.selected[2] then
                     if select_mode == "y" then
                         renderer:set_color("red")
+                        love.graphics.setLineWidth(3)
                     elseif select_mode == "z" then
                         renderer:set_color("yellow")
+                        love.graphics.setLineWidth(3)
                     end
                 end
                 -- Bottom
@@ -183,14 +195,17 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                     ((x - z) * block_width) - x_tweak - x_move,
                     (y + z + 1) * block_height + (y * y_padding))
                 renderer:set_color("white")
+                love.graphics.setLineWidth(1)
 
                 if y ~= LATTICE_GRID_SIZE + 1 then
                     -- Top
                     if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
                         if select_mode == "y" then
                             renderer:set_color("red")
+                            love.graphics.setLineWidth(3)
                         elseif select_mode == "z" then
                             renderer:set_color("yellow")
+                            love.graphics.setLineWidth(3)
                         end
                     end
                     love.graphics.line(
@@ -199,12 +214,15 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                         (x - z + 1) * block_width + x_tweak - x_move,
                         (y + z) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
+                    love.graphics.setLineWidth(1)
 
                     if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
                         if select_mode == "x" then
                             renderer:set_color("red")
+                            love.graphics.setLineWidth(3)
                         elseif select_mode == "y" or select_mode == "z" then
                             renderer:set_color("yellow")
+                            love.graphics.setLineWidth(3)
                         end
                     end
                     -- Left
@@ -214,12 +232,15 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                         (x - z - 1) * block_width - x_tweak - x_move,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
+                    love.graphics.setLineWidth(1)
 
                     if connected and self.blink_cursor_on and x == self.selected[1] then
                         if select_mode == "x" then
                             renderer:set_color("red")
+                            love.graphics.setLineWidth(3)
                         elseif select_mode == "y" or select_mode == "z" then
                             renderer:set_color("yellow")
+                            love.graphics.setLineWidth(3)
                         end
                     end
                     -- Right
@@ -229,15 +250,19 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                         ((x - z) * block_width) - x_tweak - x_move,
                         (y + z + 1) * block_height + ((2 + y) * y_padding))
                     renderer:set_color("white")
+                    love.graphics.setLineWidth(1)
 
                     -- XXX: This needs to flash on both self.selected[2] and self.selected[1].
                     if connected and self.blink_cursor_on then
                         if select_mode == "x" and (x - 1) == self.selected[1] then
                             renderer:set_color("red")
+                            love.graphics.setLineWidth(3)
                         elseif select_mode == "y" and (z - 1) == self.selected[2] then
                             renderer:set_color("red")
+                            love.graphics.setLineWidth(3)
                         elseif select_mode == "z" then
                             renderer:set_color("yellow")
+                            love.graphics.setLineWidth(3)
                         end
                     end
                     -- Bottom
@@ -247,6 +272,7 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
                         ((x - z) * block_width) + x_tweak - x_move,
                         (y + z + 1) * block_height + ((y + 1) * y_padding))
                     renderer:set_color("white")
+                    love.graphics.setLineWidth(1)
                 end
             end
         end
