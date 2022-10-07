@@ -63,17 +63,19 @@ function MenuState:key_pressed(game_state, key)
 end
 
 function MenuState:render(renderer)
-    renderer:draw_traumae_string("the harvest moon is", 8, 2)
-    renderer:draw_traumae_string("good for black tides", 9, 2)
-    renderer:draw_traumae_string("and a dead wind blows", 10, 2)
+    --renderer:draw_traumae_string("the harvest moon is", 8, 2)
+    --renderer:draw_traumae_string("good for black tides", 9, 2)
+    --renderer:draw_traumae_string("and a dead wind blows", 10, 2)
 
+    local start = 5
+    renderer:draw_string("VOIDCRASH", start, 5)
     for i=1, #menu_items do
         if i == self.current_menu_item then
             renderer:set_color("red")
         else
             renderer:set_color("gray")
         end
-        renderer:draw_string(menu_items[i][M_TEXT], i, 0)
+        renderer:draw_string(menu_items[i][M_TEXT], i + start + 2, 5)
     end
 end
 

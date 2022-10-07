@@ -116,8 +116,6 @@ function FrameObject:_start_embark_order(game_state, embark_order)
 end
 
 function FrameObject:_handle_drop_order(game_state)
-    --self.world_x = movement_order["data"]["start_x"]
-    --self.world_y = movement_order["data"]["start_y"]
     self.current_order = nil
 
     local deployable_cargo = self:_pop_deployable_cargo()
