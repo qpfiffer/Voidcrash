@@ -80,6 +80,7 @@ function Renderer:init()
         canvas3 = love.graphics.newCanvas(),
         crt_shader = nil,
         scanlines_shader = nil,
+        scanlines_phase_tick = 0,
         anaglyph_shader = nil
     }
     setmetatable(this, self)
@@ -207,8 +208,10 @@ function Renderer:render(game_state)
     love.graphics.setColor(r, g, b, a)
 
     -- First pass:
+    --self.scanlines_phase_tick = self.scanlines_phase_tick + 0.01
     love.graphics.setCanvas(self.canvas2)
     love.graphics.setShader(self.scanlines_shader)
+    self.scanlines_shader:send("phase", self.scanlines_phase_tick)
     love.graphics.draw(self.canvas)
 
     -- Second pass:

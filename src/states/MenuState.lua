@@ -68,14 +68,16 @@ function MenuState:render(renderer)
     --renderer:draw_traumae_string("and a dead wind blows", 10, 2)
 
     local start = 5
-    renderer:draw_string("VOIDCRASH", start, 5)
+    renderer:draw_string("VOIDCRASH", start, 7)
     for i=1, #menu_items do
+        local pre = "  "
         if i == self.current_menu_item then
+            pre = "> "
             renderer:set_color("red")
         else
             renderer:set_color("gray")
         end
-        renderer:draw_string(menu_items[i][M_TEXT], i + start + 2, 5)
+        renderer:draw_string(pre .. menu_items[i][M_TEXT], i + start + 2, 5)
     end
 end
 

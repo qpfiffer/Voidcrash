@@ -10,7 +10,7 @@
 // OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 // PERFORMANCE OF THIS SOFTWARE.
 number width = 2;
-number phase = 0;
+extern number phase = 0;
 number thickness = 0.25;
 number opacity = 1;
 vec3 color = vec3(0, 0, 0);
