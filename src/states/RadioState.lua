@@ -47,7 +47,7 @@ function RadioState:_draw_radio_messages(renderer, game_state)
     renderer:draw_string("Received", row, accum)
     row = row + 1
 
-    local messages = game_state.player_info.radio:get_messages()
+    local messages = game_state.player_info.hull.radio:get_messages()
     for i in pairs(messages) do
         local message = messages[i]
         renderer:set_color("gray")

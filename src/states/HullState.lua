@@ -67,7 +67,7 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:draw_string("POWER", row, accum)
     row = row + 1
 
-    local items = game_state.player_info:get_power_items()
+    local items = game_state.player_info.hull:get_power_items()
     for i in pairs(items) do
         local active_power_item = items[i]
         renderer:set_color("gray")
@@ -80,7 +80,7 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("PWR: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info:get_power_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_power_usage()), row, accum)
 end
 
 function HullState:_draw_cargo_pane(renderer, game_state)
@@ -92,7 +92,7 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:draw_string("CARGO", row, accum)
     row = row + 1
 
-    local items = game_state.player_info:get_cargo()
+    local items = game_state.player_info.hull:get_cargo()
     for i in pairs(items) do
         local cargo_item = items[i]
         renderer:set_color("gray")
@@ -105,7 +105,7 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("TON: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info:get_cargo_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_cargo_usage()), row, accum)
 end
 
 function HullState:_draw_fabricator_pane(renderer, game_state)

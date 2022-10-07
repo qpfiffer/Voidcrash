@@ -35,7 +35,7 @@ function FrameState:key_pressed(game_state, key)
 
     self.blink_cursor_on = true
 
-    local frames = game_state.player_info:get_cargo_items_of_type(ObjectType.FRAME)
+    local frames = game_state.player_info.hull:get_cargo_items_of_type(ObjectType.FRAME)
     local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
     local all_frames_in_tables = {frames, deployed_frames}
 
@@ -159,7 +159,7 @@ function FrameState:_draw_selected_frame(renderer, game_state, all_frames_in_tab
 end
 
 function FrameState:render(renderer, game_state)
-    local frames = game_state.player_info:get_cargo_items_of_type(ObjectType.FRAME)
+    local frames = game_state.player_info.hull:get_cargo_items_of_type(ObjectType.FRAME)
     local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
     local all_frames_in_tables = {frames, deployed_frames}
 

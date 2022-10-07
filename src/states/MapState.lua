@@ -32,8 +32,8 @@ local MAP_OVERLAYS = {
 
 function MapState:init(game_state)
     local this = {
-        dtotal = 0,             -- Delta time total
-        zoom_level = 1,         -- Zoom level is how far into the map we are looking.
+        dtotal = 0,
+        zoom_level = 1,
         current_x_offset = game_state.player_info.overmap_x,
         current_y_offset = game_state.player_info.overmap_y,
         blink_cursor_on = true,
@@ -47,6 +47,8 @@ function MapState:init(game_state)
         cursor_mode = nil,
         cursor_x = 0,
         cursor_y = 0,
+
+        world_tile_modifiers = {},
 
         menus = {},
     }
@@ -110,11 +112,25 @@ function MapState:_draw_map(renderer, player_info)
             local raw_noise_val = love.math.noise(noise_x, noise_y)
             local noise_val = raw_noise_val * 1000
 
+            local should_draw = false
             local distance_from_home = Utils.dist(player_info.overmap_x, player_info.overmap_y, noise_x, noise_y)
             --print("distance_from_home: " .. tostring(player_info.overmap_x) .. " " .. tostring(player_info.overmap_y) 
             --    .. ", " .. noise_x .. " " .. noise_y)
+            should_draw = distance_from_home < FOG_OF_WAR_RADIUS
 
-            if distance_from_home < FOG_OF_WAR_RADIUS then
+            if not should_draw then
+                local world_objects = player_info:get_world_objects()
+                for i in pairs(world_objects) do
+                    local wobj = world_objects[i]
+                    local distance = Utils.dist(wobj:get_x(), wobj:get_y(), noise_x, noise_y)
+                    if distance < 0.25 then
+                        should_draw = true
+                        break
+                    end
+                end
+            end
+
+            if should_draw then
                 if noise_val <= 25 then
                     if noise_val <= 16 then
                         renderer:set_color("black")
@@ -142,19 +158,19 @@ function MapState:_draw_map(renderer, player_info)
 end
 
 function MapState:insert_frame_nav_menu(game_state)
+    local zoom = self:_get_zoom()
+    local cursor_world_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
+    local cursor_world_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
+
     exit_callback = function () table.remove(self.menus, 1) end
     dispatch_callback = function ()
-        local zoom = self:_get_zoom()
-        local noise_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
-        local noise_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
-
-        local dispatchable = game_state.player_info:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
+        local dispatchable = game_state.player_info.hull:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
         dispatchable:set_deployed(true)
         dispatchable:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
             start_x = game_state.player_info.overmap_x,
             start_y = game_state.player_info.overmap_y,
-            dest_x = noise_x,
-            dest_y = noise_y
+            dest_x = cursor_world_x,
+            dest_y = cursor_world_y
         }))
 
         game_state.player_info:add_world_object(dispatchable)
@@ -170,7 +186,7 @@ function MapState:insert_frame_nav_menu(game_state)
         closest_object_context_item = {["name"]=closest_object:get_name(), ["enabled"] = false, ["callback"]=exit_callback}
     end
 
-    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info:has_dispatchable(), ["callback"]=dispatch_callback}
+    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info.hull:has_dispatchable(), ["callback"]=dispatch_callback}
     cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
     local items = nil
@@ -186,7 +202,8 @@ function MapState:insert_frame_nav_menu(game_state)
         items = {dispatch_item, cancel_item}
     end
 
-    new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback)
+    local bonus_data = {["x"] = cursor_world_x, ["y"] = cursor_world_y}
+    new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback, "white", "black", bonus_data)
     table.insert(self.menus, new_menu)
 end
 

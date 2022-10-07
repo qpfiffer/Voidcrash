@@ -88,7 +88,7 @@ end
 function FrameObject:add_order(game_state, new_order)
     table.insert(self.orders, new_order)
     local msg = self.name .. " is following new order."
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 end
 
 function FrameObject:get_tonnage()
@@ -107,12 +107,12 @@ end
 
 function FrameObject:_start_drop_order(game_state, movement_order)
     local msg = self.name .. " will dispatch next available item."
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 end
 
 function FrameObject:_start_embark_order(game_state, embark_order)
     local msg = self.name .. " will rejoin the hull."
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 end
 
 function FrameObject:_handle_drop_order(game_state)
@@ -125,7 +125,7 @@ function FrameObject:_handle_drop_order(game_state)
     game_state.player_info:add_world_object(deployable_cargo)
 
     local msg = self.name .. " has deployed " .. deployable_cargo:get_name()
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 end
 
 function FrameObject:_pop_deployable_cargo()
@@ -141,15 +141,26 @@ function FrameObject:_pop_deployable_cargo()
 end
 
 function FrameObject:_start_movement_order(game_state, movement_order)
-    self.origin_x = movement_order["data"]["start_x"]
-    self.origin_y = movement_order["data"]["start_y"]
-    self.world_x = movement_order["data"]["start_x"]
-    self.world_y = movement_order["data"]["start_y"]
+    local start_x = movement_order["data"]["start_x"]
+    local start_y = movement_order["data"]["start_y"]
+
+    if not start_x then
+        start_x = self.world_x
+    end
+
+    if not start_y then
+        start_y = self.world_y
+    end
+
+    self.origin_x = start_x
+    self.origin_y = start_y
+    self.world_x = start_x
+    self.world_y = start_y
     self.dest_x = movement_order["data"]["dest_x"]
     self.dest_y = movement_order["data"]["dest_y"]
 
     local msg = self.name .. " begins to move."
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 end
 
 function FrameObject:_handle_embark_order(game_state)
@@ -171,7 +182,7 @@ function FrameObject:_handle_embark_order(game_state)
     game_state.player_info:add_item_to_cargo(self)
 
     local msg = self.name .. " has rejoined the hull."
-    game_state.player_info.radio:add_message(msg)
+    game_state.player_info.hull.radio:add_message(msg)
 
     self.current_order = nil
 end
@@ -203,7 +214,7 @@ function FrameObject:_handle_movement_order(game_state)
         self.dest_y = nil
 
         local msg = self.name .. " has arrived at destination."
-        game_state.player_info.radio:add_message(msg)
+        game_state.player_info.hull.radio:add_message(msg)
     end
 end
 
@@ -225,10 +236,24 @@ function FrameObject:get_context_cursor_items(game_state, exit_callback)
         exit_callback()
     end
 
+    add_move_order_callback = function (bonus_data)
+        x = bonus_data["x"]
+        y = bonus_data["y"]
+        print("DATA: " .. tostring(x) .. ", " .. tostring(y))
+
+        self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
+            start_x = nil, --self.world_x,
+            start_y = nil, --self.world_y,
+            dest_x = x,
+            dest_y = y
+        }))
+        exit_callback()
+    end
+
     add_return_to_hull_callback = function ()
         self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
-            start_x = self.world_x,
-            start_y = self.world_y,
+            start_x = nil, --self.world_x,
+            start_y = nil, --self.world_y,
             dest_x = game_state.player_info.overmap_x,
             dest_y = game_state.player_info.overmap_y,
         }))
@@ -238,6 +263,7 @@ function FrameObject:get_context_cursor_items(game_state, exit_callback)
 
     local list = {
         {["name"]="Drop Item", ["enabled"] = #self:get_deployable_cargo() > 0, ["callback"]=add_drop_order_callback},
+        {["name"]="Move", ["enabled"] = self.deployed, ["callback"]=add_move_order_callback},
         {["name"]="Return to Hull", ["enabled"] = self.deployed, ["callback"]=add_return_to_hull_callback}
     }
     return list
