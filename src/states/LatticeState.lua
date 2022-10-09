@@ -194,12 +194,22 @@ function LatticeState:_render_lattice_vertical_lines(renderer, game_state, conne
             if select_mode == "x" and x == self.selected[1] then
                 renderer:set_color("red")
                 love.graphics.setLineWidth(3)
-            elseif select_mode == "y" and (z - 1) == self.selected[2] then
-                renderer:set_color("red")
-                love.graphics.setLineWidth(3)
-            elseif select_mode == "z" and x == self.selected[1] then
-                renderer:set_color("yellow")
-                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" then
+                if (z - 1) == self.selected[2] then
+                    renderer:set_color("red")
+                    love.graphics.setLineWidth(3)
+                elseif x == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
+            elseif select_mode == "z" then
+                if (z - 1) == self.selected[2] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                elseif x == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             end
         end
         love.graphics.line(
@@ -215,12 +225,22 @@ function LatticeState:_render_lattice_vertical_lines(renderer, game_state, conne
             if select_mode == "x"  and (x - 1) == self.selected[1] then
                 renderer:set_color("red")
                 love.graphics.setLineWidth(3)
-            elseif select_mode == "y" and z == self.selected[2] then
-                renderer:set_color("red")
-                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" then
+                if z == self.selected[2] then
+                    renderer:set_color("red")
+                    love.graphics.setLineWidth(3)
+                elseif (x - 1) == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             elseif select_mode == "z" then
-                renderer:set_color("yellow")
-                love.graphics.setLineWidth(3)
+                if z == self.selected[2] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                elseif (x - 1) == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             end
         end
         love.graphics.line(
@@ -236,12 +256,22 @@ function LatticeState:_render_lattice_vertical_lines(renderer, game_state, conne
             if select_mode == "x" and x == self.selected[1] then
                 renderer:set_color("red")
                 love.graphics.setLineWidth(3)
-            elseif select_mode == "y" and z == self.selected[2] then
-                renderer:set_color("red")
-                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" then
+                if z == self.selected[2] then
+                    renderer:set_color("red")
+                    love.graphics.setLineWidth(3)
+                elseif x == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             elseif select_mode == "z" then
-                renderer:set_color("yellow")
-                love.graphics.setLineWidth(3)
+                if z == self.selected[2] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                elseif x == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             end
         end
         love.graphics.line(
@@ -260,12 +290,22 @@ function LatticeState:_render_lattice_vertical_lines(renderer, game_state, conne
             if select_mode == "x" and (x - 1) == self.selected[1] then
                 renderer:set_color("red")
                 love.graphics.setLineWidth(3)
-            elseif select_mode == "y" and (z - 1) == self.selected[2] then
-                renderer:set_color("red")
-                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" then
+                if (z - 1) == self.selected[2] then
+                    renderer:set_color("red")
+                    love.graphics.setLineWidth(3)
+                elseif (x - 1) == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             elseif select_mode == "z" then
-                renderer:set_color("yellow")
-                love.graphics.setLineWidth(3)
+                if (z - 1) == self.selected[2] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                elseif (x - 1) == self.selected[1] then
+                    renderer:set_color("yellow")
+                    love.graphics.setLineWidth(3)
+                end
             end
         end
         love.graphics.line(
