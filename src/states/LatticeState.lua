@@ -52,7 +52,8 @@ function LatticeState:key_pressed(game_state, key)
         return
     end
 
-    if SELECT_MODES[self.select_mode_idx] == "x" then
+    local select_mode = SELECT_MODES[self.select_mode_idx]
+    if select_mode == "x" then
         if key == "left" then
             self.selected[1] = self.selected[1] - 1
             self.blink_cursor_on = true
@@ -60,8 +61,7 @@ function LatticeState:key_pressed(game_state, key)
             self.selected[1] = self.selected[1] + 1
             self.blink_cursor_on = true
         end
-    end
-    if SELECT_MODES[self.select_mode_idx] == "y" then
+    elseif select_mode == "y" then
         if key == "up" then
             self.selected[2] = self.selected[2] - 1
             self.blink_cursor_on = true
@@ -69,10 +69,19 @@ function LatticeState:key_pressed(game_state, key)
             self.selected[2] = self.selected[2] + 1
             self.blink_cursor_on = true
         end
+    elseif select_mode == "z" then
+        if key == "up" then
+            self.selected[3] = self.selected[3] - 1
+            self.blink_cursor_on = true
+        elseif key == "down" then
+            self.selected[3] = self.selected[3] + 1
+            self.blink_cursor_on = true
+        end
     end
 
     self:_ensure_grid_size_selected(1)
     self:_ensure_grid_size_selected(2)
+    self:_ensure_grid_size_selected(3)
 
     -- Clamp select_mode_idx to bounds of SELECT_MODES.
     if self.select_mode_idx > #SELECT_MODES then
@@ -114,13 +123,18 @@ function LatticeState:_render_lattice_surface_tile(renderer, game_state, connect
     local select_mode = SELECT_MODES[self.select_mode_idx]
 
     -- Top
-    if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
-        if select_mode == "y" then
+    if connected and self.blink_cursor_on then
+        if select_mode == "y" and (z - 1) == self.selected[2] then
             renderer:set_color("red")
             love.graphics.setLineWidth(3)
         elseif select_mode == "z" then
-            renderer:set_color("yellow")
-            love.graphics.setLineWidth(3)
+            if (y - 1) == self.selected[3] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif (z - 1) == self.selected[2] then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
         end
     end
     love.graphics.line(
@@ -131,16 +145,24 @@ function LatticeState:_render_lattice_surface_tile(renderer, game_state, connect
     renderer:set_color("white")
     love.graphics.setLineWidth(1)
 
-    if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
-        if select_mode == "x" then
+    -- Left
+    if connected and self.blink_cursor_on then
+        if select_mode == "x" and (x - 1) == self.selected[1] then
             renderer:set_color("red")
             love.graphics.setLineWidth(3)
-        elseif select_mode == "y" or select_mode == "z" then
+        elseif select_mode == "y" and (x - 1) == self.selected[1] then
             renderer:set_color("yellow")
             love.graphics.setLineWidth(3)
+        elseif select_mode == "z" then
+            if (y - 1) == self.selected[3] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif (x - 1) == self.selected[1] then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
         end
     end
-    -- Left
     love.graphics.line(
         (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
         (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
@@ -149,16 +171,24 @@ function LatticeState:_render_lattice_surface_tile(renderer, game_state, connect
     renderer:set_color("white")
     love.graphics.setLineWidth(1)
 
-    if connected and self.blink_cursor_on and x == self.selected[1] then
-        if select_mode == "x" then
+    -- Right
+    if connected and self.blink_cursor_on then
+        if select_mode == "x" and x == self.selected[1] then
             renderer:set_color("red")
             love.graphics.setLineWidth(3)
-        elseif select_mode == "y" or select_mode == "z" then
+        elseif select_mode == "y" and x == self.selected[1] then
             renderer:set_color("yellow")
             love.graphics.setLineWidth(3)
+        elseif select_mode == "z" then
+            if (y - 1) == self.selected[3] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif x == self.selected[1] then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
         end
     end
-    -- Right
     love.graphics.line(
         ((x - z) * LATTICE_BLOCK_WIDTH) - LATTICE_X_TWEAK - x_move,
         (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
@@ -167,16 +197,21 @@ function LatticeState:_render_lattice_surface_tile(renderer, game_state, connect
     renderer:set_color("white")
     love.graphics.setLineWidth(1)
 
-    if connected and self.blink_cursor_on and z == self.selected[2] then
-        if select_mode == "y" then
+    -- Bottom
+    if connected and self.blink_cursor_on then
+        if select_mode == "y" and z == self.selected[2] then
             renderer:set_color("red")
             love.graphics.setLineWidth(3)
         elseif select_mode == "z" then
-            renderer:set_color("yellow")
-            love.graphics.setLineWidth(3)
+            if (y - 1) == self.selected[3] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif z == self.selected[2] then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
         end
     end
-    -- Bottom
     love.graphics.line(
         (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
         (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
