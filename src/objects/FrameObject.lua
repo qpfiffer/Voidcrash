@@ -179,7 +179,7 @@ function FrameObject:_handle_embark_order(game_state)
     --]]
     self:set_deployed(false)
     game_state.player_info:remove_world_object(self)
-    game_state.player_info:add_item_to_cargo(self)
+    game_state.player_info.hull:add_item_to_cargo(self)
 
     local msg = self.name .. " has rejoined the hull."
     game_state.player_info.hull.radio:add_message(msg)
