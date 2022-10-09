@@ -13,6 +13,10 @@ local TICKS_ADVANCE_MIN = 1
 local TICKS_ADVANCE_MAX = 3
 
 local LATTICE_GRID_SIZE = 3
+local LATTICE_BLOCK_WIDTH = 128
+local LATTICE_BLOCK_HEIGHT = 72
+local LATTICE_X_TWEAK = 12
+local LATTICE_Y_PADDING = 72
 
 local SELECT_MODES = {"x", "y", "z"}
 
@@ -106,185 +110,188 @@ function LatticeState:update(game_state, dt)
     end
 end
 
+function LatticeState:_render_lattice_surface_tile(renderer, game_state, connected, x, y, z, x_move)
+    local select_mode = SELECT_MODES[self.select_mode_idx]
+
+    -- Top
+    if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
+        if select_mode == "y" then
+            renderer:set_color("red")
+            love.graphics.setLineWidth(3)
+        elseif select_mode == "z" then
+            renderer:set_color("yellow")
+            love.graphics.setLineWidth(3)
+        end
+    end
+    love.graphics.line(
+        ((x - z) * LATTICE_BLOCK_WIDTH) + LATTICE_X_TWEAK - x_move,
+        (y + z) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+        (x - z + 1) * LATTICE_BLOCK_WIDTH + LATTICE_X_TWEAK - x_move,
+        (y + z) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING))
+    renderer:set_color("white")
+    love.graphics.setLineWidth(1)
+
+    if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
+        if select_mode == "x" then
+            renderer:set_color("red")
+            love.graphics.setLineWidth(3)
+        elseif select_mode == "y" or select_mode == "z" then
+            renderer:set_color("yellow")
+            love.graphics.setLineWidth(3)
+        end
+    end
+    -- Left
+    love.graphics.line(
+        (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
+        (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+        ((x - z) * LATTICE_BLOCK_WIDTH) + LATTICE_X_TWEAK - x_move,
+        (y + z) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING))
+    renderer:set_color("white")
+    love.graphics.setLineWidth(1)
+
+    if connected and self.blink_cursor_on and x == self.selected[1] then
+        if select_mode == "x" then
+            renderer:set_color("red")
+            love.graphics.setLineWidth(3)
+        elseif select_mode == "y" or select_mode == "z" then
+            renderer:set_color("yellow")
+            love.graphics.setLineWidth(3)
+        end
+    end
+    -- Right
+    love.graphics.line(
+        ((x - z) * LATTICE_BLOCK_WIDTH) - LATTICE_X_TWEAK - x_move,
+        (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+        (x - z + 1) * LATTICE_BLOCK_WIDTH + LATTICE_X_TWEAK - x_move,
+        (y + z) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING))
+    renderer:set_color("white")
+    love.graphics.setLineWidth(1)
+
+    if connected and self.blink_cursor_on and z == self.selected[2] then
+        if select_mode == "y" then
+            renderer:set_color("red")
+            love.graphics.setLineWidth(3)
+        elseif select_mode == "z" then
+            renderer:set_color("yellow")
+            love.graphics.setLineWidth(3)
+        end
+    end
+    -- Bottom
+    love.graphics.line(
+        (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
+        (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+        ((x - z) * LATTICE_BLOCK_WIDTH) - LATTICE_X_TWEAK - x_move,
+        (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING))
+    renderer:set_color("white")
+    love.graphics.setLineWidth(1)
+end
+
+function LatticeState:_render_lattice_vertical_lines(renderer, game_state, connected, x, y, z, x_move)
+    local select_mode = SELECT_MODES[self.select_mode_idx]
+    if y ~= LATTICE_GRID_SIZE + 1 then
+        -- Right
+        if connected and self.blink_cursor_on then
+            if select_mode == "x" and x == self.selected[1] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" and (z - 1) == self.selected[2] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "z" and x == self.selected[1] then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
+        end
+        love.graphics.line(
+            (x - z + 1) * LATTICE_BLOCK_WIDTH + LATTICE_X_TWEAK - x_move,
+            (y + z) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+            (x - z + 1) * LATTICE_BLOCK_WIDTH + LATTICE_X_TWEAK - x_move,
+            (y + z) * LATTICE_BLOCK_HEIGHT + ((2 + y) * LATTICE_Y_PADDING))
+        renderer:set_color("white")
+        love.graphics.setLineWidth(1)
+
+        -- Left
+        if connected and self.blink_cursor_on then
+            if select_mode == "x"  and (x - 1) == self.selected[1] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" and z == self.selected[2] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "z" then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
+        end
+        love.graphics.line(
+            (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+            (x - z - 1) * LATTICE_BLOCK_WIDTH - LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + ((2 + y) * LATTICE_Y_PADDING))
+        renderer:set_color("white")
+        love.graphics.setLineWidth(1)
+
+        -- Bottom
+        if connected and self.blink_cursor_on then
+            if select_mode == "x" and x == self.selected[1] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" and z == self.selected[2] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "z" then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
+        end
+        love.graphics.line(
+            ((x - z) * LATTICE_BLOCK_WIDTH) - LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + (y * LATTICE_Y_PADDING),
+            ((x - z) * LATTICE_BLOCK_WIDTH) - LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + ((2 + y) * LATTICE_Y_PADDING))
+        renderer:set_color("white")
+        love.graphics.setLineWidth(1)
+
+        -- Top
+        -- XXX: This needs to flash on both self.selected[2] and self.selected[1].
+        if connected and self.blink_cursor_on then
+            --print("SELECT MODE: " .. select_mode .. " X: " .. tostring(x) .. " Z: " .. tostring(z))
+            --print("SELECTED 1 & 2: " .. tostring(self.selected[1]) .. ", " .. tostring(self.selected[2]))
+            if select_mode == "x" and (x - 1) == self.selected[1] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "y" and (z - 1) == self.selected[2] then
+                renderer:set_color("red")
+                love.graphics.setLineWidth(3)
+            elseif select_mode == "z" then
+                renderer:set_color("yellow")
+                love.graphics.setLineWidth(3)
+            end
+        end
+        love.graphics.line(
+            ((x - z) * LATTICE_BLOCK_WIDTH) + LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + ((y - 1) * LATTICE_Y_PADDING),
+            ((x - z) * LATTICE_BLOCK_WIDTH) + LATTICE_X_TWEAK - x_move,
+            (y + z + 1) * LATTICE_BLOCK_HEIGHT + ((y + 1) * LATTICE_Y_PADDING))
+        renderer:set_color("white")
+        love.graphics.setLineWidth(1)
+    end
+end
+
 function LatticeState:_render_lattice(renderer, game_state, connected)
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
 
     renderer:set_color("white")
     love.graphics.translate(width/2, height/16 - 150)
-    select_mode = SELECT_MODES[self.select_mode_idx]
+
     for x = 1, LATTICE_GRID_SIZE do
         for y = 1, LATTICE_GRID_SIZE + 1 do
             for z = 1, LATTICE_GRID_SIZE do
-                local block_width = 128
-                local block_height = 72
+                local x_move = (LATTICE_X_TWEAK * 2) * (z - 1)
 
-                local x_tweak = 12
-                local x_move = (x_tweak * 2) * (z - 1)
-
-                local y_padding = 72
-                local thick_line = false
-
-                -- Top
-                if connected and self.blink_cursor_on and (z - 1) == self.selected[2] then
-                    if select_mode == "y" then
-                        renderer:set_color("red")
-                        love.graphics.setLineWidth(3)
-                    elseif select_mode == "z" then
-                        renderer:set_color("yellow")
-                        love.graphics.setLineWidth(3)
-                    end
-                end
-                love.graphics.line(
-                    ((x - z) * block_width) + x_tweak - x_move,
-                    (y + z) * block_height + (y * y_padding),
-                    (x - z + 1) * block_width + x_tweak - x_move,
-                    (y + z) * block_height + (y * y_padding))
-                renderer:set_color("white")
-                love.graphics.setLineWidth(1)
-
-                if connected and self.blink_cursor_on and (x - 1) == self.selected[1] then
-                    if select_mode == "x" then
-                        renderer:set_color("red")
-                        love.graphics.setLineWidth(3)
-                    elseif select_mode == "y" or select_mode == "z" then
-                        renderer:set_color("yellow")
-                        love.graphics.setLineWidth(3)
-                    end
-                end
-                -- Left
-                love.graphics.line(
-                    (x - z - 1) * block_width - x_tweak - x_move,
-                    (y + z + 1) * block_height + (y * y_padding),
-                    ((x - z) * block_width) + x_tweak - x_move,
-                    (y + z) * block_height + (y * y_padding))
-                renderer:set_color("white")
-                love.graphics.setLineWidth(1)
-
-                if connected and self.blink_cursor_on and x == self.selected[1] then
-                    if select_mode == "x" then
-                        renderer:set_color("red")
-                        love.graphics.setLineWidth(3)
-                    elseif select_mode == "y" or select_mode == "z" then
-                        renderer:set_color("yellow")
-                        love.graphics.setLineWidth(3)
-                    end
-                end
-                -- Right
-                love.graphics.line(
-                    ((x - z) * block_width) - x_tweak - x_move,
-                    (y + z + 1) * block_height + (y * y_padding),
-                    (x - z + 1) * block_width + x_tweak - x_move,
-                    (y + z) * block_height + (y * y_padding))
-                renderer:set_color("white")
-                love.graphics.setLineWidth(1)
-
-                if connected and self.blink_cursor_on and z == self.selected[2] then
-                    if select_mode == "y" then
-                        renderer:set_color("red")
-                        love.graphics.setLineWidth(3)
-                    elseif select_mode == "z" then
-                        renderer:set_color("yellow")
-                        love.graphics.setLineWidth(3)
-                    end
-                end
-                -- Bottom
-                love.graphics.line(
-                    (x - z - 1) * block_width - x_tweak - x_move,
-                    (y + z + 1) * block_height + (y * y_padding),
-                    ((x - z) * block_width) - x_tweak - x_move,
-                    (y + z + 1) * block_height + (y * y_padding))
-                renderer:set_color("white")
-                love.graphics.setLineWidth(1)
-
-                if y ~= LATTICE_GRID_SIZE + 1 then
-                    -- Right
-                    if connected and self.blink_cursor_on then
-                        if select_mode == "x" and x == self.selected[1] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "y" and (z - 1) == self.selected[2] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "z" and x == self.selected[1] then
-                            renderer:set_color("yellow")
-                            love.graphics.setLineWidth(3)
-                        end
-                    end
-                    love.graphics.line(
-                        (x - z + 1) * block_width + x_tweak - x_move,
-                        (y + z) * block_height + (y * y_padding),
-                        (x - z + 1) * block_width + x_tweak - x_move,
-                        (y + z) * block_height + ((2 + y) * y_padding))
-                    renderer:set_color("white")
-                    love.graphics.setLineWidth(1)
-
-                    -- Left
-                    if connected and self.blink_cursor_on then
-                        if select_mode == "x"  and (x - 1) == self.selected[1] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "y" and z == self.selected[2] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "z" then
-                            renderer:set_color("yellow")
-                            love.graphics.setLineWidth(3)
-                        end
-                    end
-                    love.graphics.line(
-                        (x - z - 1) * block_width - x_tweak - x_move,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        (x - z - 1) * block_width - x_tweak - x_move,
-                        (y + z + 1) * block_height + ((2 + y) * y_padding))
-                    renderer:set_color("white")
-                    love.graphics.setLineWidth(1)
-
-                    -- Bottom
-                    if connected and self.blink_cursor_on then
-                        if select_mode == "x" and x == self.selected[1] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "y" and z == self.selected[2] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "z" then
-                            renderer:set_color("yellow")
-                            love.graphics.setLineWidth(3)
-                        end
-                    end
-                    love.graphics.line(
-                        ((x - z) * block_width) - x_tweak - x_move,
-                        (y + z + 1) * block_height + (y * y_padding),
-                        ((x - z) * block_width) - x_tweak - x_move,
-                        (y + z + 1) * block_height + ((2 + y) * y_padding))
-                    renderer:set_color("white")
-                    love.graphics.setLineWidth(1)
-
-                    -- Top
-                    -- XXX: This needs to flash on both self.selected[2] and self.selected[1].
-                    if connected and self.blink_cursor_on then
-                        --print("SELECT MODE: " .. select_mode .. " X: " .. tostring(x) .. " Z: " .. tostring(z))
-                        --print("SELECTED 1 & 2: " .. tostring(self.selected[1]) .. ", " .. tostring(self.selected[2]))
-                        if select_mode == "x" and (x - 1) == self.selected[1] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "y" and (z - 1) == self.selected[2] then
-                            renderer:set_color("red")
-                            love.graphics.setLineWidth(3)
-                        elseif select_mode == "z" then
-                            renderer:set_color("yellow")
-                            love.graphics.setLineWidth(3)
-                        end
-                    end
-                    love.graphics.line(
-                        ((x - z) * block_width) + x_tweak - x_move,
-                        (y + z + 1) * block_height + ((y - 1) * y_padding),
-                        ((x - z) * block_width) + x_tweak - x_move,
-                        (y + z + 1) * block_height + ((y + 1) * y_padding))
-                    renderer:set_color("white")
-                    love.graphics.setLineWidth(1)
-                end
+                self:_render_lattice_surface_tile(renderer, game_state, connected, x, y, z, x_move)
+                self:_render_lattice_vertical_lines(renderer, game_state, connected, x, y, z, x_move)
             end
         end
     end
