@@ -528,7 +528,7 @@ function MapState:render(renderer, game_state)
 
 
         local y = constants.MAP_Y_MAX - 5
-        local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
+        local middle_x = constants.MAP_X_MAX/2 - ((string.len(warning_text) + 4) / 2)
         local accum_initial = middle_x + 2 -- 2x sides
         local row = y + 1
         local accum = accum_initial
