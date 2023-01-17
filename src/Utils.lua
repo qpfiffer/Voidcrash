@@ -2,6 +2,10 @@ local Utils = {}
 
 local bit = require("src/vendor/bitop-funcs")
 
+function Utils.tern(pred, a, b)
+    if pred then return a else return b end
+end
+
 function Utils.generate_frame_name()
     local name = ""
     for i = 1, math.random(2,3) do

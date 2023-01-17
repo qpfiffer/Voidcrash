@@ -1,8 +1,9 @@
 local Renderer = {}
 local dbg = require("debugger")
+local Utils = require("src/Utils")
 Renderer.__index = Renderer
 
-scale = love.window.getDPIScale()
+--scale = love.window.getDPIScale()
 
 SKULL_FONT_WIDTH = 12
 SKULL_FONT_HEIGHT = 16
@@ -69,7 +70,9 @@ function _row_and_column_for_char(char)
     return _row_and_column_for_num(byte)
 end
 
-function Renderer:init()
+function Renderer:init(scale, window_width, window_height)
+    local draw_area_width = Utils.tern(window_width < window_height, window_width, window_height)
+    local draw_area_height = Utils.tern(window_width < window_height, window_width, window_height)
     local this = {
         current_color = SKULL_PALLETTE["white"],
         skull_font = love.graphics.newImage("assets/font.png"),
@@ -78,9 +81,15 @@ function Renderer:init()
         canvas = love.graphics.newCanvas(),
         canvas2 = love.graphics.newCanvas(),
         canvas3 = love.graphics.newCanvas(),
+        final_canvas = love.graphics.newCanvas(draw_area_width, draw_area_height),
         crt_shader = nil,
         scanlines_shader = nil,
         scanlines_phase_tick = 0,
+        scale = scale,
+        window_width = window_width,
+        window_height = window_height,
+        draw_area_width = draw_area_width,
+        draw_area_height = draw_area_height,
         anaglyph_shader = nil
     }
     setmetatable(this, self)
@@ -105,17 +114,17 @@ function Renderer:_draw_raw_numbers(font, array, row, col)
             local row_and_col = _row_and_column_for_num(c)
             local skull_quad = _skull_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, skull_quad,
-                (cur_iter * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
-                (row * SKULL_FONT_HEIGHT + PADDING_Y) * scale,
-                0, scale, scale, 0, 0)
+                (cur_iter * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * self.scale,
+                (row * SKULL_FONT_HEIGHT + PADDING_Y) * self.scale,
+                0, self.scale, self.scale, 0, 0)
         else
             local row_and_col = _traumae_row_and_column_for_num(c)
             --print("ROW AND COL: " .. row_and_col[1] .. ", " .. row_and_col[2])
             local quad = _traumae_quad(font, row_and_col[1], row_and_col[2])
             love.graphics.draw(font, quad,
-                (cur_iter * (T_FONT_WIDTH + T_FONT_KERN_OFFSET) + PADDING_X) * scale/2,
-                (row * T_FONT_HEIGHT + row + PADDING_Y) * scale/2,
-                0, scale/2, scale/2, 0, 0)
+                (cur_iter * (T_FONT_WIDTH + T_FONT_KERN_OFFSET) + PADDING_X) * self.scale/2,
+                (row * T_FONT_HEIGHT + row + PADDING_Y) * self.scale/2,
+                0, self.scale/2, self.scale/2, 0, 0)
         end
         cur_iter = cur_iter + 1
     end
@@ -156,6 +165,14 @@ function Renderer:render_window_with_text(x, y, text)
     self:draw_string(text, y + 1, x + 2)
 end
 
+function Renderer:getDrawAreaWidth()
+    return self.draw_area_width
+end
+
+function Renderer:getDrawAreaHeight()
+    return self.draw_area_height
+end
+
 function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     local top_str = {201, 205}
     local text_str = {186, 32}
@@ -177,10 +194,10 @@ function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     -- Clear BG to bg_color:
     self:set_color(bg_color)
     love.graphics.rectangle('fill',
-    (x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * scale,
-    (y * SKULL_FONT_HEIGHT + PADDING_Y) * scale,
-    SKULL_FONT_WIDTH * (w + 2) * scale,
-    SKULL_FONT_HEIGHT * (h + 2) * scale)
+    (x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * self.scale,
+    (y * SKULL_FONT_HEIGHT + PADDING_Y) * self.scale,
+    SKULL_FONT_WIDTH * (w + 2) * self.scale,
+    SKULL_FONT_HEIGHT * (h + 2) * self.scale)
 
     -- Draw FG:
     local row_offset = y
@@ -197,7 +214,7 @@ end
 function Renderer:render(game_state)
     local r, g, b, a = love.graphics.getColor()
 
-    local arr = {self.canvas3, self.canvas2, self.canvas}
+    local arr = {self.final_canvas, self.canvas3, self.canvas2, self.canvas}
     for i=1, #arr do
         love.graphics.setCanvas(arr[i])
         love.graphics.clear({0, 0, 0})
@@ -218,16 +235,20 @@ function Renderer:render(game_state)
     love.graphics.setCanvas(self.canvas3)
     love.graphics.setShader(self.anaglyph_shader)
     local angle, radius = 30, 1
-    local dx = math.cos(angle) * radius / love.graphics.getWidth()
-    local dy = math.sin(angle) * radius / love.graphics.getHeight()
+    local dx = math.cos(angle) * radius / self.window_width
+    local dy = math.sin(angle) * radius / self.window_height
     self.anaglyph_shader:send("direction", {dx, dy})
     love.graphics.draw(self.canvas2)
 
     -- Final pass
-    love.graphics.setCanvas()
+    love.graphics.setCanvas(self.final_canvas)
     love.graphics.setShader(self.crt_shader)
     love.graphics.draw(self.canvas3)
     love.graphics.setShader()
+
+    -- Finally to the screen
+    love.graphics.setCanvas()
+    love.graphics.draw(self.final_canvas)
 end
 
 return Renderer

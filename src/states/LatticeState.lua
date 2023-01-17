@@ -365,8 +365,8 @@ function LatticeState:_render_lattice_vertical_lines(renderer, game_state, conne
 end
 
 function LatticeState:_render_lattice(renderer, game_state, connected)
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = renderer:getDrawAreaWidth()
+    local height = renderer:getDrawAreaHeight()
 
     renderer:set_color("white")
     love.graphics.translate(width/2, height/16 - 150)
