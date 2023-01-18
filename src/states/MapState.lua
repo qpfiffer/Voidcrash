@@ -59,7 +59,7 @@ end
 
 function MapState:_draw_breadcrumbs(renderer, player_info)
     -- Vector
-    local accum = 0
+    local accum = 1
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("O: ", 0, accum)
     renderer:set_color("white")

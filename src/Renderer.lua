@@ -260,8 +260,12 @@ function Renderer:render(game_state)
     love.graphics.setShader()
 
     -- Finally to the screen
+    local width_offset = (self.window_width - self.draw_area_width) / 2
+    local height_offset = (self.window_height - self.draw_area_height) / 2
+    love.graphics.translate(width_offset, height_offset)
     love.graphics.setCanvas()
     love.graphics.draw(self.final_canvas)
+    love.graphics.origin()
 end
 
 return Renderer
