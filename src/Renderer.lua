@@ -71,8 +71,21 @@ function _row_and_column_for_char(char)
 end
 
 function Renderer:init(scale, window_width, window_height)
-    local draw_area_width = Utils.tern(window_width < window_height, window_width, window_height)
-    local draw_area_height = Utils.tern(window_width < window_height, window_width, window_height)
+    local aspect_ratio_width = 4
+    local aspect_ratio_height = 3
+
+    local draw_area_width = 0
+    local draw_area_height = 0
+    local minimum_draw = Utils.tern(window_width < window_height, window_width, window_height)
+    if window_width > window_height then
+        draw_area_height = minimum_draw
+        draw_area_width = (minimum_draw / aspect_ratio_height) * aspect_ratio_width
+    else
+        -- Dunno man, untested:
+        draw_area_height = (minimum_draw / aspect_ratio_height) * aspect_ratio_width
+        draw_area_width = minimum_draw
+    end
+
     local this = {
         current_color = SKULL_PALLETTE["white"],
         skull_font = love.graphics.newImage("assets/font.png"),

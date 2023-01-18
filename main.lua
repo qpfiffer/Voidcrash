@@ -6,14 +6,6 @@ local GameState = require("src/GameState")
 local MenuState = require("src/states/MenuState")
 local Renderer = require("src/Renderer")
 
--- Constants
---scale = 2 -- love.window.getDPIScale()
-initial_scale = 1.5
---window_width = 640 * scale
---window_height = 480 * scale
-initial_window_width = 1366
-initial_window_height = 768
-
 -- Game internals
 local game_state = nil
 local renderer = nil
@@ -22,8 +14,20 @@ local renderer = nil
 math.randomseed(os.time())
 
 function love.load(arg)
+    -- Set to 0/0 to get screen size
+    love.window.setMode(0, 0, {resizable=false, vsync=false})
+
+    --scale = 2 -- love.window.getDPIScale()
+    initial_scale = 1.5
+    --window_width = 640 * scale
+    --window_height = 480 * scale
+    initial_window_width = love.graphics.getWidth()
+    initial_window_height = love.graphics.getHeight()
+
     love.mouse.setVisible(false)
     love.window.setTitle("black_cartograph.exe")
+
+    -- TODO: Use options or something for this:
     love.window.setMode(initial_window_width, initial_window_height, {resizable=false, vsync=false})
 
     local initial_state = MenuState:init()
