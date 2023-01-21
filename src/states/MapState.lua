@@ -523,18 +523,11 @@ function MapState:render(renderer, game_state)
 
     if self:_player_is_in_weather(player_info) and not player_info.is_in_weather then
         local warning_text = "* WEATHER WARNING *"
-        local w = string.len(warning_text)
-        local h = 1
-
-
+        local x = constants.MAP_X_MAX/2 - ((string.len(warning_text) + 4) / 2)
         local y = constants.MAP_Y_MAX - 5
-        local middle_x = constants.MAP_X_MAX/2 - ((string.len(warning_text) + 4) / 2)
-        local accum_initial = middle_x + 2 -- 2x sides
-        local row = y + 1
-        local accum = accum_initial
-        renderer:render_window(middle_x, y, w, h, "red", "white")
-        renderer:set_color("white")
-        renderer:draw_string(warning_text, row, accum)
+
+        renderer:render_window_with_text(x, y, warning_text, "red", "white")
+
     end
 end
 

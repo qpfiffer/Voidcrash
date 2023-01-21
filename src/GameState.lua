@@ -102,7 +102,7 @@ function GameState:_render_paused(renderer)
     end
 
     local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
-    renderer:render_window_with_text(constants.MAP_X_MAX/2, constants.MAP_Y_MAX, "PAUSED")
+    renderer:render_window_with_text(middle_x, constants.MAP_Y_MAX, "P")
 end
 
 function GameState:render_current_state(renderer)

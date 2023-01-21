@@ -18,11 +18,11 @@ function love.load(arg)
     love.window.setMode(0, 0, {resizable=false, vsync=false})
 
     --scale = 2 -- love.window.getDPIScale()
-    initial_scale = 1.5
+    local initial_scale = 1.5
     --window_width = 640 * scale
     --window_height = 480 * scale
-    initial_window_width = love.graphics.getWidth()
-    initial_window_height = love.graphics.getHeight()
+    local initial_window_width = love.graphics.getWidth()
+    local initial_window_height = love.graphics.getHeight()
 
     love.mouse.setVisible(false)
     love.window.setTitle("black_cartograph.exe")

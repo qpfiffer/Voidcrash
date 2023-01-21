@@ -170,11 +170,13 @@ function Renderer:set_color(color_name)
     love.graphics.setColor(cc[1], cc[2], cc[3], 255)
 end
 
-function Renderer:render_window_with_text(x, y, text)
-    local w = 0
-    local h = string.len(text)
+function Renderer:render_window_with_text(x, y, text, bg_color, fg_color)
+    local w = string.len(text)
+    local h = 1
+    local _bg_color = bg_color or "black"
+    local _fg_color = fg_color or "white"
 
-    self:render_window(x, y, w, h, "black", "white")
+    self:render_window(x, y, w, h, _bg_color, _fg_color)
     self:draw_string(text, y + 1, x + 2)
 end
 
@@ -190,8 +192,8 @@ function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     local top_str = {201, 205}
     local text_str = {186, 32}
     local bottom_str = {200, 205}
+    local byte = string.byte(" ")
     for i=1, w do
-        local byte = string.byte(" ")
         table.insert(top_str, 205)
         table.insert(text_str, byte)
         table.insert(bottom_str, 205)
