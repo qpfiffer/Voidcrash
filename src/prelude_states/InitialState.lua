@@ -13,28 +13,29 @@ local FT_ROW = 2
 local FT_WAIT = 3
 local FT_COLOR = 4
 local FT_OFFSET = 5
+local FT_TRAUMAE = 6
 local fancy_text = {
-    {"Init...", 0, 1, "gray", 0},
+    {"Init...", 0, 1, "gray", 0, false},
 
-    {"Diag core internals", 2, 1, "gray", 0},
-    {"- RAM OK!", 3, 1, "gray", 4},
-    {"- VGATE OK!", 4, 1, "gray", 4},
+    {"Diag core internals", 2, 1, "gray", 0, true},
+    {"- RAM OK!", 3, 1, "gray", 4, true},
+    {"- VGATE OK!", 4, 1, "gray", 4, true},
 
-    {"Diag ship internals (critical systems)", 6, 1, "gray", 0},
-    {"- Cargo: ", 7, 1, "gray", 4},
-    {"[pods secure]", 7, 1, "green", 4},
+    {"Diag ship internals (critical systems)", 6, 1, "gray", 0, false},
+    {"- Cargo: ", 7, 1, "gray", 4, false},
+    {"[pods secure]", 7, 1, "green", 4, false},
 
-    {"Diag ship internals (non-critical)", 9, 1, "gray", 0},
-    {"- Life Support", 10, 1, "gray", 4},
+    {"Diag ship internals (non-critical)", 9, 1, "gray", 0, false},
+    {"- Life Support", 10, 1, "gray", 4, false},
 
-    {"AI Connection...", 12, 1, "gray", 0},
-    {"- Acknowledged", 13, 1, "gray", 4},
+    {"AI Connection...", 12, 1, "gray", 0, false},
+    {"- Acknowledged", 13, 1, "gray", 4, false},
 
-    {"Tap current lucid state", 15, 1, "gray", 0},
+    {"Tap current lucid state", 15, 1, "gray", 0, false},
 
     -- Glyphs here for two seconds
 
-    {"", 11, 1, "gray", 0},
+    {"", 11, 1, "gray", 0, false},
 }
 
 function InitialState:init()
@@ -102,15 +103,24 @@ function InitialState:render(renderer)
         --else
         --end
 
+        local traumae = current_text_item[FT_TRAUMAE]
         renderer:set_color(current_color)
         if i < self.current_text_item_idx then
-            renderer:draw_string(current_text_item[FT_TEXT], current_text_item[FT_ROW], column_accum)
+            if not traumae then
+                renderer:draw_string(current_text_item[FT_TEXT], current_text_item[FT_ROW], column_accum)
+            else
+                renderer:draw_traumae_string(current_text_item[FT_TEXT], current_text_item[FT_ROW], column_accum)
+            end
             column_accum = column_accum + string.len(current_text_item[FT_TEXT])
             row_accum = current_text_item[FT_ROW]
         else
             -- Draw it in stages:
             local substr = string.sub(current_text_item[FT_TEXT], 1, self.current_text_idx)
-            renderer:draw_string(substr, current_text_item[FT_ROW], column_accum)
+            if not traumae then
+                renderer:draw_string(substr, current_text_item[FT_ROW], column_accum)
+            else
+                renderer:draw_traumae_string(substr, current_text_item[FT_ROW], column_accum)
+            end
             row_accum = current_text_item[FT_ROW]
             column_accum = column_accum + string.len(substr)
         end

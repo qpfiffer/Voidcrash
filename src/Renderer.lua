@@ -207,18 +207,18 @@ function Renderer:render_window(x, y, w, h, bg_color, fg_color)
     table.insert(bottom_str, 188)
 
     -- Clear BG to bg_color:
-    self:set_color(bg_color)
-    love.graphics.rectangle('fill',
-    (x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * self.scale,
-    (y * SKULL_FONT_HEIGHT + PADDING_Y) * self.scale,
-    SKULL_FONT_WIDTH * (w + 2) * self.scale,
-    SKULL_FONT_HEIGHT * (h + 2) * self.scale)
+    --self:set_color(bg_color)
+    --love.graphics.rectangle('fill',
+    --(x * (SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) + PADDING_X) * self.scale,
+    --(y * SKULL_FONT_HEIGHT + PADDING_Y) * self.scale,
+    --(SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET) * self.scale * 2,
+    --(SKULL_FONT_HEIGHT * (h + 2)) * self.scale)
 
     -- Draw FG:
     local row_offset = y
     local column_offset = x
 
-    self:set_color(fg_color)
+    self:set_color("green")
     self:_draw_raw_numbers(self.skull_font, top_str, row_offset, column_offset)
     for j=1, h do
         self:_draw_raw_numbers(self.skull_font, text_str, row_offset + j, column_offset)

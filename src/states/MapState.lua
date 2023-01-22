@@ -527,6 +527,8 @@ function MapState:render(renderer, game_state)
         local y = constants.MAP_Y_MAX - 5
 
         renderer:render_window_with_text(x, y, warning_text, "red", "white")
+        renderer:render_window_with_text(x, y - 3, "* WEATHER WARN", "red", "white")
+        renderer:render_window_with_text(x, y - 6, "WEATHER", "red", "white")
 
     end
 end

@@ -3,7 +3,7 @@ MenuState.__index = MenuState
 
 local constants = require("src/Constants")
 
-local InitialState = require("src/states/InitialState")
+local InitialState = require("src/prelude_states/InitialState")
 
 function _start_game(game_state)
     game_state:push_state(InitialState:init())

@@ -3,7 +3,7 @@ if arg[#arg] == "vsc_debug" then require("lldebugger").start() end
 local utf8 = require("utf8")
 
 local GameState = require("src/GameState")
-local MenuState = require("src/states/MenuState")
+local MenuState = require("src/prelude_states/MenuState")
 local Renderer = require("src/Renderer")
 
 -- Game internals
@@ -25,7 +25,7 @@ function love.load(arg)
     local initial_window_height = love.graphics.getHeight()
 
     love.mouse.setVisible(false)
-    love.window.setTitle("black_cartograph.exe")
+    love.window.setTitle("Voidcrash: Prelude")
 
     -- TODO: Use options or something for this:
     love.window.setMode(initial_window_width, initial_window_height, {resizable=false, vsync=false})
