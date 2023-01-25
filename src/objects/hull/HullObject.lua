@@ -43,6 +43,12 @@ function HullObject:init(initial_state)
     }
 
     table.insert(this.powered_on, this.radio)
+    table.insert(this.cargo, this.radio)
+    for i in pairs(this.powered_on) do
+        local item = this.powered_on[i]
+        table.insert(this.cargo, item)
+    end
+
 
     return this
 end

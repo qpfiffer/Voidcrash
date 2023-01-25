@@ -32,6 +32,14 @@ function RadioObject:get_power_usage()
     return self.power_usage
 end
 
+function RadioObject:get_object_type()
+    return self.object_type
+end
+
+function RadioObject:get_tonnage()
+    return 0.002
+end
+
 function RadioObject:update(game_state, dt)
 end
 
