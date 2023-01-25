@@ -26,6 +26,10 @@ function HullState:init(next_state)
     return this
 end
 
+function HullState:get_name()
+    return "HUL"
+end
+
 function HullState:key_pressed(game_state, key)
     if key == "right" then
         self.selected_idx = self.selected_idx + 1

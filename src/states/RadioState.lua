@@ -20,6 +20,10 @@ function RadioState:init(next_state)
     return this
 end
 
+function RadioState:get_name()
+    return "RAD"
+end
+
 function RadioState:key_pressed(game_state, key)
 end
 

@@ -42,6 +42,10 @@ function LatticeState:init()
     return this
 end
 
+function LatticeState:get_name()
+    return "LAT"
+end
+
 function LatticeState:_ensure_grid_size_selected(idx)
     if self.selected[idx] > LATTICE_GRID_SIZE then
         self.selected[idx] = 0
@@ -369,7 +373,7 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
     local height = renderer:getDrawAreaHeight()
 
     renderer:set_color("white")
-    love.graphics.translate(width/2, height/16 - 150)
+    love.graphics.translate(width/2, height/16 - 225)
 
     for x = 1, LATTICE_GRID_SIZE do
         for y = 1, LATTICE_GRID_SIZE + 1 do

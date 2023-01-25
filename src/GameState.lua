@@ -25,6 +25,7 @@ function GameState:key_pressed(key)
         love.event.quit()
     end
     if self:get_game_started() then
+        -- TODO: Make this better.
         if key == "1" then
             self.current_state = self.active_states[1]
         elseif key == "2" then
@@ -96,18 +97,34 @@ function GameState:get_game_started()
     return self.game_started
 end
 
-function GameState:_render_paused(renderer)
-    if not self.paused then
-        return
+function GameState:_render_tabs(renderer)
+    local accum = 1
+    renderer:set_color("white")
+    for i in pairs(self.active_states) do
+        local is_active = false
+        if self.active_states[i] == self.current_state then
+            is_active = true
+        end
+
+        if i ~= 1 then
+            accum = accum + renderer:draw_string("| ", constants.MAP_Y_MAX + 2, accum)
+        end
+        if is_active then
+            renderer:set_color("red")
+        end
+        accum = accum + renderer:draw_string(self.active_states[i]:get_name() .. " ", constants.MAP_Y_MAX + 2, accum)
+        renderer:set_color("white")
     end
 
-    local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
-    renderer:render_window_with_text(middle_x, constants.MAP_Y_MAX, "P")
+    if self.paused then
+        local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
+        renderer:render_window_with_text(middle_x, constants.MAP_Y_MAX, "P")
+    end
 end
 
 function GameState:render_current_state(renderer)
     self.current_state:render(renderer, self)
-    self:_render_paused(renderer)
+    self:_render_tabs(renderer)
 end
 
 function GameState:update_current_state(dt)

@@ -26,6 +26,10 @@ function FrameState:init(next_state)
     return this
 end
 
+function FrameState:get_name()
+    return "FRM"
+end
+
 function FrameState:key_pressed(game_state, key)
     if key == "up" then
         self.frame_selected_idx = self.frame_selected_idx - 1

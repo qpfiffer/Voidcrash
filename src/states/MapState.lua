@@ -57,6 +57,11 @@ function MapState:init(game_state)
     return this
 end
 
+function MapState:get_name()
+    return "MAP"
+end
+
+
 function MapState:_draw_breadcrumbs(renderer, player_info)
     -- Vector
     local accum = 1
