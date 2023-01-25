@@ -3,8 +3,6 @@ local dbg = require("debugger")
 local Utils = require("src/Utils")
 Renderer.__index = Renderer
 
---scale = love.window.getDPIScale()
-
 SKULL_FONT_WIDTH = 12
 SKULL_FONT_HEIGHT = 16
 SKULL_FONT_KERN_OFFSET = 3
@@ -91,9 +89,9 @@ function Renderer:init(scale, window_width, window_height)
         skull_font = love.graphics.newImage("assets/font.png"),
         traumae_font = love.graphics.newImage("assets/font2.png"),
 
-        canvas = love.graphics.newCanvas(),
-        canvas2 = love.graphics.newCanvas(),
-        canvas3 = love.graphics.newCanvas(),
+        canvas = love.graphics.newCanvas(draw_area_width, draw_area_height),
+        canvas2 = love.graphics.newCanvas(draw_area_width, draw_area_height),
+        canvas3 = love.graphics.newCanvas(draw_area_width, draw_area_height),
         final_canvas = love.graphics.newCanvas(draw_area_width, draw_area_height),
         crt_shader = nil,
         scanlines_shader = nil,
