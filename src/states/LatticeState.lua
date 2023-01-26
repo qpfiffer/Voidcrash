@@ -107,6 +107,10 @@ function LatticeState:key_pressed(game_state, key)
 end
 
 function LatticeState:update(game_state, dt)
+    if self.lattice_state == LTC_STATE_SELECTED then
+        self.connected_window:update(game_state, dt)
+    end
+
     self.dtotal = self.dtotal + dt
     local tick_modifier = 16
     local modified_tick = constants.TICKER_RATE / tick_modifier
@@ -121,10 +125,6 @@ function LatticeState:update(game_state, dt)
         if not game_state:get_paused() then
             local player_info = game_state:get_player_info()
             player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.0002)
-        end
-
-        if self.lattice_state == LTC_STATE_SELECTED then
-            self.connected_window:update(game_state)
         end
 
         self.ticks_advanced = BLINK_TICK_COUNT
