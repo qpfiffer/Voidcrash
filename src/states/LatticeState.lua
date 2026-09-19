@@ -332,6 +332,7 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
     local height = renderer:getDrawAreaHeight()
 
     renderer:set_color("white")
+    renderer:flush() -- Queued text must land before the transform changes.
     love.graphics.translate(width/2, height/16 - 225)
 
     for x = 1, LATTICE_GRID_SIZE do

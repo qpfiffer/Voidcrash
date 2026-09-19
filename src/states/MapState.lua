@@ -166,7 +166,7 @@ function MapState:_draw_map(renderer, player_info)
                 renderer:set_color("black")
             end
 
-            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+            renderer:draw_glyph(178, y + 1, x + row_offset)
         end
     end
 end
@@ -354,7 +354,7 @@ function MapState:_draw_weather(renderer, game_state, player_info)
                     if math.fmod(x, 2) == 0 and math.fmod(y, 2) == 0 then
                         for i=0,8 do
                             if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
-                                renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
+                                renderer:draw_glyph(i - 1, y + 1, x + row_offset)
                                 break
                             end
                         end
@@ -362,7 +362,7 @@ function MapState:_draw_weather(renderer, game_state, player_info)
                 else
                     for i=0,8 do
                         if noise_val * 2 < (i * WEATHER_MAP_DIVISOR/8) then
-                            renderer:draw_raw_numbers({i - 1}, y + 1, x + row_offset)
+                            renderer:draw_glyph(i - 1, y + 1, x + row_offset)
                             break
                         end
                     end
@@ -395,11 +395,11 @@ function MapState:_draw_lattice(renderer, player_info)
                 if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
                     renderer:set_color("blood")
                     local char = 194 + math.fmod(noise_val, 4)
-                    renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+                    renderer:draw_glyph(char, y + 1, x + row_offset)
                 elseif noise_val < constants.LATTICE_MINUMUM_INTENSITY then
                     renderer:set_color("red")
                     local char = 196 + math.fmod(noise_val, 10)
-                    renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
+                    renderer:draw_glyph(char, y + 1, x + row_offset)
                 end
             end
         end
@@ -470,14 +470,14 @@ function MapState:render(renderer, game_state)
             if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
                 if not closest_object_idx then
                     renderer:set_color("red")
-                    renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                    renderer:draw_glyph(w_object:get_icon(), y + 1, x + row_offset)
                 else
                     if not self.cursor_mode or i ~= closest_object_idx then
                         renderer:set_color("red")
-                        renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                        renderer:draw_glyph(w_object:get_icon(), y + 1, x + row_offset)
                     elseif self.blink_cursor_on and i == closest_object_idx then
                         renderer:set_color("green")
-                        renderer:draw_raw_numbers({w_object:get_icon()}, y + 1, x + row_offset)
+                        renderer:draw_glyph(w_object:get_icon(), y + 1, x + row_offset)
                     end
                 end
             end
@@ -489,7 +489,7 @@ function MapState:render(renderer, game_state)
         local x = math.floor(((player_info.overmap_x - self.current_x_offset) / zoom) + (constants.MAP_X_MAX/2))
         local y = math.floor(((player_info.overmap_y - self.current_y_offset) / zoom) + (constants.MAP_Y_MAX/2))
         if x < constants.MAP_X_MAX and x >= 1 and y < constants.MAP_Y_MAX and y >= 1 then
-            renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+            renderer:draw_glyph(178, y + 1, x + row_offset)
         end
     end
 
@@ -498,7 +498,7 @@ function MapState:render(renderer, game_state)
         local y = math.floor(self.cursor_y)
 
         renderer:set_color("red")
-        renderer:draw_raw_numbers({178}, y + 1, x + row_offset)
+        renderer:draw_glyph(178, y + 1, x + row_offset)
     end
 
     for i=1, #self.menus do

@@ -7,7 +7,7 @@ function love.conf(t)
     t.window.width = 0
     t.window.height = 0
     t.window.resizable = false
-    t.window.vsync = 0
+    t.window.vsync = 1
 
     -- Nothing uses these, and audio spins up a mixer thread for no reason.
     t.modules.audio = false

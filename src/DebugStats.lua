@@ -2,7 +2,8 @@
 -- script runner so a run can be driven without anyone at the keyboard.
 --
 --   VOIDCRASH_STATS=1            print a stats line every second (F3 toggles it)
---   VOIDCRASH_KEYS=return,space  press these keys in order ("-" waits a beat)
+--   VOIDCRASH_KEYS=return,space  press these keys in order ("-" waits a beat,
+--                                "shot:name" saves name.png to VOIDCRASH_SHOT_DIR)
 --   VOIDCRASH_KEY_INTERVAL=0.5   seconds between scripted keys
 --   VOIDCRASH_EXIT_AFTER=10      quit after this many seconds
 local DebugStats = {}
@@ -99,7 +100,15 @@ function DebugStats.tick()
         local key = scripted_keys[next_key_idx]
         next_key_idx = next_key_idx + 1
         next_key_at = now + key_interval
-        if key ~= "-" then
+        local shot_name = key:match("^shot:(.+)$")
+        if shot_name then
+            love.graphics.captureScreenshot(function(image_data)
+                local dir = os.getenv("VOIDCRASH_SHOT_DIR") or "."
+                local file = assert(io.open(dir .. "/" .. shot_name .. ".png", "wb"))
+                file:write(image_data:encode("png"):getString())
+                file:close()
+            end)
+        elseif key ~= "-" then
             love.event.push("keypressed", key, key, false)
             love.event.push("keyreleased", key, key)
         end

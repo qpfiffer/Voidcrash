@@ -100,7 +100,7 @@ function LeftWipeState:render(renderer)
                     local char = ref[1]
                     local color = ref[2]
                     renderer:set_color(color_list[color])
-                    renderer:_draw_raw_numbers(renderer.traumae_font, {char}, y, x + row_offset)
+                    renderer:draw_traumae_glyph(char, y, x + row_offset)
                 end
             end
         end
