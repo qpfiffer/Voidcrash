@@ -1,3 +1,14 @@
+## Running
+
+`love .` — needs LÖVE 11.x. `luajit tests/run.lua` runs the headless tests, `tools/lint_globals.sh` checks
+for accidental globals. Set `VOIDCRASH_STATS=1` (or press F3) for per-second update/draw/CPU numbers.
+
+Keys: `1`-`5` tabs, arrows pan (or move the cursor), `pageup`/`pagedown` zoom, `h` home, `tab` overlay,
+`space` pause, `return` cursor / context menu, `escape` back out (then Resume/Quit).
+
+How it's put together (one clock, an entity-component world, screens that only redraw when something
+changes) is described in `CLAUDE.md`.
+
 Ideas
 =====
 

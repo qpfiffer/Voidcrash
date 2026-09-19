@@ -292,10 +292,10 @@ function MapState:_draw_lattice(renderer, game_state)
 
     self:_each_overlay_cell(game_state, function(x, y, world_x, world_y)
         local noise_val = game_state.fields:lattice_intensity(world_x, world_y, sim_time)
-        if noise_val < constants.LATTICE_MINUMUM_INTENSITY - 50 then
+        if noise_val < constants.LATTICE_MINIMUM_INTENSITY - 50 then
             renderer:set_color("blood")
             renderer:draw_glyph(194 + math.fmod(noise_val, 4), y + 1, x + 1)
-        elseif noise_val < constants.LATTICE_MINUMUM_INTENSITY then
+        elseif noise_val < constants.LATTICE_MINIMUM_INTENSITY then
             renderer:set_color("red")
             renderer:draw_glyph(196 + math.fmod(noise_val, 10), y + 1, x + 1)
         end
@@ -349,6 +349,17 @@ function MapState:_open_context_menu(game_state)
     table.insert(items, {name = "Cancel", enabled = true, callback = close})
 
     self.menu = ModalMenu:init(self.cursor_x, self.cursor_y, items, "white", "black")
+end
+
+function MapState:on_escape(game_state)
+    if self.menu then
+        self.menu = nil
+        return true
+    elseif self.cursor_mode then
+        self.cursor_mode = nil
+        return true
+    end
+    return false
 end
 
 function MapState:key_pressed(game_state, key)

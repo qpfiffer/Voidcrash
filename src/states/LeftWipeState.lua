@@ -3,6 +3,7 @@ local LeftWipeState = Screen.extend()
 
 local constants = require("src/Constants")
 
+-- In traumae glyphs, which are a different size from the map's: not constants.MAP_*.
 local MAP_X_MAX = 68
 local MAP_Y_MAX = 35
 

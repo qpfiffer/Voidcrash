@@ -2,7 +2,7 @@ local constants = {}
 
 -- Time. Everything is in seconds (or per second); src/Clock.lua is the only
 -- thing that ever sees dt.
-constants.SIM_HZ = 60               -- Fixed simulation steps per second.
+constants.SIM_HZ = 20               -- Fixed simulation steps per second. Nothing is tuned per step, so this only trades smoothness for CPU.
 constants.BLINK_PERIOD = 1/3        -- Seconds per blink phase (on, then off).
 constants.BOOT_TEXT_CPS = 60        -- Boot sequence characters per second.
 constants.WIPE_TICK = 1/60          -- Left-wipe advances every 1-3 of these.
@@ -35,6 +35,6 @@ constants.TICK_SLOW_FACTOR = 53     -- Seconds of sim time per displayed tick.
 
 constants.LATTICE_NOISE_OFFSET_X = 48765
 constants.LATTICE_NOISE_OFFSET_Y = 32455
-constants.LATTICE_MINUMUM_INTENSITY = 300
+constants.LATTICE_MINIMUM_INTENSITY = 300
 
 return constants

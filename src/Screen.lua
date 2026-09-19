@@ -42,6 +42,12 @@ end
 function Screen:on_exit(game_state)
 end
 
+-- Escape backs out of whatever is open (a menu, a dialog, cursor mode). Return
+-- true if there was something to back out of; if not, GameState handles it.
+function Screen:on_escape(game_state)
+    return false
+end
+
 -- Whether a blinking cursor is visible (decides if blink edges need redraws).
 function Screen:uses_blink()
     return false

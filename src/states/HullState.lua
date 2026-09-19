@@ -93,12 +93,6 @@ function HullState:_draw_fabricator_pane(renderer, game_state)
     renderer:draw_string("FAB", row, accum)
     row = row + 1
 
-    -- local items = game_state.player_info:get_cargo()
-    -- for i in pairs(items) do
-    --     local cargo_item = items[i]
-    --     renderer:set_color("gray")
-    --     accum = accum + renderer:draw_string("* " .. cargo_item:get_name(), row, accum)
-
     --     row = row + 1
     --     accum = accum_start
     -- end

@@ -7,10 +7,6 @@ local function _start_game(game_state)
     game_state:push_state(InitialState:init())
 end
 
-local function _resume_game(game_state)
-    game_state:push_state(InitialState:init())
-end
-
 local function _quit_game()
     love.event.quit()
 end
@@ -19,7 +15,7 @@ local M_TEXT = 1
 local M_FUNC = 2
 local menu_items = {
     {"New Game", _start_game},
-    {"Resume", _resume_game},
+    {"Resume", nil}, -- Nothing to resume until there are saves.
     {"Quit", _quit_game},
 }
 
@@ -40,7 +36,9 @@ function MenuState:key_pressed(game_state, key)
     elseif key == "return" then
         local c_menu_item = menu_items[self.current_menu_item]
         local func = c_menu_item[M_FUNC]
-        func(game_state)
+        if func then
+            func(game_state)
+        end
     end
 
     local cmu = self.current_menu_item
@@ -65,6 +63,9 @@ function MenuState:render(renderer)
             renderer:set_color("red")
         else
             renderer:set_color("gray")
+        end
+        if not menu_items[i][M_FUNC] then
+            renderer:set_color("grayer")
         end
         renderer:draw_string(pre .. menu_items[i][M_TEXT], i + start + 2, 5)
     end

@@ -22,7 +22,7 @@ local PADDING_Y = 0
 -- Distance between the left edges of two neighbouring skull glyphs.
 local SKULL_STRIDE = SKULL_FONT_WIDTH - SKULL_FONT_KERN_OFFSET
 
-local SKULL_PALLETTE = {
+local SKULL_PALETTE = {
     ["white"] = {1,1,1},
     ["gray"] = {0.66, 0.66, 0.66},
     ["grayer"] = {0.33, 0.33, 0.33},
@@ -89,7 +89,7 @@ function Renderer:init(scale, window_width, window_height)
     local traumae_font = love.graphics.newImage("assets/font2.png")
 
     local this = {
-        current_color = SKULL_PALLETTE["white"],
+        current_color = SKULL_PALETTE["white"],
         skull_font = skull_font,
         traumae_font = traumae_font,
 
@@ -236,7 +236,7 @@ function Renderer:draw_traumae_string(str, row, col)
 end
 
 function Renderer:set_color(color_name)
-    local cc = SKULL_PALLETTE[color_name]
+    local cc = SKULL_PALETTE[color_name]
     self.current_color = cc
     -- Glyphs take their color from the batch; this is for lines and rectangles.
     love.graphics.setColor(cc[1], cc[2], cc[3], 1)

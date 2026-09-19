@@ -3,6 +3,7 @@ GameState.__index = GameState
 
 local constants = require("src/Constants")
 local Fields = require("src/sim/fields")
+local ModalMenu = require("src/ui/ModalMenu")
 local new_game = require("src/sim/new_game")
 
 function GameState:init(initial_state, clock)
@@ -13,7 +14,7 @@ function GameState:init(initial_state, clock)
         clock = clock, -- All time lives here; pausing freezes clock.sim.
         world = new_game(), -- The simulation: everything that isn't a screen.
         fields = Fields.new(love.math.noise), -- Terrain, weather, lattice.
-        menu_open = false, -- Show the menu
+        system_menu = nil, -- The Resume/Quit popup, while it's open.
         game_started = false, -- Whether we've reached the game screens, map, lattice, etc.
         dirty = true, -- Whether the screen needs redrawing.
     }
@@ -47,14 +48,41 @@ function GameState:_set_current_state(new_state)
     new_state:_enter(self)
 end
 
-function GameState:key_pressed(key)
-    if key == "escape" then
-        -- TODO: push_state menu
-        love.event.quit()
+function GameState:_toggle_system_menu()
+    if self.system_menu then
+        self.system_menu = nil
+        return
     end
 
+    local middle_x = constants.MAP_X_MAX/2 - 6
+    self.system_menu = ModalMenu:init(middle_x, constants.MAP_Y_MAX/2 - 2, {
+        {name = "Resume", enabled = true, callback = function() self.system_menu = nil end},
+        {name = "Quit", enabled = true, callback = function() love.event.quit() end},
+    }, "white", "black")
+end
+
+function GameState:key_pressed(key)
     -- Any input restarts the blink in its "on" phase, on every screen.
     self.clock:reset_blink()
+
+    if key == "escape" then
+        -- Escape backs out one level at a time; with nothing left to back out
+        -- of it offers to quit (or just quits, before the game has started).
+        if self.system_menu then
+            self.system_menu = nil
+        elseif not self.current_state:on_escape(self) then
+            if self:get_game_started() then
+                self:_toggle_system_menu()
+            else
+                love.event.quit()
+            end
+        end
+        return
+    end
+
+    if self.system_menu then
+        return self.system_menu:key_pressed(self, key)
+    end
 
     if self:get_game_started() then
         local tab = self.active_states[tonumber(key)]
@@ -80,10 +108,6 @@ function GameState:push_state(new_state, is_active)
         table.insert(self.active_states, new_state)
     end
     self:_set_current_state(new_state)
-end
-
-function GameState:pop_state()
-    -- TBD
 end
 
 function GameState:get_current_state()
@@ -117,14 +141,6 @@ end
 
 function GameState:get_paused()
     return self.clock:is_paused()
-end
-
-function GameState:set_menu_open(new)
-    self.menu_open = new
-end
-
-function GameState:get_menu_open()
-    return self.menu_open
 end
 
 function GameState:set_game_started(new)
@@ -163,6 +179,9 @@ end
 function GameState:render_current_state(renderer)
     self.current_state:render(renderer, self)
     self:_render_tabs(renderer)
+    if self.system_menu then
+        self.system_menu:render(renderer)
+    end
 end
 
 function GameState:update(dt)
