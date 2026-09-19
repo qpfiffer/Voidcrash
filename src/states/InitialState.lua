@@ -49,7 +49,7 @@ function InitialState:init()
     return this
 end
 
-function _next_state(game_state)
+local function _next_state(game_state)
     game_state:push_state(LeftWipeState:init(GameStartState:init()))
 end
 

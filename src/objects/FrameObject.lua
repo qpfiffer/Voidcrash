@@ -6,7 +6,6 @@ local bit = require("src/vendor/bitop-funcs")
 local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
-local CollectorObject = require("src/objects/CollectorObject")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
 local UnitCommand = require("src/management/UnitCommand")
@@ -25,8 +24,8 @@ function FrameObject:init(name, x, y, orders)
         origin_x = x,
         origin_y = y,
 
-        dest_x = dest_x,
-        dest_y = dest_y,
+        dest_x = nil,
+        dest_y = nil,
 
         world_x = x,
         world_y = y,
@@ -231,15 +230,14 @@ function FrameObject:get_deployable_cargo()
 end
 
 function FrameObject:get_context_cursor_items(game_state, exit_callback)
-    add_drop_order_callback = function ()
+    local add_drop_order_callback = function ()
         self:add_order(game_state, UnitCommand:init(OrderType.DROP, {}))
         exit_callback()
     end
 
-    add_move_order_callback = function (bonus_data)
-        x = bonus_data["x"]
-        y = bonus_data["y"]
-        print("DATA: " .. tostring(x) .. ", " .. tostring(y))
+    local add_move_order_callback = function (bonus_data)
+        local x = bonus_data["x"]
+        local y = bonus_data["y"]
 
         self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
             start_x = nil, --self.world_x,
@@ -250,7 +248,7 @@ function FrameObject:get_context_cursor_items(game_state, exit_callback)
         exit_callback()
     end
 
-    add_return_to_hull_callback = function ()
+    local add_return_to_hull_callback = function ()
         self:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
             start_x = nil, --self.world_x,
             start_y = nil, --self.world_y,

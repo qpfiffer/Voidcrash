@@ -3,20 +3,20 @@ local dbg = require("debugger")
 local Utils = require("src/Utils")
 Renderer.__index = Renderer
 
-SKULL_FONT_WIDTH = 12
-SKULL_FONT_HEIGHT = 16
-SKULL_FONT_KERN_OFFSET = 3
-SKULL_FONT_VERTICAL_SPACING = 3
+local SKULL_FONT_WIDTH = 12
+local SKULL_FONT_HEIGHT = 16
+local SKULL_FONT_KERN_OFFSET = 3
+local SKULL_FONT_VERTICAL_SPACING = 3
 
-T_FONT_WIDTH = 32
-T_FONT_HEIGHT = 26
-T_FONT_KERN_OFFSET = 4
-T_FONT_VERTICAL_SPACING = 12
+local T_FONT_WIDTH = 32
+local T_FONT_HEIGHT = 26
+local T_FONT_KERN_OFFSET = 4
+local T_FONT_VERTICAL_SPACING = 12
 
-PADDING_X = 0
-PADDING_Y = 0
+local PADDING_X = 0
+local PADDING_Y = 0
 
-SKULL_PALLETTE = {
+local SKULL_PALLETTE = {
     ["white"] = {1,1,1},
     ["gray"] = {0.66, 0.66, 0.66},
     ["grayer"] = {0.33, 0.33, 0.33},
@@ -32,7 +32,7 @@ SKULL_PALLETTE = {
     ["black"] = {0, 0, 0},
 }
 
-function _skull_quad(skull_font_img, row, column)
+local function _skull_quad(skull_font_img, row, column)
     return love.graphics.newQuad(
         column * SKULL_FONT_WIDTH,
         row * (SKULL_FONT_HEIGHT + SKULL_FONT_VERTICAL_SPACING),
@@ -42,31 +42,27 @@ function _skull_quad(skull_font_img, row, column)
         skull_font_img:getHeight())
 end
 
-function _traumae_quad(traumae_font_img, row, column)
+local function _traumae_quad(traumae_font_img, row, column)
     return love.graphics.newQuad(
         column * T_FONT_WIDTH,
         row * (T_FONT_HEIGHT + T_FONT_VERTICAL_SPACING),
         T_FONT_WIDTH, T_FONT_HEIGHT, traumae_font_img:getWidth(), traumae_font_img:getHeight())
 end
 
-function _row_and_column_for_num(num)
+local function _row_and_column_for_num(num)
     -- Everything greater than 20 is ASCII
     local row = math.floor(num / 32)
     local column = num % 32
     return {row, column}
 end
 
-function _traumae_row_and_column_for_num(num)
+local function _traumae_row_and_column_for_num(num)
     local max_char = math.fmod(num, 32) -- 32 total chars
     local row = math.floor(max_char / 12) -- 3 rows of twelve
     local column = math.fmod(max_char, 12)
     return {row, column}
 end
 
-function _row_and_column_for_char(char)
-    local byte = string.byte(char)
-    return _row_and_column_for_num(byte)
-end
 
 function Renderer:init(scale, window_width, window_height)
     local aspect_ratio_width = 4

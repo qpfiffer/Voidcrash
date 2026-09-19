@@ -5,15 +5,15 @@ local constants = require("src/Constants")
 
 local InitialState = require("src/states/InitialState")
 
-function _start_game(game_state)
+local function _start_game(game_state)
     game_state:push_state(InitialState:init())
 end
 
-function _resume_game(game_state)
+local function _resume_game(game_state)
     game_state:push_state(InitialState:init())
 end
 
-function _quit_game()
+local function _quit_game()
     love.event.quit()
 end
 

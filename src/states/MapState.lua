@@ -5,6 +5,7 @@ local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
 local ModalMenu = require("src/ui/ModalMenu")
+local DebugStats = require("src/DebugStats")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
 local UnitCommand = require("src/management/UnitCommand")
@@ -40,7 +41,6 @@ function MapState:init(game_state)
         ticks_advanced = BLINK_TICK_COUNT,
 
         current_map_overlay = MAP_OVERLAYS[1],
-        current_time = GENESIS,
 
         current_weather_step = 1,
 
@@ -167,8 +167,8 @@ function MapState:insert_frame_nav_menu(game_state)
     local cursor_world_x = (zoom * (self.cursor_x - constants.MAP_X_MAX/2)) + self.current_x_offset
     local cursor_world_y = (zoom * (self.cursor_y - constants.MAP_Y_MAX/2)) + self.current_y_offset
 
-    exit_callback = function () table.remove(self.menus, 1) end
-    dispatch_callback = function ()
+    local exit_callback = function () table.remove(self.menus, 1) end
+    local dispatch_callback = function ()
         local dispatchable = game_state.player_info.hull:pop_item_from_cargo_of_type(ObjectType.DISPATCHABLE)
         dispatchable:set_deployed(true)
         dispatchable:add_order(game_state, UnitCommand:init(OrderType.MOVEMENT, {
@@ -191,8 +191,8 @@ function MapState:insert_frame_nav_menu(game_state)
         closest_object_context_item = {["name"]=closest_object:get_name(), ["enabled"] = false, ["callback"]=exit_callback}
     end
 
-    dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info.hull:has_dispatchable(), ["callback"]=dispatch_callback}
-    cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
+    local dispatch_item = {["name"]="Dispatch", ["enabled"] = game_state.player_info.hull:has_dispatchable(), ["callback"]=dispatch_callback}
+    local cancel_item = {["name"]="Cancel", ["enabled"] = true, ["callback"]=exit_callback}
 
     local items = nil
     if closest_object then
@@ -208,7 +208,7 @@ function MapState:insert_frame_nav_menu(game_state)
     end
 
     local bonus_data = {["x"] = cursor_world_x, ["y"] = cursor_world_y}
-    new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback, "white", "black", bonus_data)
+    local new_menu = ModalMenu:init(game_state, self.cursor_x, self.cursor_y, items, exit_callback, "white", "black", bonus_data)
     table.insert(self.menus, new_menu)
 end
 
@@ -232,7 +232,6 @@ function MapState:key_pressed(game_state, key)
             self.cursor_mode = "cursor"
             self.cursor_x = constants.MAP_X_MAX/2
             self.cursor_y = constants.MAP_Y_MAX/2 - 1
-            print("Cursor mode: " .. tostring(cursor_mode) .. " " .. self.cursor_x .. " " .. self.cursor_y)
         elseif self.cursor_mode == "cursor" then
             self:insert_frame_nav_menu(game_state)
             self.cursor_mode = nil
@@ -304,6 +303,7 @@ function MapState:update(game_state, dt, is_active)
     self.dtotal = self.dtotal + dt
     if self.dtotal >= constants.TICKER_RATE then
         self.dtotal = self.dtotal - constants.TICKER_RATE
+        DebugStats.count("sim")
 
         self.ticks_advanced = self.ticks_advanced - 1
         if self.ticks_advanced <= 0 then
@@ -365,7 +365,6 @@ function MapState:_draw_weather(renderer, player_info)
                 local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
                 renderer:set_color("grayest")
-                renderer:draw_raw_numbers({char}, y + 1, x + row_offset)
 
                 if noise_val < WEATHER_MAP_DIVISOR/2 then
                     if math.fmod(x, 2) == 0 and math.fmod(y, 2) == 0 then

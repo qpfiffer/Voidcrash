@@ -26,7 +26,7 @@ function LeftWipeState:key_pressed(game_state, key)
     game_state:push_state(self.next_state)
 end
 
-function _random_tick_count()
+local function _random_tick_count()
     return math.random(TICKS_ADVANCE_MIN, TICKS_ADVANCE_MAX)
 end
 

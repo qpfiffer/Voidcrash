@@ -3,6 +3,7 @@ LatticeState.__index = LatticeState
 
 local constants = require("src/Constants")
 local SleeperDialog = require("src/ui/SleeperDialog")
+local DebugStats = require("src/DebugStats")
 
 local BLINK_TICK_COUNT = 20
 local BLINK_TICKER_COUNTDOWN = 8
@@ -102,7 +103,7 @@ function LatticeState:key_pressed(game_state, key)
     if self.select_mode_idx > #SELECT_MODES then
         self.select_mode_idx = 1
     elseif self.select_mode_idx <= 0 then
-        self.selected[idx] = #SELECT_MODES - 1
+        self.select_mode_idx = #SELECT_MODES
     end
 end
 
@@ -125,6 +126,7 @@ function LatticeState:update(game_state, dt)
         if not game_state:get_paused() then
             local player_info = game_state:get_player_info()
             player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.0002)
+            DebugStats.count("lattice_step")
         end
 
         self.ticks_advanced = BLINK_TICK_COUNT
@@ -132,6 +134,7 @@ function LatticeState:update(game_state, dt)
         self.blink_ticker_countdown = self.blink_ticker_countdown - 1
         if self.blink_ticker_countdown <= 0 then
             self.blink_cursor_on = not self.blink_cursor_on
+            DebugStats.count("lattice_blink")
             self.blink_ticker_countdown = BLINK_TICKER_COUNTDOWN
         end
     end

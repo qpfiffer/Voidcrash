@@ -3,6 +3,7 @@ local SleeperDialog = {}
 SleeperDialog.__index = SleeperDialog
 
 local constants = require("src/Constants")
+local DebugStats = require("src/DebugStats")
 
 local BLINK_TICK_COUNT = 20
 
@@ -31,7 +32,6 @@ function SleeperDialog:_new_item(text)
         original_text = text,
         split_text = split_text,
         current_text_idx = 0,
-        highlighted_indexes = highlighted_indexes,
     }
 end
 
@@ -129,6 +129,7 @@ function SleeperDialog:update(game_state, dt)
 
         if current_item.current_text_idx < string.len(current_item.original_text) then
             current_item.current_text_idx = current_item.current_text_idx + 1
+            DebugStats.count("sleeper_char")
         else
             self.current_text_item_idx = self.current_text_item_idx + 1
         end

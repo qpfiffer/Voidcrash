@@ -5,7 +5,7 @@ LOVE_EXE_NAME="love.exe"
 NAME="voidcrash"
 EXE_NAME="$NAME.exe"
 
-zip -9 -r $NAME assets src main.lua debugger.lua
+zip -9 -r $NAME assets src main.lua conf.lua debugger.lua
 mv $NAME.zip $NAME.love
 
 cat $LOVE_EXE_LOC/$LOVE_EXE_NAME $NAME.love > $EXE_NAME
