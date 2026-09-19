@@ -1,24 +1,11 @@
-local HullState = {}
-HullState.__index = HullState
+local Screen = require("src/Screen")
+local HullState = Screen.extend()
 
 local constants = require("src/Constants")
+local hull_queries = require("src/sim/hull_queries")
 
-local MAP_X_MAX = 68
-local MAP_Y_MAX = 35
-
-local TICKS_ADVANCE_MIN = 1
-local TICKS_ADVANCE_MAX = 3
-
-local BLINK_TICK_COUNT = 20
-
-function HullState:init(next_state)
+function HullState:init()
     local this = {
-        dtotal = 0,
-        ticks_advanced = BLINK_TICK_COUNT,
-        next_state = next_state,
-
-        blink_cursor_on = true,
-
         selected_idx = 1,
     }
     setmetatable(this, self)
@@ -30,6 +17,10 @@ function HullState:get_name()
     return "HUL"
 end
 
+function HullState:uses_blink()
+    return true
+end
+
 function HullState:key_pressed(game_state, key)
     if key == "right" then
         self.selected_idx = self.selected_idx + 1
@@ -37,29 +28,10 @@ function HullState:key_pressed(game_state, key)
         self.selected_idx = self.selected_idx - 1
     end
 
-    self.blink_cursor_on = true
-
     if self.selected_idx > 3 then
         self.selected_idx = 1
     elseif self.selected_idx < 1 then
         self.selected_idx = 3
-    end
-end
-
-function HullState:update(game_state, dt)
-    self.dtotal = self.dtotal + dt
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE
-        self.ticks_advanced = self.ticks_advanced - 1
-
-        if self.ticks_advanced <= 0 then
-            -- Reset the counter.
-            self.ticks_advanced = BLINK_TICK_COUNT
-            self.blink_cursor_on = not self.blink_cursor_on
-        end
-
-        -- Do something.
-
     end
 end
 
@@ -71,11 +43,11 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:draw_string("POWER", row, accum)
     row = row + 1
 
-    local items = game_state.player_info.hull:get_power_items()
-    for i in pairs(items) do
-        local active_power_item = items[i]
+    local world = game_state.world
+    local items = hull_queries.powered(world)
+    for i=1, #items do
         renderer:set_color("gray")
-        accum = accum + renderer:draw_string("* " .. active_power_item:get_name(), row, accum)
+        accum = accum + renderer:draw_string("* " .. world:get(items[i], "Named").name, row, accum)
 
         row = row + 1
         accum = 2
@@ -84,7 +56,7 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("PWR: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_power_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(hull_queries.power_usage(world)), row, accum)
 end
 
 function HullState:_draw_cargo_pane(renderer, game_state)
@@ -96,11 +68,11 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:draw_string("CARGO", row, accum)
     row = row + 1
 
-    local items = game_state.player_info.hull:get_cargo()
-    for i in pairs(items) do
-        local cargo_item = items[i]
+    local world = game_state.world
+    local items = hull_queries.cargo(world)
+    for i=1, #items do
         renderer:set_color("gray")
-        accum = accum + renderer:draw_string("* " .. cargo_item:get_name(), row, accum)
+        accum = accum + renderer:draw_string("* " .. world:get(items[i], "Named").name, row, accum)
 
         row = row + 1
         accum = accum_start
@@ -109,7 +81,7 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("TON: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_cargo_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(hull_queries.cargo_tonnage(world)), row, accum)
 end
 
 function HullState:_draw_fabricator_pane(renderer, game_state)
@@ -120,12 +92,6 @@ function HullState:_draw_fabricator_pane(renderer, game_state)
     renderer:set_color("white")
     renderer:draw_string("FAB", row, accum)
     row = row + 1
-
-    -- local items = game_state.player_info:get_cargo()
-    -- for i in pairs(items) do
-    --     local cargo_item = items[i]
-    --     renderer:set_color("gray")
-    --     accum = accum + renderer:draw_string("* " .. cargo_item:get_name(), row, accum)
 
     --     row = row + 1
     --     accum = accum_start
@@ -145,20 +111,21 @@ function HullState:render(renderer, game_state)
 
     renderer:set_color("white")
 
+    local blink_on = game_state.clock:blink_on()
     local color = "white"
-    if self.blink_cursor_on and self.selected_idx == 1 then
+    if blink_on and self.selected_idx == 1 then
         color = "red"
     end
     renderer:render_window(x, y, w - 4, h, "black", color)
 
     color = "white"
-    if self.blink_cursor_on and self.selected_idx == 2 then
+    if blink_on and self.selected_idx == 2 then
         color = "red"
     end
     renderer:render_window(constants.MAP_X_MAX/3 + 1, y, w - 3, h, "black", color)
 
     color = "white"
-    if self.blink_cursor_on and self.selected_idx == 3 then
+    if blink_on and self.selected_idx == 3 then
         color = "red"
     end
     renderer:render_window(2 * (constants.MAP_X_MAX/3) + 2, y, w - 3, h, "black", color)

@@ -1,60 +1,61 @@
 local ModalMenu = {}
 ModalMenu.__index = ModalMenu
--- This should render a menu with selectable components. Update should move the selected item up and down.
--- It should take callbacks (Maybe?) So that it can alter state from a calling... thing.
+-- A popup list of things to pick from.
+-- items: {{name = "...", enabled = bool, callback = function() end}, ...}
+-- Disabled items are shown grayed out; they can't be selected or fired.
 
-function ModalMenu:init(game_state, x, y, items, exit_callback, fg_color, bg_color, bonus_data)
+function ModalMenu:init(x, y, items, fg_color, bg_color)
     local this = {
         x = x,
         y = y,
         items = items,
-        selected_idx = 1,
-        first_enabled_idx = 1,
-        exit_callback = exit_callback,
+        selected_idx = nil,
         fg_color = fg_color,
         bg_color = bg_color,
-        bonus_data = bonus_data
     }
     setmetatable(this, self)
 
-    for i in pairs(items) do
-        local item = items[i]
-        if item["enabled"] then
-            this.selected_idx = i
-            this.first_enabled_idx = i
-            break
-        end
-    end
+    this.selected_idx = this:_next_enabled(0, 1)
 
     return this
 end
 
-function ModalMenu:handle_keys(game_state, dt)
+-- The first enabled item after `from` going in `direction` (1 or -1), wrapping
+-- around. nil if nothing is enabled at all.
+function ModalMenu:_next_enabled(from, direction)
+    local count = #self.items
+    for offset=1, count do
+        local idx = ((from - 1 + offset * direction) % count) + 1
+        if self.items[idx].enabled then
+            return idx
+        end
+    end
+    return nil
 end
 
 function ModalMenu:key_pressed(game_state, key)
-    if key == "return" then
-        self.items[self.selected_idx]["callback"](self.bonus_data)
-    elseif key == "up" then
-        self.selected_idx = self.selected_idx - 1
-    elseif key == "down" then
-        self.selected_idx = self.selected_idx + 1
+    if not self.selected_idx then
+        return
     end
 
-    if self.selected_idx > #self.items then
-        self.selected_idx = self.first_enabled_idx
-    elseif self.selected_idx < self.first_enabled_idx then
-        self.selected_idx = #self.items
+    if key == "return" then
+        local item = self.items[self.selected_idx]
+        if item.enabled and item.callback then
+            item.callback()
+        end
+    elseif key == "up" then
+        self.selected_idx = self:_next_enabled(self.selected_idx, -1)
+    elseif key == "down" then
+        self.selected_idx = self:_next_enabled(self.selected_idx, 1)
     end
 end
 
-function ModalMenu:render(renderer, game_state)
+function ModalMenu:render(renderer)
     local w = 0
     local h = #self.items
 
     for i=1, #self.items do
-        local item = self.items[i]
-        local len = string.len(item["name"])
+        local len = string.len(self.items[i].name)
         if len > w then
             w = len
         end
@@ -64,25 +65,16 @@ function ModalMenu:render(renderer, game_state)
     local bg_color = self.bg_color or "black"
     renderer:render_window(self.x, self.y, w + 2, h, bg_color, fg_color)
 
-    local accum_initial = self.x + 2 -- 2x sides
-    local row = self.y + 1
-    local accum = accum_initial
+    local column = self.x + 2 -- 2x sides
     for i=1, #self.items do
         local item = self.items[i]
-        renderer:set_color("white")
-        if not item["enabled"] then
-            renderer:set_color("grayer")
-        end
+        local row = self.y + i
+
+        renderer:set_color(item.enabled and "white" or "grayer")
         if i == self.selected_idx then
-            accum = accum + renderer:draw_string("* ", row, accum)
-        else
-            accum = accum + 2 -- strlen("* ")
+            renderer:draw_string("* ", row, column)
         end
-
-        accum = accum + renderer:draw_string(item["name"], row, accum)
-
-        row = row + 1
-        accum = accum_initial
+        renderer:draw_string(item.name, row, column + 2) -- strlen("* ")
     end
 end
 
