@@ -13,11 +13,14 @@ function GameState:init(initial_state, clock)
         player_info = PlayerInfo:init(clock),
         menu_open = false, -- Show the menu
         game_started = false, -- Whether we've reached the game screens, map, lattice, etc.
+        dirty = true, -- Whether the screen needs redrawing.
     }
     setmetatable(this, self)
 
     -- The world only moves on sim steps, so pause and catch-up are the clock's problem.
+    -- While nothing in the world is doing anything, no steps run at all.
     clock:on_step(function(step) this.player_info:step(this, step) end)
+    clock:set_sim_active(function() return this.player_info:is_sim_active() end)
 
     this:_set_current_state(initial_state)
 
@@ -34,6 +37,7 @@ function GameState:_set_current_state(new_state)
     end
     self.current_state = new_state
     self.clock:set_blink_needed(new_state:uses_blink())
+    self:invalidate()
     -- Must stay last: entering a screen may immediately switch to another one.
     new_state:_enter(self)
 end
@@ -91,6 +95,18 @@ end
 
 function GameState:set_paused(new)
     self.clock:set_paused(new)
+    self:invalidate()
+end
+
+-- Ask for a redraw. Nothing is drawn unless somebody does.
+function GameState:invalidate()
+    self.dirty = true
+end
+
+function GameState:consume_dirty()
+    local was_dirty = self.dirty
+    self.dirty = false
+    return was_dirty
 end
 
 function GameState:get_paused()

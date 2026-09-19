@@ -151,7 +151,37 @@ function Renderer:flush()
     love.graphics.setColor(cc[1], cc[2], cc[3], 1)
 end
 
+-- A layer is a batch of skull glyphs that survives between frames: build it
+-- once with begin_layer/end_layer, then draw_layer is a single draw call.
+function Renderer:new_layer()
+    return {batch = love.graphics.newSpriteBatch(self.skull_font, 2048, "static")}
+end
+
+function Renderer:begin_layer(layer)
+    self:flush()
+    layer.batch:clear()
+    self.layer_batch = layer.batch
+end
+
+function Renderer:end_layer()
+    self.layer_batch = nil
+end
+
+function Renderer:draw_layer(layer)
+    self:flush()
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(layer.batch)
+    local cc = self.current_color
+    love.graphics.setColor(cc[1], cc[2], cc[3], 1)
+end
+
 function Renderer:_use_batch(batch)
+    if self.layer_batch and batch == self.skull_batch then
+        local cc = self.current_color
+        self.layer_batch:setColor(cc[1], cc[2], cc[3], 1)
+        return self.layer_batch
+    end
+
     if self.pending_batch ~= batch then
         self:flush()
         self.pending_batch = batch
@@ -301,7 +331,12 @@ function Renderer:render(game_state)
     love.graphics.draw(self.canvas3)
     love.graphics.setShader()
 
-    -- Finally to the screen
+    self:present_cached()
+end
+
+-- Puts the last rendered frame on screen again without redrawing any of it.
+function Renderer:present_cached()
+    love.graphics.setColor(1, 1, 1, 1)
     local width_offset = (self.window_width - self.draw_area_width) / 2
     local height_offset = (self.window_height - self.draw_area_height) / 2
     love.graphics.translate(width_offset, height_offset)

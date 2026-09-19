@@ -3,7 +3,8 @@
 --
 --   VOIDCRASH_STATS=1            print a stats line every second (F3 toggles it)
 --   VOIDCRASH_KEYS=return,space  press these keys in order ("-" waits a beat,
---                                "shot:name" saves name.png to VOIDCRASH_SHOT_DIR)
+--                                "shot:name" saves name.png to VOIDCRASH_SHOT_DIR,
+--                                "hold:key" / "release:key" for held keys)
 --   VOIDCRASH_KEY_INTERVAL=0.5   seconds between scripted keys
 --   VOIDCRASH_EXIT_AFTER=10      quit after this many seconds
 local DebugStats = {}
@@ -17,6 +18,9 @@ for key in (os.getenv("VOIDCRASH_KEYS") or ""):gmatch("[^,]+") do
     table.insert(scripted_keys, key)
 end
 
+-- Stats are usually piped somewhere; don't let them sit in a buffer.
+io.stdout:setvbuf("line")
+
 local counters = {}
 local counter_names = {}
 
@@ -25,6 +29,7 @@ local last_report_at = nil
 local last_report_cpu = nil
 local next_key_at = nil
 local next_key_idx = 1
+local wants_redraw = false
 
 function DebugStats.is_enabled()
     return enabled
@@ -84,6 +89,13 @@ local function _report(now)
     last_report_cpu = cpu
 end
 
+-- True (once) if this module needs a frame drawn even though nothing changed.
+function DebugStats.consume_redraw()
+    local wanted = wants_redraw
+    wants_redraw = false
+    return wanted
+end
+
 -- Call once per main loop iteration.
 function DebugStats.tick()
     local now = love.timer.getTime()
@@ -102,12 +114,17 @@ function DebugStats.tick()
         next_key_at = now + key_interval
         local shot_name = key:match("^shot:(.+)$")
         if shot_name then
+            wants_redraw = true -- Screenshots are taken at the next present.
             love.graphics.captureScreenshot(function(image_data)
                 local dir = os.getenv("VOIDCRASH_SHOT_DIR") or "."
                 local file = assert(io.open(dir .. "/" .. shot_name .. ".png", "wb"))
                 file:write(image_data:encode("png"):getString())
                 file:close()
             end)
+        elseif key:match("^hold:") then
+            love.event.push("keypressed", key:sub(6), key:sub(6), false)
+        elseif key:match("^release:") then
+            love.event.push("keyreleased", key:sub(9), key:sub(9))
         elseif key ~= "-" then
             love.event.push("keypressed", key, key, false)
             love.event.push("keyreleased", key, key)

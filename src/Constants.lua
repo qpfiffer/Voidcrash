@@ -8,6 +8,10 @@ constants.BOOT_TEXT_CPS = 60        -- Boot sequence characters per second.
 constants.WIPE_TICK = 1/60          -- Left-wipe advances every 1-3 of these.
 constants.SLEEPER_TICK = 1/170      -- Sleeper dialog types a letter every 2-7 of these (~38 cps).
 constants.HELD_KEY_HZ = 60          -- How often held keys (pan, zoom) are applied.
+constants.OVERLAY_REDRAW_HZ = 8     -- Redraws per second while an animated map overlay shows.
+constants.SIM_REDRAW_HZ = 4         -- Most redraws per second caused by the simulation moving (frames crawl).
+constants.IDLE_SLICE = 1/30         -- Longest the main loop sleeps when it has to poll for input...
+constants.DEEP_IDLE_SLICE = 1/10    -- ...and once nobody has touched a key for half a minute.
 
 constants.FRAME_SPEED = 0.012       -- Frame travel, world units per second.
 constants.WEATHER_RATE = 0.012      -- Weather noise drift per second.

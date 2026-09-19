@@ -37,8 +37,10 @@ local function _random_typing_period()
     return (2 + math.random(0, 5)) * constants.SLEEPER_TICK
 end
 
-function SleeperDialog:init(game_state)
+-- on_change() is called whenever the dialog looks different (it types on its own).
+function SleeperDialog:init(game_state, on_change)
     local this = {
+        on_change = on_change,
         items = {},
         items_to_render = {},
 
@@ -110,6 +112,9 @@ function SleeperDialog:_type_next_letter()
 
     if current_item.current_text_idx < string.len(current_item.original_text) then
         current_item.current_text_idx = current_item.current_text_idx + 1
+        if self.on_change then
+            self.on_change()
+        end
     elseif #self.items_to_render > 0 then
         self.current_text_item_idx = self.current_text_item_idx + 1
     else

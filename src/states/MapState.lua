@@ -4,6 +4,7 @@ local MapState = Screen.extend()
 local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
+local Input = require("src/Input")
 local ModalMenu = require("src/ui/ModalMenu")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
@@ -17,6 +18,9 @@ local FOG_OF_WAR_RADIUS = 0.75
 local WEATHER_NOISE_OFFSET_X = 55333
 local WEATHER_NOISE_OFFSET_Y = 46464
 local WEATHER_MAP_DIVISOR = 1600
+
+-- Keys that do something for as long as they are held.
+local HELD_KEYS = {"left", "right", "up", "down", "pageup", "pagedown"}
 
 local O_NONE = 1
 local O_WEATHER = 2
@@ -43,6 +47,13 @@ function MapState:init(game_state)
         world_tile_modifiers = {},
 
         menus = {},
+
+        held_key_timer = nil,   -- Only exists while one of HELD_KEYS is down.
+        overlay_timer = nil,    -- Only exists while an animated overlay is showing.
+        terrain_layer = nil,    -- The terrain glyphs, rebuilt only when terrain_key changes.
+        terrain_key = nil,
+        in_weather = false,     -- Latched by _slow_refresh so render doesn't have to ask.
+        shown_tick = nil,
     }
     setmetatable(this, self)
 
@@ -58,11 +69,56 @@ function MapState:uses_blink()
 end
 
 function MapState:on_start(game_state)
-    -- Held keys (pan, zoom, cursor). A ui timer, so it only runs while the map is
-    -- on screen and keeps working while the game is paused.
-    self.timers:every(1 / constants.HELD_KEY_HZ, function(elapsed)
+    -- Things on the map that change by themselves, slowly: the T readout and
+    -- whether the weather has drifted over us.
+    self.sim_timers:every(1, function() self:_slow_refresh(game_state) end)
+end
+
+function MapState:on_enter(game_state)
+    self:_slow_refresh(game_state)
+    self:_watch_held_keys(game_state)
+end
+
+function MapState:_slow_refresh(game_state)
+    local player_info = game_state:get_player_info()
+    local tick = math.floor(player_info:get_cur_tick())
+    local in_weather = self:_player_is_in_weather(game_state, player_info)
+    if tick ~= self.shown_tick or in_weather ~= self.in_weather then
+        self.shown_tick = tick
+        self.in_weather = in_weather
+        game_state:invalidate()
+    end
+end
+
+-- Held keys (pan, zoom, cursor) are applied by a ui timer, so they keep working
+-- while paused. It only exists while a key is actually down: no keys, no wakeups.
+function MapState:_watch_held_keys(game_state)
+    if self.held_key_timer or not Input.any_down(HELD_KEYS) then
+        return
+    end
+
+    self.held_key_timer = self.timers:every(1 / constants.HELD_KEY_HZ, function(elapsed)
+        if not Input.any_down(HELD_KEYS) then
+            self.held_key_timer:cancel()
+            self.held_key_timer = nil
+            return
+        end
         self:_handle_keys(game_state, math.min(elapsed, 0.05))
     end)
+end
+
+-- The weather and lattice overlays are animated (on sim time), so while one is
+-- showing the map needs regular redraws. Otherwise it needs none.
+function MapState:_watch_overlay(game_state)
+    local animated = self.current_map_overlay ~= O_NONE
+    if animated and not self.overlay_timer then
+        self.overlay_timer = self.sim_timers:every(1 / constants.OVERLAY_REDRAW_HZ, function()
+            game_state:invalidate()
+        end)
+    elseif not animated and self.overlay_timer then
+        self.overlay_timer:cancel()
+        self.overlay_timer = nil
+    end
 end
 
 -- Weather drifts with sim time: it freezes when paused and doesn't care who's on screen.
@@ -108,7 +164,33 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     accum = accum + renderer:draw_traumae_string(tostring(math.floor(player_info:get_cur_tick())), 0, accum/2)
 end
 
+-- The terrain only changes when the view moves or something that lifts the
+-- fog does, so its glyphs are kept in a layer and reused between redraws.
 function MapState:_draw_map(renderer, player_info)
+    -- Objects lift the fog around them. Half a map cell is as precisely as that can
+    -- be seen, so a crawling frame only forces a rebuild every second or so.
+    local key_parts = {self.current_x_offset, self.current_y_offset, self.zoom_level}
+    local half_cell = self:_get_zoom() / 2
+    local world_objects = player_info:get_world_objects()
+    for i=1, #world_objects do
+        table.insert(key_parts, math.floor(world_objects[i]:get_x() / half_cell))
+        table.insert(key_parts, math.floor(world_objects[i]:get_y() / half_cell))
+    end
+    local key = table.concat(key_parts, ",")
+
+    if not self.terrain_layer then
+        self.terrain_layer = renderer:new_layer()
+    end
+    if key ~= self.terrain_key then
+        self.terrain_key = key
+        renderer:begin_layer(self.terrain_layer)
+        self:_build_terrain(renderer, player_info)
+        renderer:end_layer()
+    end
+    renderer:draw_layer(self.terrain_layer)
+end
+
+function MapState:_build_terrain(renderer, player_info)
     local row_offset = 1
     local column_offset = 6
 
@@ -222,6 +304,8 @@ function MapState:insert_frame_nav_menu(game_state)
 end
 
 function MapState:key_pressed(game_state, key)
+    self:_watch_held_keys(game_state)
+
     if #self.menus >= 1 then
         return self.menus[1]:key_pressed(game_state, key)
     end
@@ -234,6 +318,7 @@ function MapState:key_pressed(game_state, key)
         self.current_y_offset = game_state.player_info.overmap_y
     elseif key == "tab" then
         self.current_map_overlay = math.fmod(self.current_map_overlay, #MAP_OVERLAYS) + 1
+        self:_watch_overlay(game_state)
     elseif key == "space" then
         game_state:set_paused(not game_state:get_paused())
     elseif key == "return" then
@@ -258,28 +343,28 @@ function MapState:_handle_keys(game_state, dt)
     local move_mod = constants.PAN_SPEED * dt
     local cursor_move_mod = constants.CURSOR_SPEED * dt
 
-    if love.keyboard.isDown("left") then
+    if Input.is_down("left") then
         if self.cursor_mode then
             self.cursor_x = self.cursor_x - cursor_move_mod
         else
             self.current_x_offset = self.current_x_offset - move_mod
         end
     end
-    if love.keyboard.isDown("right") then
+    if Input.is_down("right") then
         if self.cursor_mode then
             self.cursor_x = self.cursor_x + cursor_move_mod
         else
             self.current_x_offset = self.current_x_offset + move_mod
         end
     end
-    if love.keyboard.isDown("up") then
+    if Input.is_down("up") then
         if self.cursor_mode then
             self.cursor_y = self.cursor_y - cursor_move_mod
         else
             self.current_y_offset = self.current_y_offset - move_mod
         end
     end
-    if love.keyboard.isDown("down") then
+    if Input.is_down("down") then
         if self.cursor_mode then
             self.cursor_y = self.cursor_y + cursor_move_mod
         else
@@ -299,10 +384,10 @@ function MapState:_handle_keys(game_state, dt)
         self.cursor_y = 0
     end
 
-    if love.keyboard.isDown("pageup") then
+    if Input.is_down("pageup") then
         self.zoom_level = self.zoom_level - constants.ZOOM_SPEED * dt
     end
-    if love.keyboard.isDown("pagedown") then
+    if Input.is_down("pagedown") then
         self.zoom_level = self.zoom_level + constants.ZOOM_SPEED * dt
     end
 
@@ -510,7 +595,7 @@ function MapState:render(renderer, game_state)
         self:_draw_menu(renderer, player_info)
     end
 
-    if self:_player_is_in_weather(game_state, player_info) and not player_info.is_in_weather then
+    if self.in_weather then
         local warning_text = "* WEATHER WARNING *"
         local x = constants.MAP_X_MAX/2 - ((string.len(warning_text) + 4) / 2)
         local y = constants.MAP_Y_MAX - 5

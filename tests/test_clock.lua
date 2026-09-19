@@ -254,6 +254,20 @@ function tests.next_wake(T)
     T.near(clock:next_wake(), 0.07)
 end
 
+function tests.next_wake_for_an_idle_sim_timer_lands_on_a_step_boundary(T)
+    -- Waking up before the step boundary would find nothing to do, and spin.
+    local clock = Clock.new({step = 0.1, max_catchup = 1})
+    clock:on_step(function() end)
+    clock:set_sim_active(function() return false end)
+    local fired = false
+    clock.sim:after(0.25, function() fired = true end)
+
+    clock:advance(0.02)
+    T.near(clock:next_wake(), 0.28)
+    clock:advance(clock:next_wake())
+    T.eq(fired, true)
+end
+
 function tests.blink(T)
     local clock = Clock.new({blink_period = 0.5})
     T.eq(clock:blink_on(), true)

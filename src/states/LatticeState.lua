@@ -55,7 +55,12 @@ function LatticeState:key_pressed(game_state, key)
         if select_mode == "z" then
             self.lattice_state = LTC_STATE_SELECTED
             if not self.connected_window then
-                self.connected_window = SleeperDialog:init(game_state)
+                self.connected_window = SleeperDialog:init(game_state, function()
+                    -- It keeps typing while we're on another tab; only redraw if it can be seen.
+                    if game_state:get_current_state() == self then
+                        game_state:invalidate()
+                    end
+                end)
             end
         else
             self.select_mode_idx = self.select_mode_idx + 1

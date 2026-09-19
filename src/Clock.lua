@@ -45,6 +45,7 @@ local function _new_timeline(stats)
     local this = {
         time = 0,
         timers = {},
+        fired = 0, -- How many timers this timeline has ever fired.
         stats = stats,
     }
     return setmetatable(this, Timeline)
@@ -121,6 +122,7 @@ function Timeline:_fire_due()
                 timer.cancelled = true
             end
 
+            self.fired = self.fired + 1
             self.stats.fires = self.stats.fires + 1
             timer.fn(elapsed, timer)
         end
@@ -341,9 +343,12 @@ function Clock:next_wake()
         if self:_sim_is_active() then
             consider(self.step - self.accumulator)
         else
+            -- Sim time only moves in whole steps, so a sim timer really fires
+            -- at the first step boundary at or after its due time.
             local sim_due = self.sim:next_due()
             if sim_due then
-                consider(sim_due - self.sim.time - self.accumulator)
+                local steps_until_due = math.ceil((sim_due - self.sim.time) / self.step - EPSILON)
+                consider(math.max(steps_until_due, 1) * self.step - self.accumulator)
             end
         end
     end

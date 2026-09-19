@@ -45,6 +45,22 @@ function PlayerInfo:step(game_state, step)
     end
 end
 
+-- Whether stepping the world would change anything. While this is false the
+-- clock skips simulation entirely and the game can sleep.
+function PlayerInfo:is_sim_active()
+    if next(self.world_objects_to_remove) ~= nil then
+        return true
+    end
+
+    for i=1, #self.world_objects do
+        local object = self.world_objects[i]
+        if object.current_order or (object.orders and #object.orders > 0) then
+            return true
+        end
+    end
+    return false
+end
+
 -- The in-fiction clock. Sim time, so it stops while paused.
 function PlayerInfo:get_cur_tick()
     return self.genesis_tick + self.clock.sim.time / constants.TICK_SLOW_FACTOR
