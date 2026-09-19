@@ -1,15 +1,8 @@
-local LatticeState = {}
-LatticeState.__index = LatticeState
+local Screen = require("src/Screen")
+local LatticeState = Screen.extend()
 
 local constants = require("src/Constants")
 local SleeperDialog = require("src/ui/SleeperDialog")
-local DebugStats = require("src/DebugStats")
-
-local BLINK_TICK_COUNT = 20
-local BLINK_TICKER_COUNTDOWN = 8
-
-local TICKS_ADVANCE_MIN = 1
-local TICKS_ADVANCE_MAX = 3
 
 local LATTICE_GRID_SIZE = 3
 local LATTICE_BLOCK_WIDTH = 128
@@ -24,16 +17,12 @@ local LTC_STATE_SELECTED = 2
 
 function LatticeState:init()
     local this = {
-        dtotal = 0,
-        ticks_advanced = TICKS_ADVANCE_MAX,
         screen_state = {},
 
-        blink_cursor_on = true,
-        blink_ticker_countdown = BLINK_TICKER_COUNTDOWN,
+        blink_cursor_on = true, -- Refreshed from the shared clock blink on every render.
 
         selected = {1, 1, 1},
         select_mode_idx = 1,
-        ticks_advanced = BLINK_TICK_COUNT,
 
         lattice_state = LTC_STATE_SELECTING,
         connected_window = nil,
@@ -45,6 +34,10 @@ end
 
 function LatticeState:get_name()
     return "LAT"
+end
+
+function LatticeState:uses_blink()
+    return true
 end
 
 function LatticeState:_ensure_grid_size_selected(idx)
@@ -61,7 +54,9 @@ function LatticeState:key_pressed(game_state, key)
     if key == "return" then
         if select_mode == "z" then
             self.lattice_state = LTC_STATE_SELECTED
-            self.connected_window = SleeperDialog:init(game_state)
+            if not self.connected_window then
+                self.connected_window = SleeperDialog:init(game_state)
+            end
         else
             self.select_mode_idx = self.select_mode_idx + 1
         end
@@ -72,26 +67,20 @@ function LatticeState:key_pressed(game_state, key)
         if select_mode == "x" then
             if key == "left" then
                 self.selected[1] = self.selected[1] - 1
-                self.blink_cursor_on = true
             elseif key == "right" then
                 self.selected[1] = self.selected[1] + 1
-                self.blink_cursor_on = true
             end
         elseif select_mode == "y" then
             if key == "up" then
                 self.selected[2] = self.selected[2] - 1
-                self.blink_cursor_on = true
             elseif key == "down" then
                 self.selected[2] = self.selected[2] + 1
-                self.blink_cursor_on = true
             end
         elseif select_mode == "z" then
             if key == "up" then
                 self.selected[3] = self.selected[3] - 1
-                self.blink_cursor_on = true
             elseif key == "down" then
                 self.selected[3] = self.selected[3] + 1
-                self.blink_cursor_on = true
             end
         end
 
@@ -104,39 +93,6 @@ function LatticeState:key_pressed(game_state, key)
         self.select_mode_idx = 1
     elseif self.select_mode_idx <= 0 then
         self.select_mode_idx = #SELECT_MODES
-    end
-end
-
-function LatticeState:update(game_state, dt)
-    if self.lattice_state == LTC_STATE_SELECTED then
-        self.connected_window:update(game_state, dt)
-    end
-
-    self.dtotal = self.dtotal + dt
-    local tick_modifier = 16
-    local modified_tick = constants.TICKER_RATE / tick_modifier
-    if self.dtotal >= modified_tick then
-        self.dtotal = self.dtotal - modified_tick
-        self.ticks_advanced = self.ticks_advanced - 1
-
-        if self.ticks_advanced > 0 then
-            -- Wait til next time.
-            return
-        end
-        if not game_state:get_paused() then
-            local player_info = game_state:get_player_info()
-            player_info:set_current_lattice_step(player_info:get_current_lattice_step() + 0.0002)
-            DebugStats.count("lattice_step")
-        end
-
-        self.ticks_advanced = BLINK_TICK_COUNT
-
-        self.blink_ticker_countdown = self.blink_ticker_countdown - 1
-        if self.blink_ticker_countdown <= 0 then
-            self.blink_cursor_on = not self.blink_cursor_on
-            DebugStats.count("lattice_blink")
-            self.blink_ticker_countdown = BLINK_TICKER_COUNTDOWN
-        end
     end
 end
 
@@ -391,6 +347,8 @@ function LatticeState:_render_lattice(renderer, game_state, connected)
 end
 
 function LatticeState:render(renderer, game_state)
+    self.blink_cursor_on = game_state.clock:blink_on()
+
     renderer:draw_traumae_string("LATTICE CONN", 1, 1)
     renderer:draw_string("Lattice Sleeper Conn.", 2, 1)
     renderer:draw_string("CONN: ", 3, 1)

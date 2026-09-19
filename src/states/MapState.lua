@@ -1,17 +1,15 @@
-local MapState = {}
-MapState.__index = MapState
+local Screen = require("src/Screen")
+local MapState = Screen.extend()
 
 local constants = require("src/Constants")
 local Utils = require("src/Utils")
 
 local ModalMenu = require("src/ui/ModalMenu")
-local DebugStats = require("src/DebugStats")
 local ObjectType = require("src/objects/ObjectType")
 local OrderType = require("src/management/OrderType")
 local UnitCommand = require("src/management/UnitCommand")
 
-local move_mod = 0.02
-local cursor_move_mod = 0.4
+-- World units per map cell at zoom level 1.
 local ZOOM_MOD = 0.02
 
 local FOG_OF_WAR_RADIUS = 0.75
@@ -19,8 +17,6 @@ local FOG_OF_WAR_RADIUS = 0.75
 local WEATHER_NOISE_OFFSET_X = 55333
 local WEATHER_NOISE_OFFSET_Y = 46464
 local WEATHER_MAP_DIVISOR = 1600
-
-local BLINK_TICK_COUNT = 20
 
 local O_NONE = 1
 local O_WEATHER = 2
@@ -33,16 +29,12 @@ local MAP_OVERLAYS = {
 
 function MapState:init(game_state)
     local this = {
-        dtotal = 0,
         zoom_level = 1,
         current_x_offset = game_state.player_info.overmap_x,
         current_y_offset = game_state.player_info.overmap_y,
-        blink_cursor_on = true,
-        ticks_advanced = BLINK_TICK_COUNT,
+        blink_cursor_on = true, -- Refreshed from the shared clock blink on every render.
 
         current_map_overlay = MAP_OVERLAYS[1],
-
-        current_weather_step = 1,
 
         cursor_mode = nil,
         cursor_x = 0,
@@ -59,6 +51,23 @@ end
 
 function MapState:get_name()
     return "MAP"
+end
+
+function MapState:uses_blink()
+    return true
+end
+
+function MapState:on_start(game_state)
+    -- Held keys (pan, zoom, cursor). A ui timer, so it only runs while the map is
+    -- on screen and keeps working while the game is paused.
+    self.timers:every(1 / constants.HELD_KEY_HZ, function(elapsed)
+        self:_handle_keys(game_state, math.min(elapsed, 0.05))
+    end)
+end
+
+-- Weather drifts with sim time: it freezes when paused and doesn't care who's on screen.
+function MapState:_weather_step(game_state)
+    return 1 + constants.WEATHER_RATE * game_state.clock.sim.time
 end
 
 
@@ -96,7 +105,7 @@ function MapState:_draw_breadcrumbs(renderer, player_info)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("T: ", 0, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_traumae_string(tostring(math.floor(player_info.cur_tick)), 0, accum/2)
+    accum = accum + renderer:draw_traumae_string(tostring(math.floor(player_info:get_cur_tick())), 0, accum/2)
 end
 
 function MapState:_draw_map(renderer, player_info)
@@ -246,6 +255,9 @@ function MapState:_handle_keys(game_state, dt)
         return self.menus[1]:handle_keys(game_state, dt)
     end
 
+    local move_mod = constants.PAN_SPEED * dt
+    local cursor_move_mod = constants.CURSOR_SPEED * dt
+
     if love.keyboard.isDown("left") then
         if self.cursor_mode then
             self.cursor_x = self.cursor_x - cursor_move_mod
@@ -288,10 +300,10 @@ function MapState:_handle_keys(game_state, dt)
     end
 
     if love.keyboard.isDown("pageup") then
-        self.zoom_level = self.zoom_level - ZOOM_MOD
+        self.zoom_level = self.zoom_level - constants.ZOOM_SPEED * dt
     end
     if love.keyboard.isDown("pagedown") then
-        self.zoom_level = self.zoom_level + ZOOM_MOD
+        self.zoom_level = self.zoom_level + constants.ZOOM_SPEED * dt
     end
 
     if self.zoom_level < 1 then
@@ -299,37 +311,8 @@ function MapState:_handle_keys(game_state, dt)
     end
 end
 
-function MapState:update(game_state, dt, is_active)
-    self.dtotal = self.dtotal + dt
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE
-        DebugStats.count("sim")
-
-        self.ticks_advanced = self.ticks_advanced - 1
-        if self.ticks_advanced <= 0 then
-            -- Reset the counter.
-            self.ticks_advanced = BLINK_TICK_COUNT
-            self.blink_cursor_on = not self.blink_cursor_on
-        end
-
-        if not game_state:get_paused() then
-            self.current_weather_step = self.current_weather_step + 0.0002
-        end
-
-        if is_active then
-            self:_handle_keys(game_state, dt)
-        end
-
-        game_state.player_info:_remove_tombstoned_world_objects()
-        local world_objects = game_state.player_info:get_world_objects()
-        for i=1, #world_objects do
-            world_objects[i]:update(game_state, dt)
-        end
-    end
-end
-
-function MapState:_player_is_in_weather(player_info)
-    local raw_noise_val = love.math.noise(player_info.overmap_x, player_info.overmap_y, self.current_weather_step)
+function MapState:_player_is_in_weather(game_state, player_info)
+    local raw_noise_val = love.math.noise(player_info.overmap_x, player_info.overmap_y, self:_weather_step(game_state))
     local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
     --print("IS IN WEATHER: " .. noise_val)
@@ -343,7 +326,8 @@ function MapState:_get_zoom()
     return self.zoom_level * ZOOM_MOD
 end
 
-function MapState:_draw_weather(renderer, player_info)
+function MapState:_draw_weather(renderer, game_state, player_info)
+    local weather_step = self:_weather_step(game_state)
     local row_offset = 1
     local column_offset = 6
 
@@ -361,7 +345,7 @@ function MapState:_draw_weather(renderer, player_info)
             end
 
             if not should_continue then
-                local raw_noise_val = love.math.noise(noise_x, noise_y, self.current_weather_step)
+                local raw_noise_val = love.math.noise(noise_x, noise_y, weather_step)
                 local noise_val = math.floor(raw_noise_val * WEATHER_MAP_DIVISOR)
 
                 renderer:set_color("grayest")
@@ -456,11 +440,12 @@ end
 
 function MapState:render(renderer, game_state)
     local player_info = game_state:get_player_info()
+    self.blink_cursor_on = game_state.clock:blink_on()
 
     self:_draw_breadcrumbs(renderer, player_info)
     self:_draw_map(renderer, player_info)
     if self.current_map_overlay == O_WEATHER then
-        self:_draw_weather(renderer, player_info)
+        self:_draw_weather(renderer, game_state, player_info)
     elseif self.current_map_overlay == O_LATTICE then
         self:_draw_lattice(renderer, player_info)
     end
@@ -525,7 +510,7 @@ function MapState:render(renderer, game_state)
         self:_draw_menu(renderer, player_info)
     end
 
-    if self:_player_is_in_weather(player_info) and not player_info.is_in_weather then
+    if self:_player_is_in_weather(game_state, player_info) and not player_info.is_in_weather then
         local warning_text = "* WEATHER WARNING *"
         local x = constants.MAP_X_MAX/2 - ((string.len(warning_text) + 4) / 2)
         local y = constants.MAP_Y_MAX - 5

@@ -11,14 +11,12 @@ local OrderType = require("src/management/OrderType")
 local UnitCommand = require("src/management/UnitCommand")
 local RelayObject = require("src/objects/RelayObject")
 
-local SPEED = 0.0002
 local BASE_WEIGHT_TONS = 0.2
 
 function FrameObject:init(name, x, y, orders)
     local this = {
         object_type = ObjectType.FRAME + ObjectType.DISPATCHABLE + ObjectType.CARGOABLE,
-        speed = SPEED,
-        ticks_advanced = SPEED,
+        speed = constants.FRAME_SPEED, -- World units per second.
         progress = 0,
 
         origin_x = x,
@@ -186,12 +184,12 @@ function FrameObject:_handle_embark_order(game_state)
     self.current_order = nil
 end
 
-function FrameObject:_handle_movement_order(game_state)
+function FrameObject:_handle_movement_order(game_state, dt)
     local x_not_equal = self.world_x ~= self.dest_x
     local y_not_equal = self.world_y ~= self.dest_y
     if x_not_equal or y_not_equal then
         local distance = Utils.dist(self.origin_x, self.origin_y, self.dest_x, self.dest_y)
-        self.progress = self.progress + (self.speed * 1/distance)
+        self.progress = self.progress + (self.speed * dt / distance)
 
         if self.progress >= 1 then
             self.progress = 1
@@ -285,7 +283,7 @@ function FrameObject:update(game_state, dt)
 
     if self.current_order then
         local orders_table = {}
-        orders_table[OrderType.MOVEMENT] = function() self:_handle_movement_order(game_state) end
+        orders_table[OrderType.MOVEMENT] = function() self:_handle_movement_order(game_state, dt) end
         orders_table[OrderType.DROP] = function() self:_handle_drop_order(game_state) end
         orders_table[OrderType.EMBARK] = function() self:_handle_embark_order(game_state) end
 

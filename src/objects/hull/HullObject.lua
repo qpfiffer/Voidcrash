@@ -78,7 +78,6 @@ function HullObject:pop_item_from_cargo_of_type(object_type)
         local cargo_item = self.cargo[i]
         if bit.band(cargo_item.object_type, object_type) == object_type then
             table.remove(self.cargo, i)
-            print(#self.cargo)
             return cargo_item
         end
     end

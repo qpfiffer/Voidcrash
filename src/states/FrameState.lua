@@ -1,25 +1,13 @@
-local FrameState = {}
-FrameState.__index = FrameState
+local Screen = require("src/Screen")
+local FrameState = Screen.extend()
 
 local constants = require("src/Constants")
 
 local ObjectType = require("src/objects/ObjectType")
 
-local MAP_X_MAX = 68
-local MAP_Y_MAX = 35
-
-local TICKS_ADVANCE_MIN = 1
-local TICKS_ADVANCE_MAX = 3
-
-function FrameState:init(next_state)
+function FrameState:init()
     local this = {
-        dtotal = 0,             -- Delta time total
-        ticks_advanced = TICKS_ADVANCE_MAX,     -- Number of ticks left to go before update
-        next_state = next_state,
-
         frame_selected_idx = 1,
-        blink_cursor_on = false,
-        frame_count = 0,
     }
     setmetatable(this, self)
 
@@ -37,8 +25,6 @@ function FrameState:key_pressed(game_state, key)
         self.frame_selected_idx = self.frame_selected_idx + 1
     end
 
-    self.blink_cursor_on = true
-
     local frames = game_state.player_info.hull:get_cargo_items_of_type(ObjectType.FRAME)
     local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
     local all_frames_in_tables = {frames, deployed_frames}
@@ -55,19 +41,6 @@ function FrameState:key_pressed(game_state, key)
         self.frame_selected_idx = 1
     elseif self.frame_selected_idx < 1 then
         self.frame_selected_idx = frame_count
-    end
-end
-
-function FrameState:update(game_state, dt)
-    self.dtotal = self.dtotal + dt
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE
-        self.ticks_advanced = self.ticks_advanced - 1
-
-        if self.ticks_advanced > 0 then
-            -- Wait til next time.
-            return
-        end
     end
 end
 

@@ -1,7 +1,5 @@
-local MenuState = {}
-MenuState.__index = MenuState
-
-local constants = require("src/Constants")
+local Screen = require("src/Screen")
+local MenuState = Screen.extend()
 
 local InitialState = require("src/states/InitialState")
 
@@ -27,20 +25,11 @@ local menu_items = {
 
 function MenuState:init()
     local this = {
-        dtotal = 0,               -- Delta time total
         current_menu_item = 1,    -- Current menu item.
     }
     setmetatable(this, self)
 
     return this
-end
-
-function MenuState:update(game_state, dt)
-    self.dtotal = self.dtotal + dt   -- we add the time passed since the last update, probably a very small number like 0.01
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE   -- reduce our timer by a second, but don't discard the change... what if our framerate is 2/3 of a second?
-        -- Do something.
-    end
 end
 
 function MenuState:key_pressed(game_state, key)

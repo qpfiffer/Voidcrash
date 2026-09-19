@@ -1,11 +1,7 @@
-local dbg = require("debugger")
 local SleeperDialog = {}
 SleeperDialog.__index = SleeperDialog
 
 local constants = require("src/Constants")
-local DebugStats = require("src/DebugStats")
-
-local BLINK_TICK_COUNT = 20
 
 function SleeperDialog:_new_item(text)
     -- Don't move this function, it needs to be up here for init() to work.
@@ -36,18 +32,22 @@ function SleeperDialog:_new_item(text)
 end
 
 
+-- An uneven, "organic" typing rhythm: 2-7 ticks per letter.
+local function _random_typing_period()
+    return (2 + math.random(0, 5)) * constants.SLEEPER_TICK
+end
+
 function SleeperDialog:init(game_state)
     local this = {
-        dtotal = 0,
-        ticks_advanced = 3,
-
         items = {},
         items_to_render = {},
 
         current_text_item_idx = 1,
-        ticker = 1,
     }
     setmetatable(this, self)
+
+    -- Types on sim time, so pausing the game pauses the sleeper too.
+    this.typing_timer = game_state.clock.sim:every(_random_typing_period, function() this:_type_next_letter() end)
 
     this.items_to_render = {
         self:_new_item("the harvest moon is"),
@@ -95,48 +95,26 @@ function SleeperDialog:key_pressed(game_state, key)
     --end
 end
 
-function SleeperDialog:update(game_state, dt)
-    if game_state:get_paused() then
-        return
-    end
-
-    self.dtotal = self.dtotal + dt
-    local tick_modifier = 8
-    local modified_tick = constants.TICKER_RATE / tick_modifier
-    if self.dtotal >= modified_tick then
-        self.dtotal = self.dtotal - modified_tick
-        self.ticks_advanced = self.ticks_advanced - 1
-
-        if self.ticks_advanced > 0 then
-            -- Wait til next time.
+function SleeperDialog:_type_next_letter()
+    local current_item = self.items[self.current_text_item_idx]
+    if not current_item then
+        if #self.items_to_render > 0 then
+            -- Lines come off the tail and the newest is drawn at the bottom.
+            local head = table.remove(self.items_to_render)
+            table.insert(self.items, head)
+            current_item = head
+        else
             return
         end
+    end
 
-        --local organic_modifier = math.random(1, 5)
-        --self.ticks_advanced = BLINK_TICK_COUNT - organic_modifier
-        self.ticks_advanced = 2 + math.random(0, 5)
-
-        local current_item = self.items[self.current_text_item_idx]
-        if not current_item then
-            if #self.items_to_render > 0 then
-                local head = table.remove(self.items_to_render)
-                table.insert(self.items, head)
-                current_item = head
-            else
-                return
-            end
-        end
-
-        if current_item.current_text_idx < string.len(current_item.original_text) then
-            current_item.current_text_idx = current_item.current_text_idx + 1
-            DebugStats.count("sleeper_char")
-        else
-            self.current_text_item_idx = self.current_text_item_idx + 1
-        end
-
-        if self.current_text_item_idx > #self.items and #self.items_to_render == 0 then
-            self.current_text_item_idx = #self.items
-        end
+    if current_item.current_text_idx < string.len(current_item.original_text) then
+        current_item.current_text_idx = current_item.current_text_idx + 1
+    elseif #self.items_to_render > 0 then
+        self.current_text_item_idx = self.current_text_item_idx + 1
+    else
+        -- Everything has been said; stop waking the clock up.
+        self.typing_timer:cancel()
     end
 end
 

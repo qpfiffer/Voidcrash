@@ -1,11 +1,14 @@
 if arg[#arg] == "vsc_debug" then require("lldebugger").start() end
 
+local Clock = require("src/Clock")
+local constants = require("src/Constants")
 local DebugStats = require("src/DebugStats")
 local GameState = require("src/GameState")
 local MenuState = require("src/states/MenuState")
 local Renderer = require("src/Renderer")
 
 -- Game internals
+local clock = nil
 local game_state = nil
 local renderer = nil
 
@@ -37,8 +40,10 @@ function love.load(arg)
 
     love.mouse.setVisible(false)
 
+    clock = Clock.new({step = 1 / constants.SIM_HZ, blink_period = constants.BLINK_PERIOD})
+
     local initial_state = MenuState:init()
-    game_state = GameState:init(initial_state)
+    game_state = GameState:init(initial_state, clock)
     renderer = Renderer:init(initial_scale, initial_window_width, initial_window_height)
 end
 
@@ -52,7 +57,11 @@ end
 function love.update(dt)
     DebugStats.tick()
     DebugStats.count("update")
-    game_state:update_current_state(dt)
+
+    local steps, fires = clock.stats.steps, clock.stats.fires
+    game_state:update(dt)
+    DebugStats.count("sim", clock.stats.steps - steps)
+    DebugStats.count("timers", clock.stats.fires - fires)
 end
 
 function love.draw()

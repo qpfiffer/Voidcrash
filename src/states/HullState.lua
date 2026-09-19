@@ -1,24 +1,10 @@
-local HullState = {}
-HullState.__index = HullState
+local Screen = require("src/Screen")
+local HullState = Screen.extend()
 
 local constants = require("src/Constants")
 
-local MAP_X_MAX = 68
-local MAP_Y_MAX = 35
-
-local TICKS_ADVANCE_MIN = 1
-local TICKS_ADVANCE_MAX = 3
-
-local BLINK_TICK_COUNT = 20
-
-function HullState:init(next_state)
+function HullState:init()
     local this = {
-        dtotal = 0,
-        ticks_advanced = BLINK_TICK_COUNT,
-        next_state = next_state,
-
-        blink_cursor_on = true,
-
         selected_idx = 1,
     }
     setmetatable(this, self)
@@ -30,6 +16,10 @@ function HullState:get_name()
     return "HUL"
 end
 
+function HullState:uses_blink()
+    return true
+end
+
 function HullState:key_pressed(game_state, key)
     if key == "right" then
         self.selected_idx = self.selected_idx + 1
@@ -37,29 +27,10 @@ function HullState:key_pressed(game_state, key)
         self.selected_idx = self.selected_idx - 1
     end
 
-    self.blink_cursor_on = true
-
     if self.selected_idx > 3 then
         self.selected_idx = 1
     elseif self.selected_idx < 1 then
         self.selected_idx = 3
-    end
-end
-
-function HullState:update(game_state, dt)
-    self.dtotal = self.dtotal + dt
-    if self.dtotal >= constants.TICKER_RATE then
-        self.dtotal = self.dtotal - constants.TICKER_RATE
-        self.ticks_advanced = self.ticks_advanced - 1
-
-        if self.ticks_advanced <= 0 then
-            -- Reset the counter.
-            self.ticks_advanced = BLINK_TICK_COUNT
-            self.blink_cursor_on = not self.blink_cursor_on
-        end
-
-        -- Do something.
-
     end
 end
 
@@ -145,20 +116,21 @@ function HullState:render(renderer, game_state)
 
     renderer:set_color("white")
 
+    local blink_on = game_state.clock:blink_on()
     local color = "white"
-    if self.blink_cursor_on and self.selected_idx == 1 then
+    if blink_on and self.selected_idx == 1 then
         color = "red"
     end
     renderer:render_window(x, y, w - 4, h, "black", color)
 
     color = "white"
-    if self.blink_cursor_on and self.selected_idx == 2 then
+    if blink_on and self.selected_idx == 2 then
         color = "red"
     end
     renderer:render_window(constants.MAP_X_MAX/3 + 1, y, w - 3, h, "black", color)
 
     color = "white"
-    if self.blink_cursor_on and self.selected_idx == 3 then
+    if blink_on and self.selected_idx == 3 then
         color = "red"
     end
     renderer:render_window(2 * (constants.MAP_X_MAX/3) + 2, y, w - 3, h, "black", color)

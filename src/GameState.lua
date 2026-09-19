@@ -4,19 +4,38 @@ GameState.__index = GameState
 local constants = require("src/Constants")
 local PlayerInfo = require("src/PlayerInfo")
 
-function GameState:init(initial_state)
+function GameState:init(initial_state, clock)
     local this = {
-        current_state = initial_state,
+        current_state = nil,
         active_states = {},
 
-        player_info = PlayerInfo:init(),
-        paused = false, -- Whether or not ticks advance game objects
+        clock = clock, -- All time lives here; pausing freezes clock.sim.
+        player_info = PlayerInfo:init(clock),
         menu_open = false, -- Show the menu
         game_started = false, -- Whether we've reached the game screens, map, lattice, etc.
     }
     setmetatable(this, self)
 
+    -- The world only moves on sim steps, so pause and catch-up are the clock's problem.
+    clock:on_step(function(step) this.player_info:step(this, step) end)
+
+    this:_set_current_state(initial_state)
+
     return this
+end
+
+function GameState:_set_current_state(new_state)
+    if not new_state or new_state == self.current_state then
+        return
+    end
+
+    if self.current_state then
+        self.current_state:_exit(self)
+    end
+    self.current_state = new_state
+    self.clock:set_blink_needed(new_state:uses_blink())
+    -- Must stay last: entering a screen may immediately switch to another one.
+    new_state:_enter(self)
 end
 
 function GameState:key_pressed(key)
@@ -24,18 +43,15 @@ function GameState:key_pressed(key)
         -- TODO: push_state menu
         love.event.quit()
     end
+
+    -- Any input restarts the blink in its "on" phase, on every screen.
+    self.clock:reset_blink()
+
     if self:get_game_started() then
-        -- TODO: Make this better.
-        if key == "1" then
-            self.current_state = self.active_states[1]
-        elseif key == "2" then
-            self.current_state = self.active_states[2]
-        elseif key == "3" then
-            self.current_state = self.active_states[3]
-        elseif key == "4" then
-            self.current_state = self.active_states[4]
-        elseif key == "5" then
-            self.current_state = self.active_states[5]
+        local tab = self.active_states[tonumber(key)]
+        if tab then
+            -- The digit belongs to the tab bar, not to the tab it selects.
+            return self:_set_current_state(tab)
         end
     end
 
@@ -47,14 +63,14 @@ function GameState:add_active_state(state)
 end
 
 function GameState:switch_active_state(idx)
-    self.current_state = self.active_states[idx]
+    self:_set_current_state(self.active_states[idx])
 end
 
 function GameState:push_state(new_state, is_active)
-    self.current_state = new_state
     if is_active then
         table.insert(self.active_states, new_state)
     end
+    self:_set_current_state(new_state)
 end
 
 function GameState:pop_state()
@@ -74,11 +90,11 @@ function GameState:get_player_info()
 end
 
 function GameState:set_paused(new)
-    self.paused = new
+    self.clock:set_paused(new)
 end
 
 function GameState:get_paused()
-    return self.paused
+    return self.clock:is_paused()
 end
 
 function GameState:set_menu_open(new)
@@ -116,7 +132,7 @@ function GameState:_render_tabs(renderer)
         renderer:set_color("white")
     end
 
-    if self.paused then
+    if self:get_paused() then
         local middle_x = constants.MAP_X_MAX/2 - ((string.len("PAUSED") + 4) / 2)
         renderer:render_window_with_text(middle_x, constants.MAP_Y_MAX, "P")
     end
@@ -127,14 +143,8 @@ function GameState:render_current_state(renderer)
     self:_render_tabs(renderer)
 end
 
-function GameState:update_current_state(dt)
-    self.player_info.cur_tick = self.player_info.cur_tick + (dt / constants.TICK_SLOW_FACTOR)
-    for i in pairs(self.active_states) do
-        if self.active_states[i] ~= self.current_state then
-            self.active_states[i]:update(self, dt, false)
-        end
-    end
-    return self.current_state:update(self, dt, true)
+function GameState:update(dt)
+    self.clock:advance(dt)
 end
 
 return GameState
