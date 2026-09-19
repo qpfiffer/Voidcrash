@@ -2,4 +2,6 @@
 return {
     "test_utils",
     "test_clock",
+    "test_world",
+    "test_orders",
 }

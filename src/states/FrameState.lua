@@ -2,8 +2,7 @@ local Screen = require("src/Screen")
 local FrameState = Screen.extend()
 
 local constants = require("src/Constants")
-
-local ObjectType = require("src/objects/ObjectType")
+local containment = require("src/ecs/containment")
 
 function FrameState:init()
     local this = {
@@ -18,6 +17,13 @@ function FrameState:get_name()
     return "FRM"
 end
 
+-- Every frame, in the hold or out in the world, in the order they were built.
+-- An entity keeps its id wherever it goes, so the list doesn't shuffle when a
+-- frame is dispatched or comes home.
+local function _frames(game_state)
+    return game_state.world:query("Frame")
+end
+
 function FrameState:key_pressed(game_state, key)
     if key == "up" then
         self.frame_selected_idx = self.frame_selected_idx - 1
@@ -25,18 +31,7 @@ function FrameState:key_pressed(game_state, key)
         self.frame_selected_idx = self.frame_selected_idx + 1
     end
 
-    local frames = game_state.player_info.hull:get_cargo_items_of_type(ObjectType.FRAME)
-    local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
-    local all_frames_in_tables = {frames, deployed_frames}
-
-    local frame_count = 0
-    for i=1, #all_frames_in_tables do
-        local table = all_frames_in_tables[i]
-        for j=1, #table do
-            frame_count = frame_count + 1
-        end
-    end
-
+    local frame_count = #_frames(game_state)
     if self.frame_selected_idx > frame_count then
         self.frame_selected_idx = 1
     elseif self.frame_selected_idx < 1 then
@@ -44,7 +39,8 @@ function FrameState:key_pressed(game_state, key)
     end
 end
 
-function FrameState:_draw_left_pane(renderer, game_state, all_frames_in_tables)
+function FrameState:_draw_left_pane(renderer, game_state, frames)
+    local world = game_state.world
     local x = 1
     local y = 1
     local w = 15
@@ -52,32 +48,26 @@ function FrameState:_draw_left_pane(renderer, game_state, all_frames_in_tables)
 
     renderer:render_window(x, y, w - 4, h, "black", "white")
 
-    local row = 1
-    for i=1, #all_frames_in_tables do
-        local table = all_frames_in_tables[i]
-        for j=1, #table do
-            local frame = table[j]
-            local accum = 2
-
-            local selected_str = "  "
-            if row == self.frame_selected_idx then
-                selected_str = "* "
-            end
-
-            row = row + 1
-
-            if frame:get_deployed() then
-                renderer:set_color("white")
-            else
-                renderer:set_color("gray")
-            end
-
-            accum = accum + renderer:draw_string(selected_str .. frame:get_name(), row, accum)
+    for i=1, #frames do
+        local frame = frames[i]
+        local selected_str = "  "
+        if i == self.frame_selected_idx then
+            selected_str = "* "
         end
+
+        -- Out in the world is bright, in the hold is dim.
+        if world:has(frame, "Position") then
+            renderer:set_color("white")
+        else
+            renderer:set_color("gray")
+        end
+
+        renderer:draw_string(selected_str .. world:get(frame, "Named").name, i + 1, 2)
     end
 end
 
-function FrameState:_draw_selected_frame(renderer, game_state, all_frames_in_tables)
+function FrameState:_draw_selected_frame(renderer, game_state, frames)
+    local world = game_state.world
     local x = 16
     local y = 1
     local w = constants.MAP_X_MAX - 15
@@ -85,31 +75,20 @@ function FrameState:_draw_selected_frame(renderer, game_state, all_frames_in_tab
 
     renderer:render_window(x, y, w - 4, h, "black", "white")
 
-    local idx = self.frame_selected_idx
-    local frame = nil
-    for i=1, #all_frames_in_tables do
-        local table = all_frames_in_tables[i]
-        if idx <= #table then
-            frame = table[idx]
-            break
-        else
-            idx = idx - #table
-        end
-    end
-
+    local frame = frames[self.frame_selected_idx]
     if not frame then
         return
     end
 
     local accum = 1 + x
-    local row = 1
-    row = row + 1
+    local row = 2
 
     renderer:set_color("gray")
-    accum = accum + renderer:draw_string(" " .. tostring(frame:get_name()) .. ": ", row, accum)
-    if frame:get_deployed() then
+    accum = accum + renderer:draw_string(" " .. world:get(frame, "Named").name .. ": ", row, accum)
+    local position = world:get(frame, "Position")
+    if position then
         renderer:set_color("white")
-        accum = accum + renderer:draw_string(frame:get_x() .. ", " .. frame:get_y(), row, accum)
+        accum = accum + renderer:draw_string(position.x .. ", " .. position.y, row, accum)
     else
         renderer:set_color("gray")
         accum = accum + renderer:draw_string("In Hold", row, accum)
@@ -122,26 +101,22 @@ function FrameState:_draw_selected_frame(renderer, game_state, all_frames_in_tab
     accum = accum + renderer:draw_string(" Cargo: ", row, accum)
 
     renderer:set_color("gray")
-    local cargo = frame:get_cargo()
+    local cargo = containment.contents(world, frame)
     if #cargo > 0 then
-        accum = 1 + x
         for i=1, #cargo do
-            local cargo_item = frame:get_cargo()[i]
             row = row + 1
-            accum = accum + renderer:draw_string("  * " .. cargo_item:get_name(), row, accum)
+            renderer:draw_string("  * " .. world:get(cargo[i], "Named").name, row, 1 + x)
         end
     else
-        accum = accum + renderer:draw_string("N/A", row, accum)
+        renderer:draw_string("N/A", row, accum)
     end
 end
 
 function FrameState:render(renderer, game_state)
-    local frames = game_state.player_info.hull:get_cargo_items_of_type(ObjectType.FRAME)
-    local deployed_frames = game_state.player_info:get_world_objects_of_type(ObjectType.FRAME)
-    local all_frames_in_tables = {frames, deployed_frames}
+    local frames = _frames(game_state)
 
-    self:_draw_left_pane(renderer, game_state, all_frames_in_tables)
-    self:_draw_selected_frame(renderer, game_state, all_frames_in_tables)
+    self:_draw_left_pane(renderer, game_state, frames)
+    self:_draw_selected_frame(renderer, game_state, frames)
 end
 
 return FrameState

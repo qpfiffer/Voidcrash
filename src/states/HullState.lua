@@ -2,6 +2,7 @@ local Screen = require("src/Screen")
 local HullState = Screen.extend()
 
 local constants = require("src/Constants")
+local hull_queries = require("src/sim/hull_queries")
 
 function HullState:init()
     local this = {
@@ -42,11 +43,11 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:draw_string("POWER", row, accum)
     row = row + 1
 
-    local items = game_state.player_info.hull:get_power_items()
-    for i in pairs(items) do
-        local active_power_item = items[i]
+    local world = game_state.world
+    local items = hull_queries.powered(world)
+    for i=1, #items do
         renderer:set_color("gray")
-        accum = accum + renderer:draw_string("* " .. active_power_item:get_name(), row, accum)
+        accum = accum + renderer:draw_string("* " .. world:get(items[i], "Named").name, row, accum)
 
         row = row + 1
         accum = 2
@@ -55,7 +56,7 @@ function HullState:_draw_power_used_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("PWR: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_power_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(hull_queries.power_usage(world)), row, accum)
 end
 
 function HullState:_draw_cargo_pane(renderer, game_state)
@@ -67,11 +68,11 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:draw_string("CARGO", row, accum)
     row = row + 1
 
-    local items = game_state.player_info.hull:get_cargo()
-    for i in pairs(items) do
-        local cargo_item = items[i]
+    local world = game_state.world
+    local items = hull_queries.cargo(world)
+    for i=1, #items do
         renderer:set_color("gray")
-        accum = accum + renderer:draw_string("* " .. cargo_item:get_name(), row, accum)
+        accum = accum + renderer:draw_string("* " .. world:get(items[i], "Named").name, row, accum)
 
         row = row + 1
         accum = accum_start
@@ -80,7 +81,7 @@ function HullState:_draw_cargo_pane(renderer, game_state)
     renderer:set_color("gray")
     accum = accum + renderer:draw_string("TON: ", row, accum)
     renderer:set_color("white")
-    accum = accum + renderer:draw_string(tostring(game_state.player_info.hull:get_cargo_usage()), row, accum)
+    accum = accum + renderer:draw_string(tostring(hull_queries.cargo_tonnage(world)), row, accum)
 end
 
 function HullState:_draw_fabricator_pane(renderer, game_state)

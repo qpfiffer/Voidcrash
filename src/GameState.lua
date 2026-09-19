@@ -2,7 +2,8 @@ local GameState = {}
 GameState.__index = GameState
 
 local constants = require("src/Constants")
-local PlayerInfo = require("src/PlayerInfo")
+local Fields = require("src/sim/fields")
+local new_game = require("src/sim/new_game")
 
 function GameState:init(initial_state, clock)
     local this = {
@@ -10,7 +11,8 @@ function GameState:init(initial_state, clock)
         active_states = {},
 
         clock = clock, -- All time lives here; pausing freezes clock.sim.
-        player_info = PlayerInfo:init(clock),
+        world = new_game(), -- The simulation: everything that isn't a screen.
+        fields = Fields.new(love.math.noise), -- Terrain, weather, lattice.
         menu_open = false, -- Show the menu
         game_started = false, -- Whether we've reached the game screens, map, lattice, etc.
         dirty = true, -- Whether the screen needs redrawing.
@@ -19,8 +21,11 @@ function GameState:init(initial_state, clock)
 
     -- The world only moves on sim steps, so pause and catch-up are the clock's problem.
     -- While nothing in the world is doing anything, no steps run at all.
-    clock:on_step(function(step) this.player_info:step(this, step) end)
-    clock:set_sim_active(function() return this.player_info:is_sim_active() end)
+    clock:on_step(function(step) this.world:step(step) end)
+    clock:set_sim_active(function() return this.world:has_active_systems() end)
+
+    -- Sim steps already cause (rate limited) redraws; a new radio line should show at once.
+    this.world:on("radio_message", function() this:invalidate() end)
 
     this:_set_current_state(initial_state)
 
@@ -85,12 +90,13 @@ function GameState:get_current_state()
     return self.current_state
 end
 
-function GameState:set_player_info(pi)
-    self.player_info = pi
+function GameState:get_hull_position()
+    return self.world:get(self.world.res.hull, "Position")
 end
 
-function GameState:get_player_info()
-    return self.player_info
+-- The in-fiction clock. Sim time, so it stops while paused.
+function GameState:get_cur_tick()
+    return self.world.res.genesis_tick + self.clock.sim.time / constants.TICK_SLOW_FACTOR
 end
 
 function GameState:set_paused(new)

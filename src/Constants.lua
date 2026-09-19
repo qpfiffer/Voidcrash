@@ -20,6 +20,10 @@ constants.PAN_SPEED = 1.2           -- Map pan, world units per second.
 constants.CURSOR_SPEED = 24         -- Map cursor, cells per second.
 constants.ZOOM_SPEED = 1.2          -- Zoom levels per second.
 
+constants.EMBARK_RADIUS = 0.05        -- How close to the hull a frame must be to rejoin it.
+constants.MAX_POWER = 100            -- What the hull's reactor can supply.
+constants.HULL_CARGO_TONS = 50
+
 constants.OVERMAP_MAX_X = 65536
 constants.OVERMAP_MAX_Y = 65536
 
